@@ -1,3 +1,4 @@
+// Handles reading/writing the config file for handling the logged in user and database connection details
 package config
 
 import (
@@ -11,16 +12,13 @@ const (
 	userConfigFileName = ".gatorconfig.json"
 )
 
-// Handles reading/writing the config file for handling the logged in user and database connection details
-
-// Structure of the config.json
 type Config struct {
 	DbUrl           string `json:"db_url"`
 	CurrentUserName string `json:"current_user_name"`
 }
 
-// Reads the ~/.gatorconfig.json (must be located at the home directory)
-// Returns details in a Config struct
+// Read tyeh JSON from the ~/.gatorconfig.json
+// (must be located at the home directory)
 func ReadConfig() (Config, error) {
 	var config Config
 
@@ -40,7 +38,7 @@ func ReadConfig() (Config, error) {
 		return Config{}, errors.New("Config file empty?: " + configFile)
 	}
 
-	// Unmarshal bytes
+	// Unmarshal bytes into struct
 	if err := json.Unmarshal(configFileBytes, &config); err != nil {
 		return Config{}, err
 	}
@@ -56,7 +54,7 @@ func (cfg *Config) SetConfig() error {
 		return err
 	}
 
-	// Convert from JSON to bytes
+	// Marshal to convert from JSON to bytes
 	configFileBytes, err := json.Marshal(cfg)
 	if err != nil {
 		return err
