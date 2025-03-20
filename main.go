@@ -21,12 +21,12 @@ type command struct {
 	args []string
 }
 
-// Commands -> handler function mapping
+// Maps commands -> handler functions
 type commands struct {
 	cmds map[string]func(*state, command) error
 }
 
-// ---
+// --- Main
 
 func main() {
 	// Register the CLI commands
@@ -63,7 +63,7 @@ func main() {
 	}
 }
 
-// Commands Handler functions
+// CLI Command Handlers
 
 func handlerLogin(s *state, cmd command) error {
 	// Usage:
@@ -88,7 +88,7 @@ func handlerLogin(s *state, cmd command) error {
 // --- Command functions
 
 // Adds a new CLI command to the app
-// Errors if the command with the same name already exists (names are nomralized to lowercase)
+// Names are normalized to lowercase. Errors if the command with the same name already exists ()
 // Requires:
 // - Name of the command
 // - Function that accepts the application state and command details containing program args
