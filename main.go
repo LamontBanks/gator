@@ -83,53 +83,64 @@ func main() {
 	}
 }
 
-// CLI Command Handlers
-// Save the username to the config file
+// -- CLI Command Handlers
+
+// Log in the user
+// User must alrerady be registered
 // Usage:
 //
 //	$ go run . login <username>
 //	$ go run . login alice
 func handlerLogin(s *state, cmd command) error {
+	// Get needed args
 	if len(cmd.args) < 1 {
 		return fmt.Errorf("username required")
 	}
-
-	// Save username to the config file
 	username := cmd.args[0]
-	s.config.CurrentUserName = username
 
+	// Check if the user is registered in the db
+	// If nothing is returned, stop
+	_, err := s.db.GetUser(context.Background(), username)
+	if err == sql.ErrNoRows {
+		return fmt.Errorf("%v not registered", username)
+	}
+	if err != nil {
+		panic(err)
+	}
+
+	// Otherwise, log in the user by writing their name to the config file
+	s.config.CurrentUserName = username
 	if err := s.config.SetConfig(); err != nil {
 		return err
 	}
-
 	fmt.Printf("Logged in as %v\n", username)
 
 	return nil
 }
 
-// Register a user in on the server. Updates the config with the user.
+// Register a user on the server, then pdates the config with the user.
 // Usage:
 //
 //	$ go run . register <username>
 //	$ go run . register alice
 func handlerRegister(s *state, cmd command) error {
-	// Get name from args
+	// Get needed args
 	if len(cmd.args) < 1 {
 		return fmt.Errorf("name required")
 	}
-	name := cmd.args[0]
+	username := cmd.args[0]
 
 	// Insert user
 	queryResult, err := s.db.CreateUser(context.Background(), database.CreateUserParams{
 		ID:        uuid.New(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
-		Name:      name,
+		Name:      username,
 	})
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("Created user %v: %v\n", name, queryResult)
+	fmt.Printf("Created user %v: %v\n", username, queryResult)
 
 	// Update the config as well
 	return handlerLogin(s, cmd)
