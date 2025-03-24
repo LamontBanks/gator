@@ -20,6 +20,10 @@ RETURNING *;
 SELECT * FROM users
 WHERE name = $1;
 
+-- name: GetUsers :many
+SELECT name FROM users
+ORDER BY name ASC;
+
 -- DEV/TESTING ONLY
 -- name: Reset :exec
 DELETE FROM USERS *;

@@ -47,6 +47,7 @@ func main() {
 	appCommands.register("login", handlerLogin)
 	appCommands.register("register", handlerRegister)
 	appCommands.register("reset", handlerReset)
+	appCommands.register("users", handlerGetUsers)
 
 	// Initialize info for the application state
 	// Config
@@ -148,6 +149,32 @@ func handlerRegister(s *state, cmd command) error {
 
 	// Update the config as well
 	return handlerLogin(s, cmd)
+}
+
+// Lists all users. Indicates which usersis logged in.
+func handlerGetUsers(s *state, cmd command) error {
+	users, err := s.db.GetUsers(context.Background())
+	if err != nil {
+		return err
+	}
+
+	currUser := s.config.CurrentUserName
+	var usersList string
+
+	for _, user := range users {
+		u := fmt.Sprintf("* %v", user)
+
+		if user == currUser {
+			u += " (current)"
+		}
+		u += "\n"
+
+		usersList += u
+	}
+
+	fmt.Print(usersList)
+
+	return nil
 }
 
 // DEV/TESTING ONLY
