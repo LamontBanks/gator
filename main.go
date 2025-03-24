@@ -13,9 +13,11 @@ import (
 	"github.com/LamontBanks/blog-aggregator/internal/database"
 	"github.com/google/uuid"
 
-	// Undercore means the package will be used, but not directly
+	// Leading underscore means the package will be used, but not directly
 	_ "github.com/lib/pq"
 )
+
+// -- Structs
 
 // Application state to be passed to the commands:
 // Config, database connection, etc.
@@ -44,22 +46,24 @@ func main() {
 	}
 	appCommands.register("login", handlerLogin)
 	appCommands.register("register", handlerRegister)
+	appCommands.register("reset", handlerReset)
 
-	// Initialize the application state
-	// - Config
+	// Initialize info for the application state
+	// Config
 	cfg, err := config.ReadConfig()
 	if err != nil {
 		panic(err)
 	}
 
-	// - Database connection (from config)
+	// Database connection
 	connStr := cfg.DbUrl
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		panic(err)
 	}
-
 	dbQueries := database.New(db) // Use the SQLC wrapper database instead of the SQL db directly
+
+	// Set state
 	appState := state{
 		config: &cfg,
 		db:     dbQueries,
@@ -146,14 +150,17 @@ func handlerRegister(s *state, cmd command) error {
 	return handlerLogin(s, cmd)
 }
 
-// --- Command functions
+// DEV/TESTING ONLY
+// Deletes all users
+func handlerReset(s *state, cmd command) error {
+	return s.db.Reset(context.Background())
+}
+
+// -- Command functions
 
 // Adds a new CLI command
 // Command name is normalized to lowercase.
 // Returns an errors if the command with the same name already exists
-// Requires:
-// - Name of the command
-// - Function that accepts the application state and command details containing program args
 func (c *commands) register(name string, f func(*state, command) error) error {
 	name = strings.ToLower(name)
 

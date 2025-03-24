@@ -19,3 +19,7 @@ RETURNING *;
 -- name: GetUser :one
 SELECT * FROM users
 WHERE name = $1;
+
+-- DEV/TESTING ONLY
+-- name: Reset :exec
+DELETE FROM USERS *;
