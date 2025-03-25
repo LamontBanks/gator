@@ -17,7 +17,7 @@ CREATE TABLE feeds (
     -- REFERENCE automatically uses the PRIMARY KEY of the referenced table
     user_id uuid    NOT NULL 
                     REFERENCES users
-                    -- DELETES this row in 'feeds' if user_id in 'users' is deleted
+                    -- DELETES this row if `id` in `users` is deleted
                     ON DELETE CASCADE
 );
 

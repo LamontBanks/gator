@@ -2,10 +2,13 @@
 
 -- +goose Up
 CREATE TABLE users (
-    id uuid PRIMARY KEY,
-    created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    name TEXT UNIQUE NOT NULL DEFAULT 'Unspecified'
+    id uuid                 PRIMARY KEY,
+    created_at timestamp    NOT NULL 
+                            DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp    NOT NULL 
+                            DEFAULT CURRENT_TIMESTAMP,
+    name TEXT               UNIQUE 
+                            NOT NULL DEFAULT 'Unspecified'
 );
 
 -- +goose Down
