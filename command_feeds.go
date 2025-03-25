@@ -46,3 +46,15 @@ func handlerAddFeed(s *state, cmd command) error {
 
 	return nil
 }
+
+// Lists all feeds from all users
+func handlerGetFeeds(s *state, cmd command) error {
+	feeds, err := s.db.GetFeeds(context.Background())
+	if err != nil {
+		return err
+	}
+
+	fmt.Print(feeds)
+
+	return nil
+}
