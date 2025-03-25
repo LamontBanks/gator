@@ -10,11 +10,12 @@ import (
 )
 
 func handlerAddFeed(s *state, cmd command) error {
-	// Args: feedUrl
-	if len(cmd.args) < 1 {
-		return fmt.Errorf("RSS feed URL required")
+	// Args: feedName, feedUrl
+	if len(cmd.args) < 2 {
+		return fmt.Errorf("missing args: name, RSS url")
 	}
-	feedUrl := cmd.args[0]
+	feedName := cmd.args[0]
+	feedUrl := cmd.args[1]
 
 	// Get userId from username
 	username := s.config.CurrentUserName
@@ -27,25 +28,21 @@ func handlerAddFeed(s *state, cmd command) error {
 		return fmt.Errorf("%v not registered", username)
 	}
 
-	// Get RSSFeed details
-	rssFeed, err := fetchFeed(context.Background(), feedUrl)
-	if err != nil {
-		return err
-	}
-
-	// Insert user
-	_, err = s.db.CreateFeed(context.Background(), database.CreateFeedParams{
+	// Insert feed info
+	addFeedResult, err := s.db.CreateFeed(context.Background(), database.CreateFeedParams{
 		ID:        uuid.New(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
-		Name:      username,
-		Url:       rssFeed.Channel.Link,
+		Name:      feedName,
+		Url:       feedUrl,
 		UserID:    userRow.ID,
 	})
 	if err != nil {
-		return fmt.Errorf("could not add: %v (%v) for %v - possible duplicate feed?", rssFeed.Channel.Title, rssFeed.Channel.Link, username)
+		return fmt.Errorf("could not add: %v (%v) for %v - possible duplicate feed?", feedName, feedUrl, username)
 	}
-	fmt.Printf("Saved \"%v\" (%v) for user %v\n", rssFeed.Channel.Title, rssFeed.Channel.Link, username)
+
+	fmt.Println(addFeedResult)
+	fmt.Printf("Saved \"%v\" (%v) for user %v\n", feedName, feedUrl, username)
 
 	return nil
 }
