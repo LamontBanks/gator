@@ -35,7 +35,8 @@ func (c *commands) register(name string, f func(*state, command) error) error {
 // Runs the function mapped to the named command
 func (c *commands) run(s *state, cmd command) error {
 	// Search the mapping for the assoicated handler function
-	handlerFunc, exists := c.cmds[cmd.name]
+	normalizedCmd := strings.ToLower(cmd.name)
+	handlerFunc, exists := c.cmds[normalizedCmd]
 	if !exists {
 		return fmt.Errorf("command not found: %v", cmd.name)
 	}
