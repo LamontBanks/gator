@@ -53,6 +53,7 @@ func main() {
 	appCommands.register("register", handlerRegister)
 	appCommands.register("reset", handlerReset)
 	appCommands.register("users", handlerGetUsers)
+	appCommands.register("agg", handlerAggregator)
 
 	// Read the CLI args to take action
 	// os.Args includes the program name, then the command, and (possibly) args
