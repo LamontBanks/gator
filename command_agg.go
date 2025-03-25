@@ -6,13 +6,11 @@ import (
 )
 
 func handlerAggregator(s *state, cmd command) error {
-	// Args: url
-	// if len(cmd.args) < 1 {
-	// 	return fmt.Errorf("feed url required")
-	// }
-	// feedUrl := cmd.args[0]
-
-	feedUrl := "https://www.wagslane.dev/index.xml"
+	// Args: RSS feed url
+	if len(cmd.args) < 1 {
+		return fmt.Errorf("feed url required")
+	}
+	feedUrl := cmd.args[0]
 
 	rssFeed, err := fetchFeed(context.Background(), feedUrl)
 	if err != nil {
