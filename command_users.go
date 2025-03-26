@@ -15,9 +15,9 @@ import (
 //	$ go run . register <username>
 //	$ go run . register alice
 func handlerRegister(s *state, cmd command) error {
-	// Get needed args
+	// Args: username
 	if len(cmd.args) < 1 {
-		return fmt.Errorf("name required")
+		return fmt.Errorf("usage: %v <username>", cmd.name)
 	}
 	username := cmd.args[0]
 

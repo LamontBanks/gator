@@ -13,9 +13,9 @@ import (
 //	$ go run . login <username>
 //	$ go run . login alice
 func handlerLogin(s *state, cmd command) error {
-	// Get needed args
+	// Args: username
 	if len(cmd.args) < 1 {
-		return fmt.Errorf("username required")
+		return fmt.Errorf("usage: %v <username>", cmd.name)
 	}
 	username := cmd.args[0]
 

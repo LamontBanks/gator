@@ -12,7 +12,7 @@ import (
 func handlerAddFeed(s *state, cmd command) error {
 	// Args: feedName, feedUrl
 	if len(cmd.args) < 2 {
-		return fmt.Errorf("missing args: name, RSS url")
+		return fmt.Errorf("usage: %v <Name> <RSS Feed URL>", cmd.name)
 	}
 	feedName := cmd.args[0]
 	feedUrl := cmd.args[1]

@@ -8,7 +8,7 @@ import (
 func handlerAggregator(s *state, cmd command) error {
 	// Args: RSS feed url
 	if len(cmd.args) < 1 {
-		return fmt.Errorf("feed url required")
+		return fmt.Errorf("usage: %v <RSS Feed URL>", cmd.name)
 	}
 	feedUrl := cmd.args[0]
 
