@@ -2,14 +2,15 @@
 
 go run . reset
 
-go run . register alice
-go run . register bob
+go run . register ant
+go run . register bird
 go run . register cat
+go run . register dog
 
-go run . login alice
+go run . login ant
 go run . addFeed "Pivot To AI" https://pivot-to-ai.com/feed/
 
-go run . login bob
+go run . login bird
 go run . addFeed "Pivot To AI" https://pivot-to-ai.com/feed/
 go run . addFeed "MassivelyOP Podcast" https://feeds.libsyn.com/63150/rss
 
