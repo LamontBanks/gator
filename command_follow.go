@@ -26,13 +26,13 @@ func handlerFollow(s *state, cmd command) error {
 	}
 	userRow, err := s.db.GetUser(context.Background(), username)
 	if err != nil {
-		return fmt.Errorf("%v not registered", username)
+		return fmt.Errorf("user %v not registered", username)
 	}
 
 	// Get feed info from the feedUrl
 	feedRow, err := s.db.GetFeedByUrl(context.Background(), feedUrl)
 	if err == sql.ErrNoRows {
-		return fmt.Errorf("feed %v not saved", feedUrl)
+		return fmt.Errorf("feed url %v has not been added yet", feedUrl)
 	}
 	if err != nil {
 		return err
@@ -47,7 +47,7 @@ func handlerFollow(s *state, cmd command) error {
 		FeedID:    feedRow.ID,
 	})
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("failed to follow feed %v", queryResult.FeedName)
 	}
 	fmt.Printf("%v followed %v\n", queryResult.UserName, queryResult.FeedName)
 

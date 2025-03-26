@@ -40,9 +40,21 @@ func handlerAddFeed(s *state, cmd command) error {
 	if err != nil {
 		return fmt.Errorf("could not add: %v (%v) for %v - possible duplicate feed?", feedName, feedUrl, username)
 	}
+	fmt.Printf("Saved \"%v\" (%v) for user %v\n", addFeedResult.Name, addFeedResult.Url, userRow.Name)
 
-	fmt.Println(addFeedResult)
-	fmt.Printf("Saved \"%v\" (%v) for user %v\n", feedName, feedUrl, username)
+	// Also follow the added feed
+	// Save userId -> feedId mapping
+	queryResult, err := s.db.CreateFeedFollow(context.Background(), database.CreateFeedFollowParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		UserID:    userRow.ID,
+		FeedID:    addFeedResult.ID,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to follow feed %v", queryResult.FeedName)
+	}
+	fmt.Printf("%v followed %v\n", queryResult.UserName, queryResult.FeedName)
 
 	return nil
 }
@@ -54,7 +66,9 @@ func handlerGetFeeds(s *state, cmd command) error {
 		return err
 	}
 
-	fmt.Print(feeds)
+	for _, f := range feeds {
+		fmt.Printf("%v - %v\n", f.FeedName, f.UserName.String)
+	}
 
 	return nil
 }
