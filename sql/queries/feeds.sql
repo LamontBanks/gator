@@ -1,5 +1,6 @@
 -- https://docs.sqlc.dev/en/latest/tutorials/getting-started-postgresql.html
 
+-- Represent a feed and the user who added the feed
 -- name: CreateFeed :one
 INSERT INTO feeds (id, created_at, updated_at, name, url, user_id)
 VALUES (
@@ -18,3 +19,7 @@ FROM feeds
 LEFT JOIN users
 ON feeds.user_id = users.id
 ORDER BY feeds.name ASC;
+
+-- name: GetFeedByUrl :one
+SELECT * FROM feeds
+WHERE url = $1;

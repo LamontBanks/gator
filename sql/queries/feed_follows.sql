@@ -1,7 +1,7 @@
 -- https://docs.sqlc.dev/en/latest/tutorials/getting-started-postgresql.html
 
 -- name: CreateFeedFollow :one
-INSERT INTO users (id, created_at, updated_at, user_id, feed_id)
+INSERT INTO feed_follows (id, created_at, updated_at, user_id, feed_id)
 VALUES (
     $1,
     $2,

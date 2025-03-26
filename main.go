@@ -56,6 +56,7 @@ func main() {
 	appCommands.register("agg", handlerAggregator)
 	appCommands.register("addFeed", handlerAddFeed)
 	appCommands.register("feeds", handlerGetFeeds)
+	appCommands.register("follow", handlerFollow)
 
 	// Read the CLI args to take action
 	// os.Args includes the program name, then the command, and (possibly) args
