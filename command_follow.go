@@ -11,7 +11,6 @@ import (
 )
 
 // Sets the current user as a follower of the given RSS feed.
-// If the feed does not exist, it will be created.
 func handlerFollow(s *state, cmd command) error {
 	// Args: url
 	if len(cmd.args) < 1 {
