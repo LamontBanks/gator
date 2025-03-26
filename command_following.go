@@ -27,8 +27,9 @@ func handlerFollowing(s *state, cmd command) error {
 		return nil
 	}
 
+	// List feed names
 	for _, feed := range feedDetails {
-		fmt.Println(feed.FeedCreatorName)
+		fmt.Println(feed.FeedName)
 	}
 
 	return nil
