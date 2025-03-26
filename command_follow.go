@@ -49,8 +49,7 @@ func handlerFollow(s *state, cmd command) error {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(queryResult)
-	fmt.Printf("Followed feed %v", feedUrl)
+	fmt.Printf("%v followed %v\n", queryResult.UserName, queryResult.FeedName)
 
 	return nil
 }

@@ -18,3 +18,5 @@ go run . login cat
 go run . addFeed "Pivot To AI" https://pivot-to-ai.com/feed/
 go run . addFeed "MassivelyOP Podcast" https://feeds.libsyn.com/63150/rss
 go run . addFeed "Guild Wars 2" https://www.guildwars2.com/en/feed/
+
+go run . users

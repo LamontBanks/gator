@@ -14,15 +14,24 @@ import (
 
 const createFeedFollow = `-- name: CreateFeedFollow :one
 
-INSERT INTO feed_follows (id, created_at, updated_at, user_id, feed_id)
-VALUES (
-    $1,
-    $2,
-    $3,
-    $4,
-    $5
+
+WITH new_feed_follow_row AS (
+    INSERT INTO feed_follows (id, created_at, updated_at, user_id, feed_id)
+    VALUES (
+        $1,
+        $2,
+        $3,
+        $4,
+        $5
+    )
+    RETURNING id, created_at, updated_at, user_id, feed_id
 )
-RETURNING id, created_at, updated_at, user_id, feed_id
+SELECT new_feed_follow_row.id, new_feed_follow_row.created_at, new_feed_follow_row.updated_at, new_feed_follow_row.user_id, new_feed_follow_row.feed_id, users.name AS user_name, feeds.name AS feed_name
+FROM new_feed_follow_row
+INNER JOIN users
+ON new_feed_follow_row.user_id = users.id
+INNER JOIN feeds
+ON new_feed_follow_row.feed_id = feeds.id
 `
 
 type CreateFeedFollowParams struct {
@@ -33,8 +42,22 @@ type CreateFeedFollowParams struct {
 	FeedID    uuid.UUID
 }
 
+type CreateFeedFollowRow struct {
+	ID        uuid.UUID
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	UserID    uuid.UUID
+	FeedID    uuid.UUID
+	UserName  string
+	FeedName  string
+}
+
 // https://docs.sqlc.dev/en/latest/tutorials/getting-started-postgresql.html
-func (q *Queries) CreateFeedFollow(ctx context.Context, arg CreateFeedFollowParams) (FeedFollow, error) {
+// Common Table Expressions (CTE)
+// Use result of query as temporary table for other parts of the query
+// https://www.postgresql.org/docs/13/queries-with.html#QUERIES-WITH-CTE
+// Add entry showing user follwed a feed, then returns the name of the user and feed
+func (q *Queries) CreateFeedFollow(ctx context.Context, arg CreateFeedFollowParams) (CreateFeedFollowRow, error) {
 	row := q.db.QueryRowContext(ctx, createFeedFollow,
 		arg.ID,
 		arg.CreatedAt,
@@ -42,19 +65,22 @@ func (q *Queries) CreateFeedFollow(ctx context.Context, arg CreateFeedFollowPara
 		arg.UserID,
 		arg.FeedID,
 	)
-	var i FeedFollow
+	var i CreateFeedFollowRow
 	err := row.Scan(
 		&i.ID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.UserID,
 		&i.FeedID,
+		&i.UserName,
+		&i.FeedName,
 	)
 	return i, err
 }
 
 const getFeedFollowsForUser = `-- name: GetFeedFollowsForUser :many
-SELECT feed_follows.id, feed_follows.created_at, feed_follows.updated_at, feed_follows.user_id, feed_follows.feed_id, feeds.name AS feed_name, users.name AS feed_creator_name FROM feed_follows
+SELECT feed_follows.id, feed_follows.created_at, feed_follows.updated_at, feed_follows.user_id, feed_follows.feed_id, feeds.name AS feed_name, users.name AS feed_creator_name 
+FROM feed_follows
 INNER JOIN feeds
 ON feed_follows.feed_id = feeds.id
 INNER JOIN users
@@ -72,6 +98,7 @@ type GetFeedFollowsForUserRow struct {
 	FeedCreatorName string
 }
 
+// Get all feeds the user is following
 func (q *Queries) GetFeedFollowsForUser(ctx context.Context, userID uuid.UUID) ([]GetFeedFollowsForUserRow, error) {
 	rows, err := q.db.QueryContext(ctx, getFeedFollowsForUser, userID)
 	if err != nil {
