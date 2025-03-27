@@ -22,7 +22,7 @@ func handlerRegister(s *state, cmd command) error {
 	username := cmd.args[0]
 
 	// Insert user
-	queryResult, err := s.db.CreateUser(context.Background(), database.CreateUserParams{
+	user, err := s.db.CreateUser(context.Background(), database.CreateUserParams{
 		ID:        uuid.New(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
@@ -31,7 +31,7 @@ func handlerRegister(s *state, cmd command) error {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("Created user %v: %v\n", username, queryResult)
+	fmt.Printf("Registered user %v", user.Name)
 
 	// Update the config as well
 	return handlerLogin(s, cmd)
