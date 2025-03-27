@@ -5,6 +5,7 @@ import (
 	"fmt"
 )
 
+// Downloads and prints an RSS
 func handlerAggregator(s *state, cmd command) error {
 	// Args: RSS feed url
 	if len(cmd.args) < 1 {

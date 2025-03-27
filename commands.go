@@ -17,7 +17,7 @@ type commands struct {
 }
 
 // Adds a new CLI command
-// Command name is normalized to lowercase.
+// Command name is normalized to lowercase
 // Returns an errors if the command with the same name already exists
 func (c *commands) register(name string, f func(*state, command) error) error {
 	name = strings.ToLower(name)
