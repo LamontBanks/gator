@@ -25,8 +25,9 @@ go run . follow https://feeds.libsyn.com/63150/rss
 go run . login Bird
 go run . follow https://www.guildwars2.com/en/feed/
 
-echo "Sample feeds for manual testing:"
-echo "* HN | https://hnrss.org/newest"
-echo "* LaneBlog | https://www.wagslane.dev/index.xml"
+echo "Some sample feeds for manual testing:"
+echo "HN | https://hnrss.org/newest"
+echo "LaneBlog | https://www.wagslane.dev/index.xml"
 
 go run . users
+go run . feeds

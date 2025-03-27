@@ -60,6 +60,7 @@ func main() {
 	appCommands.register("follow", middlewareLoggedIn(handlerFollow))
 	appCommands.register("unfollow", middlewareLoggedIn(handlerUnfollow))
 	appCommands.register("following", middlewareLoggedIn(handlerFollowing))
+	appCommands.register("update", handlerUpdateFeed)
 
 	// Read the CLI args to take action
 	// os.Args includes the program name, then the command, and (possibly) args
@@ -84,6 +85,7 @@ func middlewareLoggedIn(handler func(s *state, cmd command, user database.User) 
 	// Return the needed handler function...
 	return func(s *state, cmd command) error {
 		username := s.config.CurrentUserName
+
 		if username == "" {
 			return fmt.Errorf("no user logged in")
 		}
@@ -93,7 +95,7 @@ func middlewareLoggedIn(handler func(s *state, cmd command, user database.User) 
 			return fmt.Errorf("%v not registered", username)
 		}
 
-		// but with the user passed into the actual handler
+		// ...but with the user passed into the actual handler
 		return handler(s, cmd, user)
 	}
 }

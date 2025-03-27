@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -57,9 +58,37 @@ func handlerGetFeeds(s *state, cmd command) error {
 		return err
 	}
 
-	for _, f := range feeds {
-		fmt.Printf("%v - %v\n", f.FeedName, f.UserName.String)
+	for _, feed := range feeds {
+		fmt.Printf("%v - added by %v\n", feed.FeedName, feed.UserName.String)
 	}
+
+	return nil
+}
+
+// TESTING
+func handlerUpdateFeed(s *state, cmd command) error {
+	// Args: <feed url>
+	if len(cmd.args) < 1 {
+		return fmt.Errorf("usage: %v <feed url>", cmd.name)
+	}
+	feedUrl := cmd.args[0]
+
+	// Feed info from url
+	feed, err := s.db.GetFeedByUrl(context.Background(), feedUrl)
+	if err == sql.ErrNoRows {
+		return fmt.Errorf("feed url %v has not been added yet", feedUrl)
+	}
+	if err != nil {
+		return err
+	}
+
+	// Update timestamps
+	err = s.db.MarkFeedFetched(context.Background(), feed.ID)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Fetched %v (%v)\n", feed.Name, feedUrl)
 
 	return nil
 }
