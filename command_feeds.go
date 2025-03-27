@@ -15,7 +15,7 @@ import (
 func handlerAddFeed(s *state, cmd command, user database.User) error {
 	// Args: feedName, feedUrl
 	if len(cmd.args) < 2 {
-		return fmt.Errorf("usage: %v <Name> <RSS Feed URL>", cmd.name)
+		return fmt.Errorf("usage: %v <username> <url>", cmd.name)
 	}
 	feedName := cmd.args[0]
 	feedUrl := cmd.args[1]
@@ -69,7 +69,7 @@ func handlerGetFeeds(s *state, cmd command) error {
 func handlerUpdateFeed(s *state, cmd command) error {
 	// Args: <feed url>
 	if len(cmd.args) < 1 {
-		return fmt.Errorf("usage: %v <feed url>", cmd.name)
+		return fmt.Errorf("usage: %v <url>", cmd.name)
 	}
 	feedUrl := cmd.args[0]
 
@@ -83,12 +83,12 @@ func handlerUpdateFeed(s *state, cmd command) error {
 	}
 
 	// Update timestamps
-	err = s.db.MarkFeedFetched(context.Background(), feed.ID)
+	err = s.db.MarkFeedAsFetched(context.Background(), feed.ID)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Fetched %v (%v)\n", feed.Name, feedUrl)
+	fmt.Printf("Updated \"%v\" (%v)\n", feed.Name, feedUrl)
 
 	return nil
 }

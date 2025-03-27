@@ -12,7 +12,7 @@ import (
 func handlerUnfollow(s *state, cmd command, user database.User) error {
 	// Args: url
 	if len(cmd.args) < 1 {
-		return fmt.Errorf("usage: %v <RSS Feed URL>", cmd.name)
+		return fmt.Errorf("usage: %v <url>", cmd.name)
 	}
 	feedUrl := cmd.args[0]
 

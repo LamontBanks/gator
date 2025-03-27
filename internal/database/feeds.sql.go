@@ -117,13 +117,41 @@ func (q *Queries) GetFeeds(ctx context.Context) ([]GetFeedsRow, error) {
 	return items, nil
 }
 
-const markFeedFetched = `-- name: MarkFeedFetched :exec
+const getNextFeedToFetch = `-- name: GetNextFeedToFetch :one
+SELECT id, name, url, last_fetched_at
+FROM feeds
+ORDER BY last_fetched_at ASC
+NULLS FIRST
+`
+
+type GetNextFeedToFetchRow struct {
+	ID            uuid.UUID
+	Name          string
+	Url           string
+	LastFetchedAt sql.NullTime
+}
+
+// Gets oldest feed to update
+// Feeds that have never been updated (last_fetched_at = NULL) are prioritized (though no specific order can be gauranteed)
+func (q *Queries) GetNextFeedToFetch(ctx context.Context) (GetNextFeedToFetchRow, error) {
+	row := q.db.QueryRowContext(ctx, getNextFeedToFetch)
+	var i GetNextFeedToFetchRow
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Url,
+		&i.LastFetchedAt,
+	)
+	return i, err
+}
+
+const markFeedAsFetched = `-- name: MarkFeedAsFetched :exec
 UPDATE feeds
 SET last_fetched_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
 WHERE id = $1
 `
 
-func (q *Queries) MarkFeedFetched(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.ExecContext(ctx, markFeedFetched, id)
+func (q *Queries) MarkFeedAsFetched(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, markFeedAsFetched, id)
 	return err
 }
