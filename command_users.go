@@ -37,7 +37,8 @@ func handlerRegister(s *state, cmd command) error {
 	return handlerLogin(s, cmd)
 }
 
-// Lists all users. Indicates which usersis logged in.
+// Lists all users
+// Indicates which usersis logged in
 func handlerGetUsers(s *state, cmd command) error {
 	users, err := s.db.GetUsers(context.Background())
 	if err != nil {

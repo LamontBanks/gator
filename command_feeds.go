@@ -9,24 +9,15 @@ import (
 	"github.com/google/uuid"
 )
 
-func handlerAddFeed(s *state, cmd command) error {
+// Create a feed in the system, attributed to the user
+// Fails if the feed already exists
+func handlerAddFeed(s *state, cmd command, user database.User) error {
 	// Args: feedName, feedUrl
 	if len(cmd.args) < 2 {
 		return fmt.Errorf("usage: %v <Name> <RSS Feed URL>", cmd.name)
 	}
 	feedName := cmd.args[0]
 	feedUrl := cmd.args[1]
-
-	// Get userId from username
-	username := s.config.CurrentUserName
-	if username == "" {
-		return fmt.Errorf("unable to save feed - no user logged in")
-	}
-
-	userRow, err := s.db.GetUser(context.Background(), username)
-	if err != nil {
-		return fmt.Errorf("%v not registered", username)
-	}
 
 	// Insert feed info
 	addFeedResult, err := s.db.CreateFeed(context.Background(), database.CreateFeedParams{
@@ -35,12 +26,12 @@ func handlerAddFeed(s *state, cmd command) error {
 		UpdatedAt: time.Now(),
 		Name:      feedName,
 		Url:       feedUrl,
-		UserID:    userRow.ID,
+		UserID:    user.ID,
 	})
 	if err != nil {
-		return fmt.Errorf("could not add: %v (%v) for %v - possible duplicate feed?", feedName, feedUrl, username)
+		return fmt.Errorf("could not add: %v (%v) for %v - possible duplicate feed?", feedName, feedUrl, user.Name)
 	}
-	fmt.Printf("Saved \"%v\" (%v) for user %v\n", addFeedResult.Name, addFeedResult.Url, userRow.Name)
+	fmt.Printf("Saved \"%v\" (%v) for user %v\n", addFeedResult.Name, addFeedResult.Url, user.Name)
 
 	// Also follow the added feed
 	// Save userId -> feedId mapping
@@ -48,7 +39,7 @@ func handlerAddFeed(s *state, cmd command) error {
 		ID:        uuid.New(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
-		UserID:    userRow.ID,
+		UserID:    user.ID,
 		FeedID:    addFeedResult.ID,
 	})
 	if err != nil {

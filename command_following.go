@@ -3,22 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
+
+	"github.com/LamontBanks/blog-aggregator/internal/database"
 )
 
 // Prints details of all the feeds the current user is following
-func handlerFollowing(s *state, cmd command) error {
-	// Get user info from username
-	username := s.config.CurrentUserName
-	if username == "" {
-		return fmt.Errorf("unable to save feed - no user logged in")
-	}
-	userRow, err := s.db.GetUser(context.Background(), username)
-	if err != nil {
-		return fmt.Errorf("%v not registered", username)
-	}
-
+func handlerFollowing(s *state, cmd command, user database.User) error {
 	// Get followed feed details
-	feedDetails, err := s.db.GetFeedFollowsForUser(context.Background(), userRow.ID)
+	feedDetails, err := s.db.GetFeedFollowsForUser(context.Background(), user.ID)
 	if err != nil {
 		return err
 	}

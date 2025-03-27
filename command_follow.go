@@ -11,22 +11,12 @@ import (
 )
 
 // Sets the current user as a follower of the given RSS feed.
-func handlerFollow(s *state, cmd command) error {
+func handlerFollow(s *state, cmd command, user database.User) error {
 	// Args: url
 	if len(cmd.args) < 1 {
 		return fmt.Errorf("usage: %v <RSS Feed URL>", cmd.name)
 	}
 	feedUrl := cmd.args[0]
-
-	// Get user info from username
-	username := s.config.CurrentUserName
-	if username == "" {
-		return fmt.Errorf("unable to save feed - no user logged in")
-	}
-	userRow, err := s.db.GetUser(context.Background(), username)
-	if err != nil {
-		return fmt.Errorf("user %v not registered", username)
-	}
 
 	// Get feed info from the feedUrl
 	feedRow, err := s.db.GetFeedByUrl(context.Background(), feedUrl)
@@ -42,7 +32,7 @@ func handlerFollow(s *state, cmd command) error {
 		ID:        uuid.New(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
-		UserID:    userRow.ID,
+		UserID:    user.ID,
 		FeedID:    feedRow.ID,
 	})
 	if err != nil {

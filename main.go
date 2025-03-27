@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
 
@@ -20,7 +21,7 @@ type state struct {
 	db     *database.Queries
 }
 
-// --- Main
+// -- Main
 
 func main() {
 	// Initialize info for the application state
@@ -37,7 +38,7 @@ func main() {
 		panic(err)
 	}
 	defer db.Close()
-	dbQueries := database.New(db) // Use the SQLC database wrapper instead of the SQL db directly
+	dbQueries := database.New(db) // Use the SQLC `database` wrapper instead of the native Go SQL db directly
 
 	// Set state
 	appState := state{
@@ -54,10 +55,10 @@ func main() {
 	appCommands.register("reset", handlerReset)
 	appCommands.register("users", handlerGetUsers)
 	appCommands.register("agg", handlerAggregator)
-	appCommands.register("addFeed", handlerAddFeed)
+	appCommands.register("addFeed", middlewareLoggedIn(handlerAddFeed))
 	appCommands.register("feeds", handlerGetFeeds)
-	appCommands.register("follow", handlerFollow)
-	appCommands.register("following", handlerFollowing)
+	appCommands.register("follow", middlewareLoggedIn(handlerFollow))
+	appCommands.register("following", middlewareLoggedIn(handlerFollowing))
 
 	// Read the CLI args to take action
 	// os.Args includes the program name, then the command, and (possibly) args
@@ -74,6 +75,25 @@ func main() {
 	})
 	if cmdErr != nil {
 		log.Fatal(cmdErr)
+	}
+}
+
+// Wrapper for CLI commands that require the user to be logged in
+func middlewareLoggedIn(handler func(s *state, cmd command, user database.User) error) func(*state, command) error {
+	// Return the needed handler function...
+	return func(s *state, cmd command) error {
+		username := s.config.CurrentUserName
+		if username == "" {
+			return fmt.Errorf("no user logged in")
+		}
+
+		user, err := s.db.GetUser(context.Background(), username)
+		if err != nil {
+			return fmt.Errorf("%v not registered", username)
+		}
+
+		// but with the user passed into the actual handler
+		return handler(s, cmd, user)
 	}
 }
 
