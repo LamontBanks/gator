@@ -28,6 +28,7 @@ go run . follow https://www.guildwars2.com/en/feed/
 echo "Some sample feeds for manual testing:"
 echo "HN | https://hnrss.org/newest"
 echo "LaneBlog | https://www.wagslane.dev/index.xml"
+echo "Guild Wars 2 Dev Tracker | https://en-forum.guildwars2.com/discover/6.xml"
 
 go run . users
 go run . feeds
