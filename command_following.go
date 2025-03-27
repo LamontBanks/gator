@@ -9,7 +9,6 @@ import (
 
 // Prints details of all the feeds the current user is following
 func handlerFollowing(s *state, cmd command, user database.User) error {
-	// Get followed feed details
 	feedDetails, err := s.db.GetFeedFollowsForUser(context.Background(), user.ID)
 	if err != nil {
 		return err
@@ -21,7 +20,7 @@ func handlerFollowing(s *state, cmd command, user database.User) error {
 
 	// List feed names
 	for _, feed := range feedDetails {
-		fmt.Println(feed.FeedName)
+		fmt.Printf("%v | %v\n", feed.FeedName, feed.FeedUrl)
 	}
 
 	return nil

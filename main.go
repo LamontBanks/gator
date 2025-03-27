@@ -58,6 +58,7 @@ func main() {
 	appCommands.register("addFeed", middlewareLoggedIn(handlerAddFeed))
 	appCommands.register("feeds", handlerGetFeeds)
 	appCommands.register("follow", middlewareLoggedIn(handlerFollow))
+	appCommands.register("unfollow", middlewareLoggedIn(handlerUnfollow))
 	appCommands.register("following", middlewareLoggedIn(handlerFollowing))
 
 	// Read the CLI args to take action
