@@ -60,7 +60,6 @@ func main() {
 	appCommands.register("follow", middlewareLoggedIn(handlerFollow))
 	appCommands.register("unfollow", middlewareLoggedIn(handlerUnfollow))
 	appCommands.register("following", middlewareLoggedIn(handlerFollowing))
-	appCommands.register("update", handlerUpdateFeed)
 
 	// Read the CLI args to take action
 	// os.Args includes the program name, then the command, and (possibly) args
