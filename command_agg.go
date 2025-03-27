@@ -4,40 +4,30 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"math"
-	"strconv"
+	"time"
 )
 
 // Downloads and prints an RSS
 func handlerAggregator(s *state, cmd command) error {
-	// Args: RSS feed url
+	// Args: <update freq string, ex: 1s, 30s, 1m, 5m, 1h>
+	freqFormat := "1s, 30s, 1m, 5m, 1h, 1d"
 	if len(cmd.args) < 1 {
-		return fmt.Errorf("usage: %v <url>", cmd.name)
+		return fmt.Errorf("usage: %v <update freq string, ex: %v, etc.>", cmd.name, freqFormat)
 	}
-	feedUrl := cmd.args[0]
 
-	rssFeed, err := fetchFeed(context.Background(), feedUrl)
+	freq, err := time.ParseDuration(cmd.args[0])
 	if err != nil {
-		return err
+		return fmt.Errorf("could not parse frequency - format is %v", freqFormat)
 	}
 
-	fmt.Println(rssFeed)
-
-	return nil
+	ticker := time.NewTicker(freq)
+	for ; ; <-ticker.C {
+		getAllFeedUpdates(s)
+	}
 }
 
 // Continuously fetch updates for all feeds
-func getAllFeedUpdates(s *state, cmd command) error {
-	// Optional args: number of recent posts
-	maxNumPosts := math.MaxInt
-	if len(cmd.args) > 0 {
-		i, err := strconv.Atoi(cmd.args[0])
-		maxNumPosts = i
-		if err != nil {
-			return fmt.Errorf("usage: %v <max number of posts> (optional)", cmd.name)
-		}
-	}
-
+func getAllFeedUpdates(s *state) error {
 	// Get the oldest feed info
 	oldestFeed, err := s.db.GetNextFeedToFetch(context.Background())
 	if err == sql.ErrNoRows {
@@ -60,10 +50,10 @@ func getAllFeedUpdates(s *state, cmd command) error {
 	}
 
 	// Print the feed
-	maxNumPosts = min(len(rssFeed.Channel.Item), maxNumPosts)
-
 	fmt.Printf("- %v -\n", rssFeed.Channel.Title)
-	for i := range maxNumPosts {
+
+	maxItems := 3
+	for i := range maxItems {
 		fmt.Println(rssFeed.Channel.Item[i].Title)
 		// fmt.Println(rssFeed.Channel.Item[i].Description)
 	}
