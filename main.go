@@ -55,10 +55,11 @@ func main() {
 	appCommands.register("reset", handlerReset)
 	appCommands.register("users", handlerGetUsers)
 
-	// Main command
+	// Main commands
 	appCommands.register("agg", handlerAggregator)
-
 	appCommands.register("addFeed", middlewareLoggedIn(handlerAddFeed))
+	appCommands.register("browse", middlewareLoggedIn(handlerBrowse))
+
 	appCommands.register("feeds", handlerGetFeeds)
 	appCommands.register("follow", middlewareLoggedIn(handlerFollow))
 	appCommands.register("unfollow", middlewareLoggedIn(handlerUnfollow))
