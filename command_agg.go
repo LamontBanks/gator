@@ -21,7 +21,7 @@ func handlerAggregator(s *state, cmd command) error {
 	}
 
 	// Periodic updates
-	fmt.Printf("-- Pulling feeds every %v --\n", freq)
+	fmt.Printf("-- Updated at %v --\n", time.Now())
 	ticker := time.NewTicker(freq)
 	for ; ; <-ticker.C {
 		getAllFeedUpdates(s)

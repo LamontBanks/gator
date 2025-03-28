@@ -31,7 +31,7 @@ func handlerRegister(s *state, cmd command) error {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("Registered user %v", user.Name)
+	fmt.Printf("Registered user %v\n", user.Name)
 
 	// Update the config as well
 	return handlerLogin(s, cmd)
