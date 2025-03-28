@@ -59,7 +59,7 @@ func getAllFeedUpdates(s *state) error {
 		}
 
 		// Print the feed
-		fmt.Printf("- %v -\n", rssFeed.Channel.Title)
+		fmt.Printf("\n- %v -\n", rssFeed.Channel.Title)
 
 		maxItems := 3
 		for i := range maxItems {
