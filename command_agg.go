@@ -5,6 +5,9 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
+
+	"github.com/LamontBanks/blog-aggregator/internal/database"
+	"github.com/google/uuid"
 )
 
 // Downloads and prints an RSS
@@ -29,6 +32,7 @@ func handlerAggregator(s *state, cmd command) error {
 }
 
 // Continuously fetch updates for all feeds
+// Saves to database
 func getAllFeedUpdates(s *state) error {
 	// Get number of feeds
 	allFeeds, err := s.db.GetFeeds(context.Background())
@@ -64,7 +68,34 @@ func getAllFeedUpdates(s *state) error {
 		maxItems := 3
 		for i := range maxItems {
 			fmt.Printf("* %v\n", rssFeed.Channel.Item[i].Title)
-			// fmt.Println(rssFeed.Channel.Item[i].Description)
+		}
+
+		saveFeedPosts(s, rssFeed, oldestFeed.ID)
+
+	}
+	return nil
+}
+
+// Save the posts to the database
+func saveFeedPosts(s *state, rssFeed *RSSFeed, feedId uuid.UUID) error {
+	for i := range len(rssFeed.Channel.Item) {
+		pubDate, err := ParseRSSPubDate(rssFeed.Channel.Item[i].PubDate)
+		if err != nil {
+			return err
+		}
+
+		err = s.db.CreatePost(context.Background(), database.CreatePostParams{
+			ID:          uuid.New(),
+			CreatedAt:   time.Now(),
+			UpdatedAt:   time.Now(),
+			Title:       rssFeed.Channel.Item[i].Title,
+			Url:         rssFeed.Channel.Item[i].Link,
+			Description: rssFeed.Channel.Item[i].Description,
+			PublishedAt: pubDate,
+			FeedID:      feedId,
+		})
+		if err != nil {
+			return err
 		}
 	}
 	return nil

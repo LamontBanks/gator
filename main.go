@@ -102,7 +102,7 @@ func middlewareLoggedIn(handler func(s *state, cmd command, user database.User) 
 	}
 }
 
-// DEV/TESTING ONLY
+// TODO: DEV/TESTING ONLY
 // Deletes all users
 func handlerReset(s *state, cmd command) error {
 	return s.db.Reset(context.Background())

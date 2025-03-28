@@ -9,6 +9,7 @@ go run . register Dog
 
 go run . login Ant
 go run . addFeed "Pivot To AI" https://pivot-to-ai.com/feed/
+go run . addFeed "LaneBlog" https://www.wagslane.dev/index.xml
 
 go run . login Bird
 go run . addFeed "Pivot To AI" https://pivot-to-ai.com/feed/
@@ -24,6 +25,8 @@ go run . follow https://feeds.libsyn.com/63150/rss
 
 go run . login Bird
 go run . follow https://www.guildwars2.com/en/feed/
+go run . follow https://massivelyop.com/feed/
+go run . follow https://www.wagslane.dev/index.xml
 
 echo "Some sample feeds for manual testing:"
 echo "HN | https://hnrss.org/newest"

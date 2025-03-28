@@ -10,12 +10,14 @@ CREATE TABLE posts (
                             DEFAULT CURRENT_TIMESTAMP,
     title TEXT              NOT NULL
                             DEFAULT 'No Title',
-    url TEXT                UNIQUE,
-    description TEXT,
+    url TEXT                NOT NULL
+                            UNIQUE,
+    description TEXT        NOT NULL,
     published_at timestamp  NOT NULL 
                             DEFAULT CURRENT_TIMESTAMP,
     feed_id uuid            NOT NULL
                             REFERENCES feeds
+                            -- Deletes this post if feeds.id if deleted in feeds
                             ON DELETE CASCADE
 );
 
