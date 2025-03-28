@@ -58,7 +58,7 @@ func handlerGetFeeds(s *state, cmd command) error {
 	}
 
 	for _, feed := range feeds {
-		fmt.Printf("%v - added by %v\n", feed.FeedName, feed.UserName.String)
+		fmt.Printf("* %v\n%v\n\n", feed.FeedName, feed.Url)
 	}
 
 	return nil

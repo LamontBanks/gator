@@ -30,7 +30,7 @@ func handlerBrowse(s *state, cmd command, user database.User) error {
 	}
 
 	for _, p := range posts {
-		fmt.Printf("%v | %v | Published: %v\n", p.FeedName, p.Title, p.PublishedAt)
+		fmt.Printf("%v | %v\n", p.FeedName, p.Title)
 	}
 
 	return nil

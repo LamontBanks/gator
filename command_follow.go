@@ -36,7 +36,7 @@ func handlerFollow(s *state, cmd command, user database.User) error {
 		FeedID:    feed.ID,
 	})
 	if err != nil {
-		return fmt.Errorf("failed to follow feed %v", queryResult.FeedName)
+		return fmt.Errorf("failed to follow %v; you may already be following it?", feedUrl)
 	}
 	fmt.Printf("%v followed %v\n", queryResult.UserName, queryResult.FeedName)
 
