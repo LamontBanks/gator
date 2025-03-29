@@ -19,7 +19,6 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 	feedName := cmd.args[0]
 	feedUrl := cmd.args[1]
 
-	// Insert feed info
 	addFeedResult, err := s.db.CreateFeed(context.Background(), database.CreateFeedParams{
 		ID:        uuid.New(),
 		CreatedAt: time.Now(),
@@ -33,9 +32,8 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 	}
 	fmt.Printf("Saved \"%v\" (%v) for user %v\n", addFeedResult.Name, addFeedResult.Url, user.Name)
 
-	// Also follow the added feed
-	// Save userId -> feedId mapping
-	queryResult, err := s.db.CreateFeedFollow(context.Background(), database.CreateFeedFollowParams{
+	// Make user follow the new feed
+	newFeedFollow, err := s.db.CreateFeedFollow(context.Background(), database.CreateFeedFollowParams{
 		ID:        uuid.New(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
@@ -43,14 +41,14 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 		FeedID:    addFeedResult.ID,
 	})
 	if err != nil {
-		return fmt.Errorf("failed to follow feed %v", queryResult.FeedName)
+		return fmt.Errorf("failed to follow feed %v", newFeedFollow.FeedName)
 	}
-	fmt.Printf("%v followed %v\n", queryResult.UserName, queryResult.FeedName)
+	fmt.Printf("%v followed %v\n", newFeedFollow.UserName, newFeedFollow.FeedName)
 
 	return nil
 }
 
-// Lists all feeds from all users
+// Prints feeds from all users
 func handlerGetFeeds(s *state, cmd command) error {
 	feeds, err := s.db.GetFeeds(context.Background())
 	if err != nil {

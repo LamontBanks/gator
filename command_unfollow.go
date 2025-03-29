@@ -16,7 +16,6 @@ func handlerUnfollow(s *state, cmd command, user database.User) error {
 	}
 	feedUrl := cmd.args[0]
 
-	// Get feed info from the feedUrl
 	feed, err := s.db.GetFeedByUrl(context.Background(), feedUrl)
 	if err == sql.ErrNoRows {
 		return fmt.Errorf("feed url %v has not been added yet", feedUrl)

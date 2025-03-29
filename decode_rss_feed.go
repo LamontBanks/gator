@@ -28,7 +28,6 @@ type RSSItem struct {
 }
 
 func fetchFeed(ctx context.Context, feedUrl string) (*RSSFeed, error) {
-	// Create request
 	req, err := http.NewRequestWithContext(ctx, "GET", feedUrl, nil)
 	if err != nil {
 		return nil, err
@@ -36,26 +35,23 @@ func fetchFeed(ctx context.Context, feedUrl string) (*RSSFeed, error) {
 
 	req.Header.Set("User-Agent", "Go-Demo-Aggregator")
 
-	// Make Request
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
 
-	// Read response into bytes
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	// Unmarshal the bytes
 	var rssFeed RSSFeed
 	if err := xml.Unmarshal(data, &rssFeed); err != nil {
 		return &rssFeed, err
 	}
 
-	// Unescape HTML characters
+	// Unescape HTML characters in both the Channel and Items
 	rssFeed.Channel.Title = html.UnescapeString(rssFeed.Channel.Title)
 	rssFeed.Channel.Description = html.UnescapeString(rssFeed.Channel.Description)
 
@@ -67,7 +63,7 @@ func fetchFeed(ctx context.Context, feedUrl string) (*RSSFeed, error) {
 	return &rssFeed, nil
 }
 
-// Try a couple of time layouts, use what works
+// Try parsing a few time layouts, use what works
 func ParseRSSPubDate(pubDate string) (time.Time, error) {
 	// https://pkg.go.dev/time@go1.24.1#Layout
 	timeLayoutsToTry := []string{

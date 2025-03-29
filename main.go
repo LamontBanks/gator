@@ -14,7 +14,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// Application state to be passed to the commands:
+// Application state to be passed to the commands
 // Config, database connection, etc.
 type state struct {
 	config *config.Config
@@ -25,20 +25,20 @@ type state struct {
 
 func main() {
 	// Initialize info for the application state
-	// Config
 	cfg, err := config.ReadConfig()
 	if err != nil {
 		panic(err)
 	}
 
-	// Database connection
+	// Database
 	connStr := cfg.DbUrl
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
-	dbQueries := database.New(db) // Use the SQLC `database` wrapper instead of the native Go SQL db directly
+	// Using the SQLC `database` wrapper instead of the native Go SQL db directly
+	dbQueries := database.New(db)
 
 	// Set state
 	appState := state{
@@ -50,23 +50,20 @@ func main() {
 	appCommands := commands{
 		cmds: make(map[string]func(*state, command) error),
 	}
+	appCommands.register("agg", handlerAggregator)
 	appCommands.register("login", handlerLogin)
 	appCommands.register("register", handlerRegister)
 	appCommands.register("reset", handlerReset)
 	appCommands.register("users", handlerGetUsers)
-
-	// Main commands
-	appCommands.register("agg", handlerAggregator)
 	appCommands.register("addFeed", middlewareLoggedIn(handlerAddFeed))
 	appCommands.register("browse", middlewareLoggedIn(handlerBrowse))
-
 	appCommands.register("feeds", handlerGetFeeds)
 	appCommands.register("follow", middlewareLoggedIn(handlerFollow))
 	appCommands.register("unfollow", middlewareLoggedIn(handlerUnfollow))
 	appCommands.register("following", middlewareLoggedIn(handlerFollowing))
 
 	// Read the CLI args to take action
-	// os.Args includes the program name, then the command, and (possibly) args
+	// os.Args includes the program name, then the command, and (possible) args
 	if len(os.Args) < 2 {
 		log.Fatal("not enough args provided - need <command> <args>")
 	}
@@ -87,6 +84,8 @@ func main() {
 func middlewareLoggedIn(handler func(s *state, cmd command, user database.User) error) func(*state, command) error {
 	// Return the needed handler function...
 	return func(s *state, cmd command) error {
+
+		// ...but first get the user from the database
 		username := s.config.CurrentUserName
 
 		if username == "" {
@@ -98,7 +97,7 @@ func middlewareLoggedIn(handler func(s *state, cmd command, user database.User) 
 			return fmt.Errorf("%v not registered", username)
 		}
 
-		// ...but with the user passed into the actual handler
+		// pass user into the handler function
 		return handler(s, cmd, user)
 	}
 }

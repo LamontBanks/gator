@@ -18,7 +18,6 @@ func handlerFollow(s *state, cmd command, user database.User) error {
 	}
 	feedUrl := cmd.args[0]
 
-	// Get feed info from the feedUrl
 	feed, err := s.db.GetFeedByUrl(context.Background(), feedUrl)
 	if err == sql.ErrNoRows {
 		return fmt.Errorf("feed url %v has not been added yet", feedUrl)
@@ -27,8 +26,7 @@ func handlerFollow(s *state, cmd command, user database.User) error {
 		return err
 	}
 
-	// Save userId -> feedId mapping
-	queryResult, err := s.db.CreateFeedFollow(context.Background(), database.CreateFeedFollowParams{
+	newFeedFollow, err := s.db.CreateFeedFollow(context.Background(), database.CreateFeedFollowParams{
 		ID:        uuid.New(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
@@ -38,7 +36,7 @@ func handlerFollow(s *state, cmd command, user database.User) error {
 	if err != nil {
 		return fmt.Errorf("failed to follow %v; you may already be following it?", feedUrl)
 	}
-	fmt.Printf("%v followed %v\n", queryResult.UserName, queryResult.FeedName)
+	fmt.Printf("%v followed %v\n", newFeedFollow.UserName, newFeedFollow.FeedName)
 
 	return nil
 }

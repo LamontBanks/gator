@@ -8,10 +8,6 @@ import (
 
 // Log in the user
 // User must alrerady be registered
-// Usage:
-//
-//	$ go run . login <username>
-//	$ go run . login alice
 func handlerLogin(s *state, cmd command) error {
 	// Args: username
 	if len(cmd.args) < 1 {
@@ -29,7 +25,7 @@ func handlerLogin(s *state, cmd command) error {
 		panic(err)
 	}
 
-	// Otherwise, log in the user by writing their name to the config file
+	// Otherwise, "log in" the user by writing their name to the config file
 	s.config.CurrentUserName = username
 	if err := s.config.SetConfig(); err != nil {
 		return err

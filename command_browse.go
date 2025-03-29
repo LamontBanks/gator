@@ -11,7 +11,7 @@ import (
 // Display posts from feeds the logged in use is following
 func handlerBrowse(s *state, cmd command, user database.User) error {
 	// Optional arg: max number of posts, default 2
-	maxNumPosts := 2
+	maxNumPosts := 3
 
 	if len(cmd.args) > 0 {
 		i, err := strconv.Atoi(cmd.args[0])

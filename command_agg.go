@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// Downloads and prints an RSS
+// Periodically Downloads all saved RSSFeeds
 func handlerAggregator(s *state, cmd command) error {
 	// Args: <update freq string, ex: 1s, 30s, 1m, 5m, 1h>
 	freqFormat := "1s, 30s, 1m, 5m, 1h, 1d"
@@ -30,17 +30,14 @@ func handlerAggregator(s *state, cmd command) error {
 	}
 }
 
-// Continuously fetch updates for all feeds
-// Saves to database
+// Save updates for the most out-of-date feed
 func getAllFeedUpdates(s *state) error {
-	// Get number of feeds
 	allFeeds, err := s.db.GetFeeds(context.Background())
 	if err != nil {
 		return err
 	}
 
 	for range len(allFeeds) {
-		// Get the oldest feed info
 		oldestFeed, err := s.db.GetNextFeedToFetch(context.Background())
 		if err == sql.ErrNoRows {
 			return fmt.Errorf("no feeds to update")
@@ -49,35 +46,26 @@ func getAllFeedUpdates(s *state) error {
 			return err
 		}
 
-		// Download the latest feed
 		rssFeed, err := fetchFeed(context.Background(), oldestFeed.Url)
 		if err != nil {
 			return err
 		}
 
-		// Mark the feed as updated
 		err = s.db.MarkFeedAsFetched(context.Background(), oldestFeed.ID)
 		if err != nil {
 			return fmt.Errorf("failed marking %v as updated", oldestFeed.Name)
 		}
 
-		// Print the feed
-		fmt.Printf("\n- %v -\n", rssFeed.Channel.Title)
-
-		maxItems := 3
-		for i := range maxItems {
-			fmt.Printf("* %v\n", rssFeed.Channel.Item[i].Title)
-		}
-
 		saveFeedPosts(s, rssFeed, oldestFeed.ID)
-
 	}
+
 	return nil
 }
 
 // Save the posts to the database
 func saveFeedPosts(s *state, rssFeed *RSSFeed, feedId uuid.UUID) error {
 	for i := range len(rssFeed.Channel.Item) {
+		// Convert published data string to time.Time
 		pubDate, err := ParseRSSPubDate(rssFeed.Channel.Item[i].PubDate)
 		if err != nil {
 			return err
