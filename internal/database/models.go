@@ -34,7 +34,6 @@ type Post struct {
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	Title       string
-	Author      string
 	Url         string
 	Description string
 	PublishedAt time.Time

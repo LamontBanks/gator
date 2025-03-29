@@ -61,7 +61,7 @@ WITH user_followed_feeds AS (
     ON feed_follows.feed_id = feeds.id
     WHERE feed_follows.user_id = $1
 )
-SELECT posts.title, posts.published_at, user_followed_feeds.feed_name
+SELECT posts.title, posts.description, posts.published_at, user_followed_feeds.feed_name
 FROM posts
 INNER JOIN user_followed_feeds
 ON user_followed_feeds.feed_id = posts.feed_id
@@ -76,10 +76,13 @@ type GetPostsFromFollowedFeedsParams struct {
 
 type GetPostsFromFollowedFeedsRow struct {
 	Title       string
+	Description string
 	PublishedAt time.Time
 	FeedName    string
 }
 
+// Get feeds you follow...
+// ...get all posts from those feeds
 func (q *Queries) GetPostsFromFollowedFeeds(ctx context.Context, arg GetPostsFromFollowedFeedsParams) ([]GetPostsFromFollowedFeedsRow, error) {
 	rows, err := q.db.QueryContext(ctx, getPostsFromFollowedFeeds, arg.UserID, arg.Limit)
 	if err != nil {
@@ -89,7 +92,12 @@ func (q *Queries) GetPostsFromFollowedFeeds(ctx context.Context, arg GetPostsFro
 	var items []GetPostsFromFollowedFeedsRow
 	for rows.Next() {
 		var i GetPostsFromFollowedFeedsRow
-		if err := rows.Scan(&i.Title, &i.PublishedAt, &i.FeedName); err != nil {
+		if err := rows.Scan(
+			&i.Title,
+			&i.Description,
+			&i.PublishedAt,
+			&i.FeedName,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
