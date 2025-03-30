@@ -28,7 +28,7 @@ ORDER BY posts.published_at DESC
 LIMIT $2;
 
 -- name: GetRecentPostsFromFeed :many
-SELECT feeds.name, posts.title, posts.description, posts.published_at
+SELECT feeds.name AS feed_name, posts.title, posts.description, posts.published_at, posts.Url
 FROM posts
 INNER JOIN feeds ON feeds.id = posts.feed_id
 WHERE posts.feed_id = $1

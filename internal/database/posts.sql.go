@@ -111,7 +111,7 @@ func (q *Queries) GetFollowedPosts(ctx context.Context, arg GetFollowedPostsPara
 }
 
 const getRecentPostsFromFeed = `-- name: GetRecentPostsFromFeed :many
-SELECT feeds.name, posts.title, posts.description, posts.published_at
+SELECT feeds.name AS feed_name, posts.title, posts.description, posts.published_at, posts.Url
 FROM posts
 INNER JOIN feeds ON feeds.id = posts.feed_id
 WHERE posts.feed_id = $1
@@ -125,10 +125,11 @@ type GetRecentPostsFromFeedParams struct {
 }
 
 type GetRecentPostsFromFeedRow struct {
-	Name        string
+	FeedName    string
 	Title       string
 	Description string
 	PublishedAt time.Time
+	Url         string
 }
 
 func (q *Queries) GetRecentPostsFromFeed(ctx context.Context, arg GetRecentPostsFromFeedParams) ([]GetRecentPostsFromFeedRow, error) {
@@ -141,10 +142,11 @@ func (q *Queries) GetRecentPostsFromFeed(ctx context.Context, arg GetRecentPosts
 	for rows.Next() {
 		var i GetRecentPostsFromFeedRow
 		if err := rows.Scan(
-			&i.Name,
+			&i.FeedName,
 			&i.Title,
 			&i.Description,
 			&i.PublishedAt,
+			&i.Url,
 		); err != nil {
 			return nil, err
 		}

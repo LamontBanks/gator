@@ -19,7 +19,7 @@ func handlerAggregator(s *state, cmd command) error {
 
 	freq, err := time.ParseDuration(cmd.args[0])
 	if err != nil {
-		return fmt.Errorf("could not parse frequency - format is %v", freqFormat)
+		return fmt.Errorf("%v: could not parse frequency - format is %v", cmd.name, freqFormat)
 	}
 
 	// Periodic updates

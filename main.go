@@ -57,6 +57,7 @@ func main() {
 	appCommands.register("users", handlerGetUsers)
 	appCommands.register("addFeed", middlewareLoggedIn(handlerAddFeed))
 	appCommands.register("browse", middlewareLoggedIn(handlerBrowse))
+	appCommands.register("browseFeed", handlerBrowseFeed)
 	appCommands.register("feeds", handlerGetFeeds)
 	appCommands.register("follow", middlewareLoggedIn(handlerFollow))
 	appCommands.register("unfollow", middlewareLoggedIn(handlerUnfollow))
@@ -67,6 +68,7 @@ func main() {
 	if len(os.Args) < 2 {
 		log.Fatal("not enough args provided - need <command> <args>")
 	}
+
 	cmdName := os.Args[1]
 	cmdArgs := os.Args[2:]
 
