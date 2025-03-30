@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/LamontBanks/blog-aggregator/internal/database"
 )
@@ -13,7 +14,6 @@ import (
 func handlerBrowse(s *state, cmd command, user database.User) error {
 	// Optional arg: max number of posts, default 3
 	maxNumPosts := 3
-
 	if len(cmd.args) > 0 {
 		i, err := strconv.Atoi(cmd.args[0])
 		if err != nil {
@@ -22,16 +22,38 @@ func handlerBrowse(s *state, cmd command, user database.User) error {
 		maxNumPosts = i
 	}
 
-	posts, err := s.db.GetFollowedPosts(context.Background(), database.GetFollowedPostsParams{
-		UserID: user.ID,
-		Limit:  int32(maxNumPosts),
-	})
+	feeds, err := s.db.GetFeedFollowsForUser(context.Background(), user.ID)
 	if err != nil {
 		return err
 	}
 
-	for _, post := range posts {
-		fmt.Printf("* %v | %v\n%v\n", post.Title, post.FeedName, post.Url)
+	// Pull posts for each feed, but only within the time window
+	// and no more posts per feed than specified
+	for _, feed := range feeds {
+		// Calculate time limit
+		timeLimit := "48h"
+		t, err := time.ParseDuration(timeLimit)
+		if err != nil {
+			return err
+		}
+		withinTimeLimit := time.Now().Add(-1 * t)
+
+		posts, err := s.db.GetRecentPostsFromFeed(context.Background(), database.GetRecentPostsFromFeedParams{
+			FeedID:      feed.FeedID,
+			PublishedAt: withinTimeLimit,
+			Limit:       int32(maxNumPosts),
+		})
+		if err != nil {
+			return err
+		}
+
+		fmt.Println(feed.FeedName)
+		if len(posts) == 0 {
+			fmt.Printf("| (nothing in the last %v)\n", timeLimit)
+		}
+		for _, post := range posts {
+			fmt.Printf("| %v\n", post.Title)
+		}
 	}
 
 	return nil
@@ -45,7 +67,7 @@ func handlerBrowseFeed(s *state, cmd command) error {
 	}
 	feedUrl := cmd.args[0]
 
-	maxNumPosts := 10
+	maxNumPosts := 7
 	if len(cmd.args) > 1 {
 		i, err := strconv.Atoi(cmd.args[1])
 		if err != nil {

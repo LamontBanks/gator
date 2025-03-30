@@ -21,7 +21,7 @@ WITH user_followed_feeds AS (
     WHERE feed_follows.user_id = $1
 )
 -- ...get all posts from those feeds
-SELECT posts.title, posts.description, posts.published_at, posts.url, user_followed_feeds.feed_name
+SELECT posts.*, user_followed_feeds.feed_name
 FROM posts
 INNER JOIN user_followed_feeds ON user_followed_feeds.feed_id = posts.feed_id
 ORDER BY posts.published_at DESC
@@ -31,6 +31,6 @@ LIMIT $2;
 SELECT feeds.name AS feed_name, posts.title, posts.description, posts.published_at, posts.Url
 FROM posts
 INNER JOIN feeds ON feeds.id = posts.feed_id
-WHERE posts.feed_id = $1
+WHERE posts.feed_id = $1 AND posts.published_at >= $2 
 ORDER BY posts.published_at DESC
-LIMIT $2;
+LIMIT $3;

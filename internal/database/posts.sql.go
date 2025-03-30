@@ -59,7 +59,7 @@ WITH user_followed_feeds AS (
     INNER JOIN feeds ON feed_follows.feed_id = feeds.id
     WHERE feed_follows.user_id = $1
 )
-SELECT posts.title, posts.description, posts.published_at, posts.url, user_followed_feeds.feed_name
+SELECT posts.id, posts.created_at, posts.updated_at, posts.title, posts.url, posts.description, posts.published_at, posts.feed_id, user_followed_feeds.feed_name
 FROM posts
 INNER JOIN user_followed_feeds ON user_followed_feeds.feed_id = posts.feed_id
 ORDER BY posts.published_at DESC
@@ -72,10 +72,14 @@ type GetFollowedPostsParams struct {
 }
 
 type GetFollowedPostsRow struct {
+	ID          uuid.UUID
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 	Title       string
+	Url         string
 	Description string
 	PublishedAt time.Time
-	Url         string
+	FeedID      uuid.UUID
 	FeedName    string
 }
 
@@ -91,10 +95,14 @@ func (q *Queries) GetFollowedPosts(ctx context.Context, arg GetFollowedPostsPara
 	for rows.Next() {
 		var i GetFollowedPostsRow
 		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
 			&i.Title,
+			&i.Url,
 			&i.Description,
 			&i.PublishedAt,
-			&i.Url,
+			&i.FeedID,
 			&i.FeedName,
 		); err != nil {
 			return nil, err
@@ -114,14 +122,15 @@ const getRecentPostsFromFeed = `-- name: GetRecentPostsFromFeed :many
 SELECT feeds.name AS feed_name, posts.title, posts.description, posts.published_at, posts.Url
 FROM posts
 INNER JOIN feeds ON feeds.id = posts.feed_id
-WHERE posts.feed_id = $1
+WHERE posts.feed_id = $1 AND posts.published_at >= $2 
 ORDER BY posts.published_at DESC
-LIMIT $2
+LIMIT $3
 `
 
 type GetRecentPostsFromFeedParams struct {
-	FeedID uuid.UUID
-	Limit  int32
+	FeedID      uuid.UUID
+	PublishedAt time.Time
+	Limit       int32
 }
 
 type GetRecentPostsFromFeedRow struct {
@@ -133,7 +142,7 @@ type GetRecentPostsFromFeedRow struct {
 }
 
 func (q *Queries) GetRecentPostsFromFeed(ctx context.Context, arg GetRecentPostsFromFeedParams) ([]GetRecentPostsFromFeedRow, error) {
-	rows, err := q.db.QueryContext(ctx, getRecentPostsFromFeed, arg.FeedID, arg.Limit)
+	rows, err := q.db.QueryContext(ctx, getRecentPostsFromFeed, arg.FeedID, arg.PublishedAt, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
