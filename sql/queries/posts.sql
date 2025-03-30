@@ -11,7 +11,7 @@ VALUES (
     $8
 );
 
--- name: GetPostsFromFollowedFeeds :many
+-- name: GetFollowedFeeds :many
 WITH user_followed_feeds AS (
 -- Get feeds being followed...
     SELECT feeds.name AS feed_name, feeds.id AS feed_id

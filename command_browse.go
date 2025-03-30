@@ -21,7 +21,7 @@ func handlerBrowse(s *state, cmd command, user database.User) error {
 		maxNumPosts = i
 	}
 
-	posts, err := s.db.GetPostsFromFollowedFeeds(context.Background(), database.GetPostsFromFollowedFeedsParams{
+	feeds, err := s.db.GetFollowedFeeds(context.Background(), database.GetFollowedFeedsParams{
 		UserID: user.ID,
 		Limit:  int32(maxNumPosts),
 	})
@@ -29,28 +29,9 @@ func handlerBrowse(s *state, cmd command, user database.User) error {
 		return err
 	}
 
-	allPosts := groupPosts(posts)
-
-	for feedName, postTitles := range allPosts {
-		fmt.Printf("-- %v --\n", feedName)
-		for _, title := range postTitles {
-			fmt.Printf("* %v\n", title)
-		}
+	for _, feed := range feeds {
+		fmt.Printf("%v | %v\n", feed.FeedName, feed.Title)
 	}
 
 	return nil
-}
-
-func groupPosts(posts []database.GetPostsFromFollowedFeedsRow) map[string][]string {
-	groupedPosts := make(map[string][]string)
-
-	for _, post := range posts {
-		_, exists := groupedPosts[post.FeedName]
-		if !exists {
-			groupedPosts[post.FeedName] = []string{}
-		}
-		groupedPosts[post.FeedName] = append(groupedPosts[post.FeedName], post.Title)
-	}
-
-	return groupedPosts
 }

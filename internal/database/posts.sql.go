@@ -51,7 +51,7 @@ func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) error {
 	return err
 }
 
-const getPostsFromFollowedFeeds = `-- name: GetPostsFromFollowedFeeds :many
+const getFollowedFeeds = `-- name: GetFollowedFeeds :many
 WITH user_followed_feeds AS (
     SELECT feeds.name AS feed_name, feeds.id AS feed_id
     FROM feed_follows
@@ -66,12 +66,12 @@ ORDER BY posts.published_at DESC
 LIMIT $2
 `
 
-type GetPostsFromFollowedFeedsParams struct {
+type GetFollowedFeedsParams struct {
 	UserID uuid.UUID
 	Limit  int32
 }
 
-type GetPostsFromFollowedFeedsRow struct {
+type GetFollowedFeedsRow struct {
 	Title       string
 	Description string
 	PublishedAt time.Time
@@ -80,15 +80,15 @@ type GetPostsFromFollowedFeedsRow struct {
 
 // Get feeds being followed...
 // ...get all posts from those feeds
-func (q *Queries) GetPostsFromFollowedFeeds(ctx context.Context, arg GetPostsFromFollowedFeedsParams) ([]GetPostsFromFollowedFeedsRow, error) {
-	rows, err := q.db.QueryContext(ctx, getPostsFromFollowedFeeds, arg.UserID, arg.Limit)
+func (q *Queries) GetFollowedFeeds(ctx context.Context, arg GetFollowedFeedsParams) ([]GetFollowedFeedsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getFollowedFeeds, arg.UserID, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetPostsFromFollowedFeedsRow
+	var items []GetFollowedFeedsRow
 	for rows.Next() {
-		var i GetPostsFromFollowedFeedsRow
+		var i GetFollowedFeedsRow
 		if err := rows.Scan(
 			&i.Title,
 			&i.Description,
