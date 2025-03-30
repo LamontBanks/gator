@@ -13,19 +13,24 @@ VALUES (
 
 -- name: GetPostsFromFollowedFeeds :many
 WITH user_followed_feeds AS (
--- Get feeds you follow...
+-- Get feeds being followed...
     SELECT feeds.name AS feed_name, feeds.id AS feed_id
     FROM feed_follows
-    INNER JOIN users
-    ON feed_follows.user_id = users.id
-    INNER JOIN feeds
-    ON feed_follows.feed_id = feeds.id
+    INNER JOIN users ON feed_follows.user_id = users.id
+    INNER JOIN feeds ON feed_follows.feed_id = feeds.id
     WHERE feed_follows.user_id = $1
 )
 -- ...get all posts from those feeds
 SELECT posts.title, posts.description, posts.published_at, user_followed_feeds.feed_name
 FROM posts
-INNER JOIN user_followed_feeds
-ON user_followed_feeds.feed_id = posts.feed_id
+INNER JOIN user_followed_feeds ON user_followed_feeds.feed_id = posts.feed_id
+ORDER BY posts.published_at DESC
+LIMIT $2;
+
+-- name: GetRecentPostsFromFeed :many
+SELECT feeds.name, posts.title, posts.description, posts.published_at
+FROM posts
+INNER JOIN feeds ON feeds.id = posts.feed_id
+WHERE posts.feed_id = $1
 ORDER BY posts.published_at DESC
 LIMIT $2;

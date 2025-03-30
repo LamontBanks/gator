@@ -19,19 +19,14 @@ WITH new_feed_follow_row AS (
 )
 SELECT new_feed_follow_row.*, users.name AS user_name, feeds.name AS feed_name
 FROM new_feed_follow_row
-INNER JOIN users
-ON new_feed_follow_row.user_id = users.id
-INNER JOIN feeds
-ON new_feed_follow_row.feed_id = feeds.id;
+INNER JOIN users ON new_feed_follow_row.user_id = users.id
+INNER JOIN feeds ON new_feed_follow_row.feed_id = feeds.id;
 
 -- Get all feeds the user is following
 -- name: GetFeedFollowsForUser :many
-SELECT feed_follows.*, feeds.name AS feed_name, feeds.url as feed_url, users.name AS feed_creator_name 
+SELECT feed_follows.feed_id, feeds.name AS feed_name, feeds.url as feed_url 
 FROM feed_follows
-INNER JOIN feeds
-ON feed_follows.feed_id = feeds.id
-INNER JOIN users
-ON feeds.user_id = users.id
+INNER JOIN feeds ON feed_follows.feed_id = feeds.id
 WHERE feed_follows.user_id = $1;
 
 -- name: DeleteFeedFollowForUser :exec

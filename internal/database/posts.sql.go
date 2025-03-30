@@ -55,16 +55,13 @@ const getPostsFromFollowedFeeds = `-- name: GetPostsFromFollowedFeeds :many
 WITH user_followed_feeds AS (
     SELECT feeds.name AS feed_name, feeds.id AS feed_id
     FROM feed_follows
-    INNER JOIN users
-    ON feed_follows.user_id = users.id
-    INNER JOIN feeds
-    ON feed_follows.feed_id = feeds.id
+    INNER JOIN users ON feed_follows.user_id = users.id
+    INNER JOIN feeds ON feed_follows.feed_id = feeds.id
     WHERE feed_follows.user_id = $1
 )
 SELECT posts.title, posts.description, posts.published_at, user_followed_feeds.feed_name
 FROM posts
-INNER JOIN user_followed_feeds
-ON user_followed_feeds.feed_id = posts.feed_id
+INNER JOIN user_followed_feeds ON user_followed_feeds.feed_id = posts.feed_id
 ORDER BY posts.published_at DESC
 LIMIT $2
 `
@@ -81,7 +78,7 @@ type GetPostsFromFollowedFeedsRow struct {
 	FeedName    string
 }
 
-// Get feeds you follow...
+// Get feeds being followed...
 // ...get all posts from those feeds
 func (q *Queries) GetPostsFromFollowedFeeds(ctx context.Context, arg GetPostsFromFollowedFeedsParams) ([]GetPostsFromFollowedFeedsRow, error) {
 	rows, err := q.db.QueryContext(ctx, getPostsFromFollowedFeeds, arg.UserID, arg.Limit)
@@ -97,6 +94,55 @@ func (q *Queries) GetPostsFromFollowedFeeds(ctx context.Context, arg GetPostsFro
 			&i.Description,
 			&i.PublishedAt,
 			&i.FeedName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getRecentPostsFromFeed = `-- name: GetRecentPostsFromFeed :many
+SELECT feeds.name, posts.title, posts.description, posts.published_at
+FROM posts
+INNER JOIN feeds ON feeds.id = posts.feed_id
+WHERE posts.feed_id = $1
+ORDER BY posts.published_at DESC
+LIMIT $2
+`
+
+type GetRecentPostsFromFeedParams struct {
+	FeedID uuid.UUID
+	Limit  int32
+}
+
+type GetRecentPostsFromFeedRow struct {
+	Name        string
+	Title       string
+	Description string
+	PublishedAt time.Time
+}
+
+func (q *Queries) GetRecentPostsFromFeed(ctx context.Context, arg GetRecentPostsFromFeedParams) ([]GetRecentPostsFromFeedRow, error) {
+	rows, err := q.db.QueryContext(ctx, getRecentPostsFromFeed, arg.FeedID, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetRecentPostsFromFeedRow
+	for rows.Next() {
+		var i GetRecentPostsFromFeedRow
+		if err := rows.Scan(
+			&i.Name,
+			&i.Title,
+			&i.Description,
+			&i.PublishedAt,
 		); err != nil {
 			return nil, err
 		}
