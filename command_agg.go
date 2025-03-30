@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// Periodically Downloads all saved RSSFeeds
+// Aggregate all RSS feeds
 func handlerAggregator(s *state, cmd command) error {
 	// Args: <update freq string, ex: 1s, 30s, 1m, 5m, 1h>
 	freqFormat := "1s, 30s, 1m, 5m, 1h, 1d"
@@ -55,6 +55,32 @@ func getAllFeedUpdates(s *state) error {
 		}
 
 		saveFeedPosts(s, rssFeed, oldestFeed.ID)
+
+		// Pull posts for each feed, but only within the time window
+		// Calculate time limit
+		timeLimit := "48h"
+		t, err := time.ParseDuration(timeLimit)
+		if err != nil {
+			return err
+		}
+		withinTimeLimit := time.Now().Add(-1 * t)
+
+		posts, err := s.db.GetRecentPostsFromFeed(context.Background(), database.GetRecentPostsFromFeedParams{
+			FeedID:      oldestFeed.ID,
+			PublishedAt: withinTimeLimit,
+			Limit:       3,
+		})
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("\n%v | %v\n", oldestFeed.Name, oldestFeed.Url)
+		if len(posts) == 0 {
+			fmt.Printf("| (nothing in the last %v)\n", timeLimit)
+		}
+		for _, post := range posts {
+			fmt.Printf("| %v\n", post.Title)
+		}
 	}
 
 	return nil
