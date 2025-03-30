@@ -8,9 +8,9 @@ import (
 	"github.com/LamontBanks/blog-aggregator/internal/database"
 )
 
-// Display posts from feeds the logged in use is following
+// Display most recent posts from user's feeds
 func handlerBrowse(s *state, cmd command, user database.User) error {
-	// Optional arg: max number of posts, default 2
+	// Optional arg: max number of posts, default 3
 	maxNumPosts := 3
 
 	if len(cmd.args) > 0 {
@@ -21,7 +21,7 @@ func handlerBrowse(s *state, cmd command, user database.User) error {
 		maxNumPosts = i
 	}
 
-	feeds, err := s.db.GetFollowedFeeds(context.Background(), database.GetFollowedFeedsParams{
+	posts, err := s.db.GetFollowedPosts(context.Background(), database.GetFollowedPostsParams{
 		UserID: user.ID,
 		Limit:  int32(maxNumPosts),
 	})
@@ -29,8 +29,8 @@ func handlerBrowse(s *state, cmd command, user database.User) error {
 		return err
 	}
 
-	for _, feed := range feeds {
-		fmt.Printf("%v | %v\n", feed.FeedName, feed.Title)
+	for _, post := range posts {
+		fmt.Printf("* %v | %v | %v\n", post.FeedName, post.Title, post.Url)
 	}
 
 	return nil

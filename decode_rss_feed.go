@@ -63,12 +63,14 @@ func fetchFeed(ctx context.Context, feedUrl string) (*RSSFeed, error) {
 	return &rssFeed, nil
 }
 
-// Try parsing a few time layouts, use what works
+// Try parsing time with multiple time format, use what works
 func ParseRSSPubDate(pubDate string) (time.Time, error) {
 	// https://pkg.go.dev/time@go1.24.1#Layout
 	timeLayoutsToTry := []string{
 		time.RFC1123Z,
+		time.RFC1123,
 		time.RFC822Z,
+		time.RFC822,
 	}
 
 	for _, layout := range timeLayoutsToTry {

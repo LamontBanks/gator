@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/LamontBanks/blog-aggregator/internal/database"
@@ -14,7 +15,7 @@ import (
 func handlerAddFeed(s *state, cmd command, user database.User) error {
 	// Args: feedName, feedUrl
 	if len(cmd.args) < 2 {
-		return fmt.Errorf("usage: %v <username> <url>", cmd.name)
+		return fmt.Errorf("usage: %v <feed name> <url>", cmd.name)
 	}
 	feedName := cmd.args[0]
 	feedUrl := cmd.args[1]
@@ -55,8 +56,14 @@ func handlerGetFeeds(s *state, cmd command) error {
 		return err
 	}
 
+	// Sort by Feed name
+	sort.Slice(feeds, func(i, j int) bool {
+		return feeds[i].FeedName < feeds[j].FeedName
+	})
+
+	fmt.Println("Available RSS Feeds to follow:")
 	for _, feed := range feeds {
-		fmt.Printf("* %v\n%v\n\n", feed.FeedName, feed.Url)
+		fmt.Printf("* %v | %v\n", feed.FeedName, feed.Url)
 	}
 
 	return nil

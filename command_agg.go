@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"time"
 
@@ -26,11 +25,12 @@ func handlerAggregator(s *state, cmd command) error {
 	// Periodic updates
 	ticker := time.NewTicker(freq)
 	for ; ; <-ticker.C {
+		fmt.Println("Updating RSS feeds...")
 		getAllFeedUpdates(s)
 	}
 }
 
-// Save updates for the most out-of-date feed
+// Save updates all feeds
 func getAllFeedUpdates(s *state) error {
 	allFeeds, err := s.db.GetFeeds(context.Background())
 	if err != nil {
@@ -38,10 +38,8 @@ func getAllFeedUpdates(s *state) error {
 	}
 
 	for range len(allFeeds) {
+		// Start with the most out-of-date feed
 		oldestFeed, err := s.db.GetNextFeedToFetch(context.Background())
-		if err == sql.ErrNoRows {
-			return fmt.Errorf("no feeds to update")
-		}
 		if err != nil {
 			return err
 		}
@@ -68,6 +66,7 @@ func saveFeedPosts(s *state, rssFeed *RSSFeed, feedId uuid.UUID) error {
 		// Convert published data string to time.Time
 		pubDate, err := ParseRSSPubDate(rssFeed.Channel.Item[i].PubDate)
 		if err != nil {
+			fmt.Println(err)
 			return err
 		}
 

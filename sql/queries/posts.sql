@@ -11,7 +11,7 @@ VALUES (
     $8
 );
 
--- name: GetFollowedFeeds :many
+-- name: GetFollowedPosts :many
 WITH user_followed_feeds AS (
 -- Get feeds being followed...
     SELECT feeds.name AS feed_name, feeds.id AS feed_id
@@ -21,7 +21,7 @@ WITH user_followed_feeds AS (
     WHERE feed_follows.user_id = $1
 )
 -- ...get all posts from those feeds
-SELECT posts.title, posts.description, posts.published_at, user_followed_feeds.feed_name
+SELECT posts.title, posts.description, posts.published_at, posts.url, user_followed_feeds.feed_name
 FROM posts
 INNER JOIN user_followed_feeds ON user_followed_feeds.feed_id = posts.feed_id
 ORDER BY posts.published_at DESC

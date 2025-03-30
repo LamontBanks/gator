@@ -19,7 +19,7 @@ func handlerFollowing(s *state, cmd command, user database.User) error {
 	}
 
 	for _, feed := range feedDetails {
-		fmt.Printf("* %v\n%v\n\n", feed.FeedName, feed.FeedUrl)
+		fmt.Printf("* %v | %v\n", feed.FeedName, feed.FeedUrl)
 	}
 
 	return nil
