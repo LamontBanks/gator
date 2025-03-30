@@ -47,7 +47,7 @@ func handlerBrowse(s *state, cmd command, user database.User) error {
 			return err
 		}
 
-		fmt.Println(feed.FeedName)
+		fmt.Printf("\n%v | %v\n", feed.FeedName, feed.FeedUrl)
 		if len(posts) == 0 {
 			fmt.Printf("| (nothing in the last %v)\n", timeLimit)
 		}
@@ -67,7 +67,7 @@ func handlerBrowseFeed(s *state, cmd command) error {
 	}
 	feedUrl := cmd.args[0]
 
-	maxNumPosts := 7
+	maxNumPosts := 10
 	if len(cmd.args) > 1 {
 		i, err := strconv.Atoi(cmd.args[1])
 		if err != nil {
@@ -93,7 +93,7 @@ func handlerBrowseFeed(s *state, cmd command) error {
 	}
 
 	for _, post := range posts {
-		fmt.Printf("\n* %v | %v\n", post.Title, post.FeedName)
+		fmt.Printf("%v | %v\n", post.FeedName, post.Title)
 	}
 
 	return nil

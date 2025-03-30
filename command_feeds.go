@@ -46,6 +46,8 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 	}
 	fmt.Printf("%v followed %v\n", newFeedFollow.UserName, newFeedFollow.FeedName)
 
+	// TODO: Immediately update added feed
+
 	return nil
 }
 
