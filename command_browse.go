@@ -31,7 +31,7 @@ func handlerBrowse(s *state, cmd command, user database.User) error {
 	// and no more posts per feed than specified
 	for _, feed := range feeds {
 		// Calculate time limit
-		timeLimit := "48h"
+		timeLimit := "18h"
 		t, err := time.ParseDuration(timeLimit)
 		if err != nil {
 			return err
