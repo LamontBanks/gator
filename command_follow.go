@@ -10,12 +10,12 @@ import (
 	"github.com/google/uuid"
 )
 
-func followHelp() commandHelp {
-	return commandHelp{
+func followHelp() commandInfo {
+	return commandInfo{
 		description: "Follow a registered feed",
-		usage:       "gator follow <RSS feed URL>",
+		usage:       "follow <RSS feed URL>",
 		examples: []string{
-			"gator follow http://example.com/rss/feed",
+			"follow http://example.com/rss/feed",
 		},
 	}
 }

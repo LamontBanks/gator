@@ -9,22 +9,22 @@ import (
 	"github.com/google/uuid"
 )
 
-func registerHelp() commandHelp {
-	return commandHelp{
+func registerHelp() commandInfo {
+	return commandInfo{
 		description: "Registers a new users, logs them in",
-		usage:       "gator register <unique username>",
+		usage:       "register <unique username>",
 		examples: []string{
-			"gator register bob",
+			"register bob",
 		},
 	}
 }
 
-func usersHelp() commandHelp {
-	return commandHelp{
+func usersHelp() commandInfo {
+	return commandInfo{
 		description: "List all users",
-		usage:       "gator users",
+		usage:       "users",
 		examples: []string{
-			"gator users",
+			"users",
 		},
 	}
 }

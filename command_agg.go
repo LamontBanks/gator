@@ -9,17 +9,17 @@ import (
 	"github.com/google/uuid"
 )
 
-func aggHelp() commandHelp {
-	return commandHelp{
+func aggCommandInfo() commandInfo {
+	return commandInfo{
 		description: "Aggregate all RRS feeds",
-		usage:       "gator agg <update freq> <oldest post time limit>",
+		usage:       "agg <update freq> <oldest post time limit>",
 		examples: []string{
-			"gator agg 30s",
-			"gator agg 15m",
-			"gator agg 1h",
-			"gator agg 48h",
-			"gator agg 15m 12h",
-			"gator agg 15m 48h",
+			"agg 30s",
+			"agg 15m",
+			"agg 1h",
+			"agg 48h",
+			"agg 15m 12h",
+			"agg 15m 48h",
 		},
 	}
 }

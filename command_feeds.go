@@ -10,12 +10,12 @@ import (
 	"github.com/google/uuid"
 )
 
-func addFeedHelp() commandHelp {
-	return commandHelp{
+func addFeedHelp() commandInfo {
+	return commandInfo{
 		description: "Adds ",
-		usage:       "gator addFeed <feed name> <unique RSS feed>",
+		usage:       "addFeed <feed name> <unique RSS feed>",
 		examples: []string{
-			"gator addFeed \"Example Feed Name\" http://example.com/rss/feed",
+			"addFeed \"Example Feed Name\" http://example.com/rss/feed",
 		},
 	}
 }
@@ -72,10 +72,10 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 	return nil
 }
 
-func feedsHelp() commandHelp {
-	return commandHelp{
+func feedsHelp() commandInfo {
+	return commandInfo{
 		description: "List all RSS feeds",
-		usage:       "gator feeds",
+		usage:       "feeds",
 		examples:    []string{},
 	}
 }

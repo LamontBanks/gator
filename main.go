@@ -50,7 +50,7 @@ func main() {
 	appCommands := commands{
 		cmds: make(map[string]commandDetails),
 	}
-	appCommands.register("agg", aggHelp(), handlerAggregator)
+	appCommands.register("agg", aggCommandInfo(), handlerAggregator)
 	appCommands.register("login", loginHelp(), handlerLogin)
 	appCommands.register("register", registerHelp(), handlerRegister)
 	appCommands.register("browse", browseHelp(), middlewareLoggedIn(handlerBrowse))
@@ -59,10 +59,11 @@ func main() {
 	appCommands.register("browseFeed", browseFeedHelp(), handlerBrowseFeed)
 	appCommands.register("follow", followHelp(), middlewareLoggedIn(handlerFollow))
 	appCommands.register("unfollow", unfollowHelp(), middlewareLoggedIn(handlerUnfollow))
-	appCommands.register("following", followingHelp(), middlewareLoggedIn(handlerFollowing))
+	appCommands.register("following", followingCommandInfo(), middlewareLoggedIn(handlerFollowing))
 	appCommands.register("users", usersHelp(), handlerGetUsers)
+	appCommands.register("help", helpCommandInfo(), appCommands.handlerInfo)
 
-	appCommands.register("reset", commandHelp{}, handlerReset)
+	appCommands.register("reset", commandInfo{}, handlerReset)
 
 	// Read the CLI args to take action
 	// os.Args includes the program name, then the command, and (possible) args

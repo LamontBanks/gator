@@ -10,14 +10,14 @@ import (
 	"github.com/LamontBanks/blog-aggregator/internal/database"
 )
 
-func browseHelp() commandHelp {
-	return commandHelp{
+func browseHelp() commandInfo {
+	return commandInfo{
 		description: "Show recent posts from current user's followed feed",
-		usage:       "gator browse <max number of posts per feed, default: 3>",
+		usage:       "browse <max number of posts per feed, default: 3>",
 		examples: []string{
-			"gator browse",
-			"gator browse 5",
-			"gator browse 10",
+			"browse",
+			"browse 5",
+			"browse 10",
 		},
 	}
 }
@@ -73,12 +73,12 @@ func handlerBrowse(s *state, cmd command, user database.User) error {
 	return nil
 }
 
-func browseFeedHelp() commandHelp {
-	return commandHelp{
+func browseFeedHelp() commandInfo {
+	return commandInfo{
 		description: "Lists ",
-		usage:       "gator browseFeed <registered RSS feed URL> <optional: >",
+		usage:       "browseFeed <registered RSS feed URL> <optional: >",
 		examples: []string{
-			"gator browseFeed http://example.com/rss/feed",
+			"browseFeed http://example.com/rss/feed",
 		},
 	}
 }

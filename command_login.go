@@ -6,12 +6,12 @@ import (
 	"fmt"
 )
 
-func loginHelp() commandHelp {
-	return commandHelp{
+func loginHelp() commandInfo {
+	return commandInfo{
 		description: "Logs in a user",
-		usage:       "gator login USERNAME",
+		usage:       "login USERNAME",
 		examples: []string{
-			"gator login alice",
+			"login alice",
 		},
 	}
 }

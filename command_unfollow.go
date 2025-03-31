@@ -8,12 +8,12 @@ import (
 	"github.com/LamontBanks/blog-aggregator/internal/database"
 )
 
-func unfollowHelp() commandHelp {
-	return commandHelp{
+func unfollowHelp() commandInfo {
+	return commandInfo{
 		description: "Stop following a feed",
-		usage:       "gator unfollow <feed url>",
+		usage:       "unfollow <feed url>",
 		examples: []string{
-			"gator unfollow http://example.com/rss/feed",
+			"unfollow http://example.com/rss/feed",
 		},
 	}
 }

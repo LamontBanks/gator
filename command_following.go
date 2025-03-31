@@ -7,10 +7,10 @@ import (
 	"github.com/LamontBanks/blog-aggregator/internal/database"
 )
 
-func followingHelp() commandHelp {
-	return commandHelp{
+func followingCommandInfo() commandInfo {
+	return commandInfo{
 		description: "List all followed feeds",
-		usage:       "gator following",
+		usage:       "following",
 		examples:    []string{},
 	}
 }
