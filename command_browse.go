@@ -49,10 +49,11 @@ func handlerBrowse(s *state, cmd command, user database.User) error {
 
 		fmt.Printf("\n%v | %v\n", feed.FeedName, feed.FeedUrl)
 		if len(posts) == 0 {
-			fmt.Printf("| (nothing in the last %v)\n", timeLimit)
+			fmt.Printf("* Nothing in the last %v\n", timeLimit)
 		}
 		for _, post := range posts {
-			fmt.Printf("| %v\n", post.Title)
+			fmt.Printf("* %v\n", post.Title)
+			fmt.Printf("  %v\n", post.Url)
 		}
 	}
 

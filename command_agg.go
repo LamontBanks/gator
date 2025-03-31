@@ -23,7 +23,7 @@ func handlerAggregator(s *state, cmd command) error {
 	}
 
 	// Optional: Parse oldest post time limit
-	oldestPostTime, _ := time.ParseDuration("48h") // Skipping error handling
+	oldestPostTime, _ := time.ParseDuration("18h") // Skipping error handling
 	if len(cmd.args) > 2 {
 		t, err := time.ParseDuration(cmd.args[1])
 		if err != nil {
@@ -83,10 +83,11 @@ func getAllFeedUpdates(s *state, oldestPostTime time.Duration) error {
 
 		fmt.Printf("\n%v | %v\n", oldestFeed.Name, oldestFeed.Url)
 		if len(posts) == 0 {
-			fmt.Printf("| (nothing in the last %v)\n", oldestPostTime)
+			fmt.Printf("* Nothing in the last %v\n", oldestPostTime)
 		}
 		for _, post := range posts {
-			fmt.Printf("| %v\n", post.Title)
+			fmt.Printf("* %v\n", post.Title)
+			fmt.Printf("  %v\n", post.Url)
 		}
 	}
 
