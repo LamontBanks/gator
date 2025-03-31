@@ -6,6 +6,16 @@ import (
 	"fmt"
 )
 
+func loginHelp() commandHelp {
+	return commandHelp{
+		description: "Logs in a user",
+		usage:       "gator login USERNAME",
+		examples: []string{
+			"gator login alice",
+		},
+	}
+}
+
 // Log in the user
 // User must alrerady be registered
 func handlerLogin(s *state, cmd command) error {

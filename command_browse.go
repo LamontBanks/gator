@@ -10,6 +10,18 @@ import (
 	"github.com/LamontBanks/blog-aggregator/internal/database"
 )
 
+func browseHelp() commandHelp {
+	return commandHelp{
+		description: "Show recent posts from current user's followed feed",
+		usage:       "gator browse <max number of posts per feed, default: 3>",
+		examples: []string{
+			"gator browse",
+			"gator browse 5",
+			"gator browse 10",
+		},
+	}
+}
+
 // Display most recent posts from user's feeds
 func handlerBrowse(s *state, cmd command, user database.User) error {
 	// Optional arg: max number of posts, default 3
@@ -48,16 +60,27 @@ func handlerBrowse(s *state, cmd command, user database.User) error {
 		}
 
 		fmt.Printf("\n%v | %v\n", feed.FeedName, feed.FeedUrl)
-		if len(posts) == 0 {
-			fmt.Printf("* Nothing in the last %v\n", timeLimit)
-		}
-		for _, post := range posts {
-			fmt.Printf("* %v\n", post.Title)
-			fmt.Printf("  %v\n", post.Url)
+		if len(posts) > 0 {
+			for _, post := range posts {
+				fmt.Println(formatTitleAndLink(post.Title, post.Url))
+			}
+		} else {
+			emptyPost := fmt.Sprintf("Nothing in the last %v", timeLimit)
+			fmt.Println(formatTitleAndLink(emptyPost, ""))
 		}
 	}
 
 	return nil
+}
+
+func browseFeedHelp() commandHelp {
+	return commandHelp{
+		description: "Lists ",
+		usage:       "gator browseFeed <registered RSS feed URL> <optional: >",
+		examples: []string{
+			"gator browseFeed http://example.com/rss/feed",
+		},
+	}
 }
 
 // Display recent posts from saved feeds

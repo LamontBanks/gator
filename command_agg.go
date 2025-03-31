@@ -9,6 +9,21 @@ import (
 	"github.com/google/uuid"
 )
 
+func aggHelp() commandHelp {
+	return commandHelp{
+		description: "Aggregate all RRS feeds",
+		usage:       "gator agg <update freq> <oldest post time limit>",
+		examples: []string{
+			"gator agg 30s",
+			"gator agg 15m",
+			"gator agg 1h",
+			"gator agg 48h",
+			"gator agg 15m 12h",
+			"gator agg 15m 48h",
+		},
+	}
+}
+
 // Aggregate all RSS feeds
 func handlerAggregator(s *state, cmd command) error {
 	// Args: <update freq string, ex: 1s, 30s, 1m, 5m, 1h>, optional: <oldest posts to show, ex: 1h, 3h, 24h, 36h, etc.>

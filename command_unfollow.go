@@ -8,6 +8,16 @@ import (
 	"github.com/LamontBanks/blog-aggregator/internal/database"
 )
 
+func unfollowHelp() commandHelp {
+	return commandHelp{
+		description: "Stop following a feed",
+		usage:       "gator unfollow <feed url>",
+		examples: []string{
+			"gator unfollow http://example.com/rss/feed",
+		},
+	}
+}
+
 // Unfollows the given RSS feel URL
 func handlerUnfollow(s *state, cmd command, user database.User) error {
 	// Args: url

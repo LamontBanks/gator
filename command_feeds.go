@@ -10,6 +10,16 @@ import (
 	"github.com/google/uuid"
 )
 
+func addFeedHelp() commandHelp {
+	return commandHelp{
+		description: "Adds ",
+		usage:       "gator addFeed <feed name> <unique RSS feed>",
+		examples: []string{
+			"gator addFeed \"Example Feed Name\" http://example.com/rss/feed",
+		},
+	}
+}
+
 // Create a feed in the system, attributed to the user
 // Fails if the feed already exists
 func handlerAddFeed(s *state, cmd command, user database.User) error {
@@ -49,6 +59,14 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 	// TODO: Immediately update added feed
 
 	return nil
+}
+
+func feedsHelp() commandHelp {
+	return commandHelp{
+		description: "List all RSS feeds",
+		usage:       "gator feeds",
+		examples:    []string{},
+	}
 }
 
 // Prints feeds from all users

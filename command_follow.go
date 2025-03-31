@@ -10,6 +10,16 @@ import (
 	"github.com/google/uuid"
 )
 
+func followHelp() commandHelp {
+	return commandHelp{
+		description: "Follow a registered feed",
+		usage:       "gator follow <RSS feed URL>",
+		examples: []string{
+			"gator follow http://example.com/rss/feed",
+		},
+	}
+}
+
 // Sets the current user as a follower of the given RSS feed.
 func handlerFollow(s *state, cmd command, user database.User) error {
 	// Args: url

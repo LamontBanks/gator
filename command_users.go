@@ -9,6 +9,26 @@ import (
 	"github.com/google/uuid"
 )
 
+func registerHelp() commandHelp {
+	return commandHelp{
+		description: "Registers a new users, logs them in",
+		usage:       "gator register <unique username>",
+		examples: []string{
+			"gator register bob",
+		},
+	}
+}
+
+func usersHelp() commandHelp {
+	return commandHelp{
+		description: "List all users",
+		usage:       "gator users",
+		examples: []string{
+			"gator users",
+		},
+	}
+}
+
 // Saves a user to the database, then updates the config with the user
 func handlerRegister(s *state, cmd command) error {
 	// Args: username

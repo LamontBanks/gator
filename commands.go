@@ -11,23 +11,35 @@ type command struct {
 	args []string
 }
 
-// Mapping of commands -> handler functions
-type commands struct {
-	cmds map[string]func(*state, command) error
+type commandDetails struct {
+	handlerFunc func(*state, command) error
+	help        commandHelp
 }
 
-// Maps a command "name" to a handler function
+type commandHelp struct {
+	description string
+	usage       string
+	examples    []string
+}
+
+// Mapping of commands -> handler functions
+type commands struct {
+	cmds map[string]commandDetails
+}
+
+// Maps a command name to its details, notably its handler function
 // Command name is normalized to lowercase
 // Returns an errors if the command with the same name already exists
-func (c *commands) register(name string, f func(*state, command) error) error {
+func (c *commands) register(name string, help commandHelp, f func(*state, command) error) error {
 	name = strings.ToLower(name)
-
 	_, exists := c.cmds[name]
 	if exists {
 		return fmt.Errorf("command already exists: %v", name)
 	}
-
-	c.cmds[name] = f
+	c.cmds[name] = commandDetails{
+		handlerFunc: f,
+		help:        help,
+	}
 
 	return nil
 }
@@ -35,10 +47,11 @@ func (c *commands) register(name string, f func(*state, command) error) error {
 // Runs the function mapped to the named command
 func (c *commands) run(s *state, cmd command) error {
 	normalizedCmd := strings.ToLower(cmd.name)
-	handlerFunc, exists := c.cmds[normalizedCmd]
+
+	cmdDetails, exists := c.cmds[normalizedCmd]
 	if !exists {
 		return fmt.Errorf("command not found: %v", cmd.name)
 	}
 
-	return handlerFunc(s, cmd)
+	return cmdDetails.handlerFunc(s, cmd)
 }

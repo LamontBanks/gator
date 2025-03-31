@@ -7,6 +7,14 @@ import (
 	"github.com/LamontBanks/blog-aggregator/internal/database"
 )
 
+func followingHelp() commandHelp {
+	return commandHelp{
+		description: "List all followed feeds",
+		usage:       "gator following",
+		examples:    []string{},
+	}
+}
+
 // Prints details of all the feeds the current user is following
 func handlerFollowing(s *state, cmd command, user database.User) error {
 	feedDetails, err := s.db.GetFeedFollowsForUser(context.Background(), user.ID)
@@ -19,7 +27,7 @@ func handlerFollowing(s *state, cmd command, user database.User) error {
 	}
 
 	for _, feed := range feedDetails {
-		fmt.Printf("* %v | %v\n", feed.FeedName, feed.FeedUrl)
+		fmt.Println(formatTitleAndLink(feed.FeedName, feed.FeedUrl))
 	}
 
 	return nil

@@ -48,20 +48,21 @@ func main() {
 
 	// Register the CLI commands
 	appCommands := commands{
-		cmds: make(map[string]func(*state, command) error),
+		cmds: make(map[string]commandDetails),
 	}
-	appCommands.register("agg", handlerAggregator)
-	appCommands.register("login", handlerLogin)
-	appCommands.register("register", handlerRegister)
-	appCommands.register("reset", handlerReset)
-	appCommands.register("users", handlerGetUsers)
-	appCommands.register("addFeed", middlewareLoggedIn(handlerAddFeed))
-	appCommands.register("browse", middlewareLoggedIn(handlerBrowse))
-	appCommands.register("browseFeed", handlerBrowseFeed)
-	appCommands.register("feeds", handlerGetFeeds)
-	appCommands.register("follow", middlewareLoggedIn(handlerFollow))
-	appCommands.register("unfollow", middlewareLoggedIn(handlerUnfollow))
-	appCommands.register("following", middlewareLoggedIn(handlerFollowing))
+	appCommands.register("agg", aggHelp(), handlerAggregator)
+	appCommands.register("login", loginHelp(), handlerLogin)
+	appCommands.register("register", registerHelp(), handlerRegister)
+	appCommands.register("users", usersHelp(), handlerGetUsers)
+	appCommands.register("addFeed", addFeedHelp(), middlewareLoggedIn(handlerAddFeed))
+	appCommands.register("browse", browseHelp(), middlewareLoggedIn(handlerBrowse))
+	appCommands.register("browseFeed", browseFeedHelp(), handlerBrowseFeed)
+	appCommands.register("feeds", feedsHelp(), handlerGetFeeds)
+	appCommands.register("follow", followHelp(), middlewareLoggedIn(handlerFollow))
+	appCommands.register("unfollow", unfollowHelp(), middlewareLoggedIn(handlerUnfollow))
+	appCommands.register("following", followingHelp(), middlewareLoggedIn(handlerFollowing))
+
+	appCommands.register("reset", commandHelp{}, handlerReset)
 
 	// Read the CLI args to take action
 	// os.Args includes the program name, then the command, and (possible) args
@@ -72,7 +73,7 @@ func main() {
 	cmdName := os.Args[1]
 	cmdArgs := os.Args[2:]
 
-	// Run command
+	// Create and run command
 	cmdErr := appCommands.run(&appState, command{
 		name: cmdName,
 		args: cmdArgs,
@@ -108,4 +109,8 @@ func middlewareLoggedIn(handler func(s *state, cmd command, user database.User) 
 // Deletes all users
 func handlerReset(s *state, cmd command) error {
 	return s.db.Reset(context.Background())
+}
+
+func formatTitleAndLink(title, link string) string {
+	return fmt.Sprintf("- %v\n  %v", title, link)
 }
