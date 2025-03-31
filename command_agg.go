@@ -26,9 +26,9 @@ func aggHelp() commandHelp {
 
 // Aggregate all RSS feeds
 func handlerAggregator(s *state, cmd command) error {
-	// Args: <update freq string, ex: 1s, 30s, 1m, 5m, 1h>, optional: <oldest posts to show, ex: 1h, 3h, 24h, 36h, etc.>
+	// Args: <update freq string>, optional: <oldest posts to show>
 	// Parse update frequency
-	freqFormat := "1s, 30s, 1m, 5m, 1h, 1d"
+	freqFormat := "30s, 1m, 5m, 1h, 1d"
 	if len(cmd.args) < 1 {
 		return fmt.Errorf("usage: %v <update freq string, ex: %v, etc.>", cmd.name, freqFormat)
 	}

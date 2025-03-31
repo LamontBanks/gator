@@ -53,14 +53,14 @@ func main() {
 	appCommands.register("agg", aggHelp(), handlerAggregator)
 	appCommands.register("login", loginHelp(), handlerLogin)
 	appCommands.register("register", registerHelp(), handlerRegister)
-	appCommands.register("users", usersHelp(), handlerGetUsers)
-	appCommands.register("addFeed", addFeedHelp(), middlewareLoggedIn(handlerAddFeed))
 	appCommands.register("browse", browseHelp(), middlewareLoggedIn(handlerBrowse))
-	appCommands.register("browseFeed", browseFeedHelp(), handlerBrowseFeed)
 	appCommands.register("feeds", feedsHelp(), handlerGetFeeds)
+	appCommands.register("addFeed", addFeedHelp(), middlewareLoggedIn(handlerAddFeed))
+	appCommands.register("browseFeed", browseFeedHelp(), handlerBrowseFeed)
 	appCommands.register("follow", followHelp(), middlewareLoggedIn(handlerFollow))
 	appCommands.register("unfollow", unfollowHelp(), middlewareLoggedIn(handlerUnfollow))
 	appCommands.register("following", followingHelp(), middlewareLoggedIn(handlerFollowing))
+	appCommands.register("users", usersHelp(), handlerGetUsers)
 
 	appCommands.register("reset", commandHelp{}, handlerReset)
 
@@ -109,8 +109,4 @@ func middlewareLoggedIn(handler func(s *state, cmd command, user database.User) 
 // Deletes all users
 func handlerReset(s *state, cmd command) error {
 	return s.db.Reset(context.Background())
-}
-
-func formatTitleAndLink(title, link string) string {
-	return fmt.Sprintf("- %v\n  %v", title, link)
 }

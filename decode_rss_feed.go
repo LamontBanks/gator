@@ -1,3 +1,4 @@
+// Reads RSS feed info into custom structs
 package main
 
 import (
@@ -27,6 +28,7 @@ type RSSItem struct {
 	PubDate     string `xml:"pubDate"`
 }
 
+// Downloads the feed
 func fetchFeed(ctx context.Context, feedUrl string) (*RSSFeed, error) {
 	req, err := http.NewRequestWithContext(ctx, "GET", feedUrl, nil)
 	if err != nil {

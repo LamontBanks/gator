@@ -123,7 +123,7 @@ SELECT feeds.name AS feed_name, posts.title, posts.description, posts.published_
 FROM posts
 INNER JOIN feeds ON feeds.id = posts.feed_id
 WHERE posts.feed_id = $1 AND posts.published_at >= $2 
-ORDER BY feeds.name ASC, posts.published_at DESC
+ORDER BY posts.published_at DESC
 LIMIT $3
 `
 

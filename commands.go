@@ -46,12 +46,14 @@ func (c *commands) register(name string, help commandHelp, f func(*state, comman
 
 // Runs the function mapped to the named command
 func (c *commands) run(s *state, cmd command) error {
-	normalizedCmd := strings.ToLower(cmd.name)
-
-	cmdDetails, exists := c.cmds[normalizedCmd]
+	cmdDetails, exists := c.cmds[strings.ToLower(cmd.name)]
 	if !exists {
 		return fmt.Errorf("command not found: %v", cmd.name)
 	}
 
 	return cmdDetails.handlerFunc(s, cmd)
+}
+
+func formatTitleAndLink(title, link string) string {
+	return fmt.Sprintf("- %v\n  %v", title, link)
 }

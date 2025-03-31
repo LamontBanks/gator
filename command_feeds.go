@@ -20,7 +20,7 @@ func addFeedHelp() commandHelp {
 	}
 }
 
-// Create a feed in the system, attributed to the user
+// Create a feed, available for all users to follow
 // Fails if the feed already exists
 func handlerAddFeed(s *state, cmd command, user database.User) error {
 	// Args: feedName, feedUrl
@@ -30,13 +30,26 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 	feedName := cmd.args[0]
 	feedUrl := cmd.args[1]
 
+	// Attempt to download the feed before saving it
+	feed, err := fetchFeed(context.Background(), feedUrl)
+	if err != nil {
+		return fmt.Errorf("failed to add feed: %v", err)
+	}
+
+	// If feed is missing any required elements, also don't save it
+	// https://www.rssboard.org/rss-specification#requiredChannelElements
+	if feed.Channel.Title == "" {
+		return fmt.Errorf("did not save feed %v, missing required RSS fields:\nTitle: %v\nSee https://www.rssboard.org/rss-specification#requiredChannelElements", feedUrl, feed.Channel.Title)
+	}
+
 	addFeedResult, err := s.db.CreateFeed(context.Background(), database.CreateFeedParams{
-		ID:        uuid.New(),
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-		Name:      feedName,
-		Url:       feedUrl,
-		UserID:    user.ID,
+		ID:          uuid.New(),
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+		Name:        feedName,
+		Url:         feedUrl,
+		UserID:      user.ID,
+		Description: feed.Channel.Description,
 	})
 	if err != nil {
 		return fmt.Errorf("could not add: %v (%v) for %v - possible duplicate feed?", feedName, feedUrl, user.Name)
@@ -56,8 +69,6 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 	}
 	fmt.Printf("%v followed %v\n", newFeedFollow.UserName, newFeedFollow.FeedName)
 
-	// TODO: Immediately update added feed
-
 	return nil
 }
 
@@ -69,7 +80,7 @@ func feedsHelp() commandHelp {
 	}
 }
 
-// Prints feeds from all users
+// Prints all feeds
 func handlerGetFeeds(s *state, cmd command) error {
 	feeds, err := s.db.GetFeeds(context.Background())
 	if err != nil {
@@ -83,7 +94,8 @@ func handlerGetFeeds(s *state, cmd command) error {
 
 	fmt.Println("Available RSS Feeds to follow:")
 	for _, feed := range feeds {
-		fmt.Printf("* %v | %v\n", feed.FeedName, feed.Url)
+		title := fmt.Sprintf("%v | %v", feed.FeedName, feed.Description)
+		fmt.Println(formatTitleAndLink(title, feed.Url))
 	}
 
 	return nil

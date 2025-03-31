@@ -30,7 +30,7 @@ func handlerFollow(s *state, cmd command, user database.User) error {
 
 	feed, err := s.db.GetFeedByUrl(context.Background(), feedUrl)
 	if err == sql.ErrNoRows {
-		return fmt.Errorf("feed url %v has not been added yet", feedUrl)
+		return fmt.Errorf("failed to follow %v - not yet added", feedUrl)
 	}
 	if err != nil {
 		return err

@@ -59,6 +59,11 @@ func handlerGetUsers(s *state, cmd command) error {
 		return err
 	}
 
+	if len(users) == 0 {
+		fmt.Println("no users registered")
+		return nil
+	}
+
 	var usersList string
 	for _, user := range users {
 		u := fmt.Sprintf("* %v", user)

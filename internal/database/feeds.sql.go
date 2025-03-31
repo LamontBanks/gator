@@ -15,29 +15,34 @@ import (
 
 const createFeed = `-- name: CreateFeed :one
 
-INSERT INTO feeds (id, created_at, updated_at, name, url, user_id)
+INSERT INTO feeds (id, created_at, updated_at, name, url, user_id, last_fetched_at, description)
 VALUES (
     $1,
     $2,
     $3,
     $4,
     $5,
-    $6
+    $6,
+    $7,
+    $8
 )
-RETURNING id, created_at, updated_at, name, url, user_id, last_fetched_at
+RETURNING id, created_at, updated_at, name, url, user_id, last_fetched_at, description
 `
 
 type CreateFeedParams struct {
-	ID        uuid.UUID
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Name      string
-	Url       string
-	UserID    uuid.UUID
+	ID            uuid.UUID
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	Name          string
+	Url           string
+	UserID        uuid.UUID
+	LastFetchedAt sql.NullTime
+	Description   string
 }
 
 // https://docs.sqlc.dev/en/latest/tutorials/getting-started-postgresql.html
 // Represent a feed and the user who added the feed
+// Nulling `last_fetched_at` timestamp field - that will be set when the feed is downloaded
 func (q *Queries) CreateFeed(ctx context.Context, arg CreateFeedParams) (Feed, error) {
 	row := q.db.QueryRowContext(ctx, createFeed,
 		arg.ID,
@@ -46,6 +51,8 @@ func (q *Queries) CreateFeed(ctx context.Context, arg CreateFeedParams) (Feed, e
 		arg.Name,
 		arg.Url,
 		arg.UserID,
+		arg.LastFetchedAt,
+		arg.Description,
 	)
 	var i Feed
 	err := row.Scan(
@@ -56,12 +63,13 @@ func (q *Queries) CreateFeed(ctx context.Context, arg CreateFeedParams) (Feed, e
 		&i.Url,
 		&i.UserID,
 		&i.LastFetchedAt,
+		&i.Description,
 	)
 	return i, err
 }
 
 const getFeedByUrl = `-- name: GetFeedByUrl :one
-SELECT id, created_at, updated_at, name, url, user_id, last_fetched_at FROM feeds
+SELECT id, created_at, updated_at, name, url, user_id, last_fetched_at, description FROM feeds
 WHERE url = $1
 `
 
@@ -76,21 +84,23 @@ func (q *Queries) GetFeedByUrl(ctx context.Context, url string) (Feed, error) {
 		&i.Url,
 		&i.UserID,
 		&i.LastFetchedAt,
+		&i.Description,
 	)
 	return i, err
 }
 
 const getFeeds = `-- name: GetFeeds :many
-SELECT feeds.name AS feed_name, feeds.url, users.name AS user_name
+SELECT feeds.name AS feed_name, feeds.url, feeds.description, users.name AS user_name
 FROM feeds
 LEFT JOIN users ON feeds.user_id = users.id
 ORDER BY feeds.name ASC
 `
 
 type GetFeedsRow struct {
-	FeedName string
-	Url      string
-	UserName sql.NullString
+	FeedName    string
+	Url         string
+	Description string
+	UserName    sql.NullString
 }
 
 func (q *Queries) GetFeeds(ctx context.Context) ([]GetFeedsRow, error) {
@@ -102,7 +112,12 @@ func (q *Queries) GetFeeds(ctx context.Context) ([]GetFeedsRow, error) {
 	var items []GetFeedsRow
 	for rows.Next() {
 		var i GetFeedsRow
-		if err := rows.Scan(&i.FeedName, &i.Url, &i.UserName); err != nil {
+		if err := rows.Scan(
+			&i.FeedName,
+			&i.Url,
+			&i.Description,
+			&i.UserName,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

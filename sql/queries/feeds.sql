@@ -1,20 +1,23 @@
 -- https://docs.sqlc.dev/en/latest/tutorials/getting-started-postgresql.html
 
 -- Represent a feed and the user who added the feed
+-- Nulling `last_fetched_at` timestamp field - that will be set when the feed is downloaded
 -- name: CreateFeed :one
-INSERT INTO feeds (id, created_at, updated_at, name, url, user_id)
+INSERT INTO feeds (id, created_at, updated_at, name, url, user_id, last_fetched_at, description)
 VALUES (
     $1,
     $2,
     $3,
     $4,
     $5,
-    $6
+    $6,
+    $7,
+    $8
 )
 RETURNING *;
 
 -- name: GetFeeds :many
-SELECT feeds.name AS feed_name, feeds.url, users.name AS user_name
+SELECT feeds.name AS feed_name, feeds.url, feeds.description, users.name AS user_name
 FROM feeds
 LEFT JOIN users ON feeds.user_id = users.id
 ORDER BY feeds.name ASC;

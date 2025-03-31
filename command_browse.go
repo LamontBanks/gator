@@ -102,7 +102,7 @@ func handlerBrowseFeed(s *state, cmd command) error {
 
 	feed, err := s.db.GetFeedByUrl(context.Background(), feedUrl)
 	if err == sql.ErrNoRows {
-		return fmt.Errorf("feed url %v has not been added yet", feedUrl)
+		return fmt.Errorf("failed to browser %v - not yet added", feedUrl)
 	}
 	if err != nil {
 		return err
