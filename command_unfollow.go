@@ -8,7 +8,7 @@ import (
 	"github.com/LamontBanks/blog-aggregator/internal/database"
 )
 
-func unfollowHelp() commandInfo {
+func unfollowCommandInfo() commandInfo {
 	return commandInfo{
 		description: "Stop following a feed",
 		usage:       "unfollow <feed url>",

@@ -10,7 +10,7 @@ import (
 	"github.com/LamontBanks/blog-aggregator/internal/database"
 )
 
-func browseHelp() commandInfo {
+func browseCommandInfo() commandInfo {
 	return commandInfo{
 		description: "Show recent posts for feeds followed by the current user",
 		usage:       "browse <max number of posts per feed, default: 10>",
@@ -73,7 +73,7 @@ func handlerBrowse(s *state, cmd command, user database.User) error {
 	return nil
 }
 
-func browseFeedHelp() commandInfo {
+func browseFeedCommandInfo() commandInfo {
 	return commandInfo{
 		description: "Show posts for an RSS feed URL",
 		usage:       "browseFeed <RSS feed URL> <optional: max number of posts, default: 10>",
@@ -117,7 +117,7 @@ func handlerBrowseFeed(s *state, cmd command) error {
 	}
 
 	for _, post := range posts {
-		fmt.Printf("%v | %v\n", post.FeedName, post.Title)
+		fmt.Println(formatTitleAndLink(post.Title, post.Url))
 	}
 
 	return nil

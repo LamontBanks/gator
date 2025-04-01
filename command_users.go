@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func registerHelp() commandInfo {
+func registerCommandInfo() commandInfo {
 	return commandInfo{
 		description: "Register a new user",
 		usage:       "register <unique username>",
@@ -19,7 +19,7 @@ func registerHelp() commandInfo {
 	}
 }
 
-func usersHelp() commandInfo {
+func usersCommandInfo() commandInfo {
 	return commandInfo{
 		description: "List all users",
 		usage:       "users",

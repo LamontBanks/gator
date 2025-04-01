@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func addFeedHelp() commandInfo {
+func addFeedCommandInfo() commandInfo {
 	return commandInfo{
 		description: "Add a new feed",
 		usage:       "addFeed <feed name> <unique RSS feed>",
@@ -73,7 +73,7 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 	return nil
 }
 
-func feedsHelp() commandInfo {
+func feedsCommandInfo() commandInfo {
 	return commandInfo{
 		description: "List all feeds",
 		usage:       "feeds",

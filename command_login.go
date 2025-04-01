@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-func loginHelp() commandInfo {
+func loginCommandInfo() commandInfo {
 	return commandInfo{
 		description: "Logs in a user",
 		usage:       "login USERNAME",

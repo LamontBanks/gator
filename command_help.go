@@ -28,9 +28,9 @@ func helpCommandInfo() commandInfo {
 func (c *commands) handlerInfo(s *state, cmd command) error {
 	programName := "gator"
 
-	programOverview := "Run gator in the background (`gator help agg`). Then, login or create a user for yourself.\n"
-	programOverview += "View available RSS feeds and follow any that intereset you. Or, add new feeds to the library.\n"
-	programOverview += "See updates across all your feeds at a glance, dig into each posts' details.\n"
+	programOverview := "Run gator in the background (check `gator help agg`). Then, login or create a user for yourself.\n"
+	programOverview += "View and follow available RSS feeds, or add new feeds.\n"
+	programOverview += "See updates across all your followed feeds and see posts' descriptions\n"
 
 	// Individual command help
 	if len(cmd.args) > 0 {

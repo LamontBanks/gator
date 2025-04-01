@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func followHelp() commandInfo {
+func followCommandInfo() commandInfo {
 	return commandInfo{
 		description: "Follow a registered feed",
 		usage:       "follow <RSS feed URL>",
