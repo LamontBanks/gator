@@ -69,7 +69,6 @@ func fetchFeed(ctx context.Context, feedUrl string) (*RSSFeed, error) {
 func ParseRSSPubDate(pubDate string) (time.Time, error) {
 	// https://pkg.go.dev/time@go1.24.1#Layout
 	timeLayoutsToTry := []string{
-		"Mon, 02 Jan 2006 15:04 MST",
 		time.RFC1123Z,
 		time.RFC1123,
 		time.RFC822Z,
