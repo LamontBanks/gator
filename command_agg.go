@@ -11,10 +11,10 @@ import (
 
 func aggCommandInfo() commandInfo {
 	return commandInfo{
-		description: "Aggregate all RRS feeds",
-		usage:       "agg <update freq> <oldest post time limit>",
+		description: "Aggregate all feeds, poll for updates, useful when run in the background with '*'",
+		usage:       "agg <update freq> <oldest post time limit, optional>",
 		examples: []string{
-			"agg 30s",
+			"agg 30s &",
 			"agg 15m",
 			"agg 1h",
 			"agg 48h",
@@ -28,7 +28,7 @@ func aggCommandInfo() commandInfo {
 func handlerAggregator(s *state, cmd command) error {
 	// Args: <update freq string>, optional: <oldest posts to show>
 	// Parse update frequency
-	freqFormat := "30s, 1m, 5m, 1h, 1d"
+	freqFormat := "30s, 1m, 5m, 1h 5h"
 	if len(cmd.args) < 1 {
 		return fmt.Errorf("usage: %v <update freq string, ex: %v, etc.>", cmd.name, freqFormat)
 	}
@@ -81,29 +81,6 @@ func getAllFeedUpdates(s *state, oldestPostTime time.Duration) error {
 		}
 
 		saveFeedPosts(s, rssFeed, oldestFeed.ID)
-
-		// Pull posts for each feed, but only within the time window
-		// Calculate time limit
-
-		withinTimeLimit := time.Now().Add(-1 * oldestPostTime)
-
-		posts, err := s.db.GetRecentPostsFromFeed(context.Background(), database.GetRecentPostsFromFeedParams{
-			FeedID:      oldestFeed.ID,
-			PublishedAt: withinTimeLimit,
-			Limit:       3,
-		})
-		if err != nil {
-			return err
-		}
-
-		fmt.Printf("\n%v | %v\n", oldestFeed.Name, oldestFeed.Url)
-		if len(posts) == 0 {
-			fmt.Printf("* Nothing in the last %v\n", oldestPostTime)
-		}
-		for _, post := range posts {
-			fmt.Printf("* %v\n", post.Title)
-			fmt.Printf("  %v\n", post.Url)
-		}
 	}
 
 	return nil

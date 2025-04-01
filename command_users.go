@@ -11,7 +11,7 @@ import (
 
 func registerHelp() commandInfo {
 	return commandInfo{
-		description: "Registers a new users, logs them in",
+		description: "Register a new user",
 		usage:       "register <unique username>",
 		examples: []string{
 			"register bob",

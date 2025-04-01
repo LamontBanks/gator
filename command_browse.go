@@ -12,12 +12,12 @@ import (
 
 func browseHelp() commandInfo {
 	return commandInfo{
-		description: "Show recent posts from current user's followed feed",
-		usage:       "browse <max number of posts per feed, default: 3>",
+		description: "Show recent posts for feeds followed by the current user",
+		usage:       "browse <max number of posts per feed, default: 10>",
 		examples: []string{
 			"browse",
-			"browse 5",
-			"browse 10",
+			"browseFeed 5",
+			"browseFeed 10",
 		},
 	}
 }
@@ -75,8 +75,8 @@ func handlerBrowse(s *state, cmd command, user database.User) error {
 
 func browseFeedHelp() commandInfo {
 	return commandInfo{
-		description: "Lists ",
-		usage:       "browseFeed <registered RSS feed URL> <optional: >",
+		description: "Show posts for an RSS feed URL",
+		usage:       "browseFeed <RSS feed URL> <optional: max number of posts, default: 10>",
 		examples: []string{
 			"browseFeed http://example.com/rss/feed",
 		},
@@ -102,7 +102,7 @@ func handlerBrowseFeed(s *state, cmd command) error {
 
 	feed, err := s.db.GetFeedByUrl(context.Background(), feedUrl)
 	if err == sql.ErrNoRows {
-		return fmt.Errorf("failed to browser %v - not yet added", feedUrl)
+		return fmt.Errorf("failed to browseFeed %v - not yet added", feedUrl)
 	}
 	if err != nil {
 		return err

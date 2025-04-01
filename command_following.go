@@ -9,7 +9,7 @@ import (
 
 func followingCommandInfo() commandInfo {
 	return commandInfo{
-		description: "List all followed feeds",
+		description: "List all followed RSS feeds",
 		usage:       "following",
 		examples:    []string{},
 	}
@@ -27,7 +27,8 @@ func handlerFollowing(s *state, cmd command, user database.User) error {
 	}
 
 	for _, feed := range feedDetails {
-		fmt.Println(formatTitleAndLink(feed.FeedName, feed.FeedUrl))
+		title := fmt.Sprintf("%v | %v", feed.FeedName, feed.Description)
+		fmt.Println(formatTitleAndLink(title, feed.FeedUrl))
 	}
 
 	return nil

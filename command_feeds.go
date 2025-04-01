@@ -12,10 +12,11 @@ import (
 
 func addFeedHelp() commandInfo {
 	return commandInfo{
-		description: "Adds ",
+		description: "Add a new feed",
 		usage:       "addFeed <feed name> <unique RSS feed>",
 		examples: []string{
 			"addFeed \"Example Feed Name\" http://example.com/rss/feed",
+			"addFeed \"Example Feed Name\" http://example.com/rss.xml",
 		},
 	}
 }
@@ -74,7 +75,7 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 
 func feedsHelp() commandInfo {
 	return commandInfo{
-		description: "List all RSS feeds",
+		description: "List all feeds",
 		usage:       "feeds",
 		examples:    []string{},
 	}
