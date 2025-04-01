@@ -27,8 +27,7 @@ func handlerFollowing(s *state, cmd command, user database.User) error {
 	}
 
 	for _, feed := range feedDetails {
-		title := fmt.Sprintf("%v | %v", feed.FeedName, feed.Description)
-		fmt.Println(formatTitleAndLink(title, feed.FeedUrl))
+		printFeed(feed.FeedName, feed.Description, feed.FeedUrl)
 	}
 
 	return nil

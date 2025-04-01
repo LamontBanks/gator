@@ -50,7 +50,3 @@ func (c *commands) run(s *state, cmd command) error {
 
 	return cmdDetails.handlerFunc(s, cmd)
 }
-
-func formatTitleAndLink(title, link string) string {
-	return fmt.Sprintf("- %v\n  %v", title, link)
-}

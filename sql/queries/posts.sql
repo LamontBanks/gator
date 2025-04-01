@@ -34,3 +34,11 @@ INNER JOIN feeds ON feeds.id = posts.feed_id
 WHERE posts.feed_id = $1 AND posts.published_at >= $2 
 ORDER BY posts.published_at DESC
 LIMIT $3;
+
+-- name: GetPostsFromFeed :many
+SELECT feeds.name AS feed_name, posts.title, posts.description, posts.published_at, posts.Url
+FROM posts
+INNER JOIN feeds ON feeds.id = posts.feed_id
+WHERE posts.feed_id = $1
+ORDER BY posts.published_at DESC
+LIMIT $2;

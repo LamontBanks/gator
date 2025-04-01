@@ -95,9 +95,16 @@ func handlerGetFeeds(s *state, cmd command) error {
 
 	fmt.Println("Available RSS Feeds to follow:")
 	for _, feed := range feeds {
-		title := fmt.Sprintf("%v | %v", feed.FeedName, feed.Description)
-		fmt.Println(formatTitleAndLink(title, feed.Url))
+		printFeed(feed.FeedName, feed.Url, feed.Description)
 	}
 
 	return nil
+}
+
+func printFeed(title, desc, link string) {
+	s := fmt.Sprintf("- %v\n", title)
+	s += fmt.Sprintf("  %v\n", desc)
+	s += fmt.Sprintf("  %v\n", link)
+
+	fmt.Println(s)
 }

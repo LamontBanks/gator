@@ -37,27 +37,16 @@ func handlerAggregator(s *state, cmd command) error {
 		return fmt.Errorf("%v: could not parse frequency - format is %v", cmd.name, freqFormat)
 	}
 
-	// Optional: Parse oldest post time limit
-	oldestPostTime, _ := time.ParseDuration("18h") // Skipping error handling
-	if len(cmd.args) > 2 {
-		t, err := time.ParseDuration(cmd.args[1])
-		if err != nil {
-			fmt.Printf("error parsing %v, format: 1h, 3h, 24h, 36h, etc.", cmd.args[1])
-		} else {
-			oldestPostTime = t
-		}
-	}
-
 	// Periodic updates
 	ticker := time.NewTicker(freq)
 	for ; ; <-ticker.C {
 		fmt.Println("Updating RSS feeds...")
-		getAllFeedUpdates(s, oldestPostTime)
+		getAllFeedUpdates(s)
 	}
 }
 
 // Save updates all feeds
-func getAllFeedUpdates(s *state, oldestPostTime time.Duration) error {
+func getAllFeedUpdates(s *state) error {
 	allFeeds, err := s.db.GetFeeds(context.Background())
 	if err != nil {
 		return err

@@ -118,6 +118,57 @@ func (q *Queries) GetFollowedPosts(ctx context.Context, arg GetFollowedPostsPara
 	return items, nil
 }
 
+const getPostsFromFeed = `-- name: GetPostsFromFeed :many
+SELECT feeds.name AS feed_name, posts.title, posts.description, posts.published_at, posts.Url
+FROM posts
+INNER JOIN feeds ON feeds.id = posts.feed_id
+WHERE posts.feed_id = $1
+ORDER BY posts.published_at DESC
+LIMIT $2
+`
+
+type GetPostsFromFeedParams struct {
+	FeedID uuid.UUID
+	Limit  int32
+}
+
+type GetPostsFromFeedRow struct {
+	FeedName    string
+	Title       string
+	Description string
+	PublishedAt time.Time
+	Url         string
+}
+
+func (q *Queries) GetPostsFromFeed(ctx context.Context, arg GetPostsFromFeedParams) ([]GetPostsFromFeedRow, error) {
+	rows, err := q.db.QueryContext(ctx, getPostsFromFeed, arg.FeedID, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetPostsFromFeedRow
+	for rows.Next() {
+		var i GetPostsFromFeedRow
+		if err := rows.Scan(
+			&i.FeedName,
+			&i.Title,
+			&i.Description,
+			&i.PublishedAt,
+			&i.Url,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getRecentPostsFromFeed = `-- name: GetRecentPostsFromFeed :many
 SELECT feeds.name AS feed_name, posts.title, posts.description, posts.published_at, posts.Url
 FROM posts
