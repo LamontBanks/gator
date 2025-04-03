@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 )
 
@@ -49,4 +50,34 @@ func (c *commands) run(s *state, cmd command) error {
 	}
 
 	return cmdDetails.handlerFunc(s, cmd)
+}
+
+// Return the user's choice from a 2D slice of labels-values
+// Ex:
+//
+//	labelsValues := [][]string{
+//		{"Label 1", {"Value 1"},
+//		{"Label 2", {"Value 2"},
+//		...
+//	}
+func listOptionsReadChoice(labelsValues [][]string, message string) (string, string, error) {
+	fmt.Println(message)
+
+	// List options
+	for i, lblVal := range labelsValues {
+		fmt.Printf("%v: %v\n", i, lblVal[0])
+	}
+
+	// Get user's choice
+	var choice int
+	_, err := fmt.Scan(&choice)
+	if err != nil {
+		return "", "", err
+	}
+	if choice < 0 || choice >= len(labelsValues) {
+		return "", "", errors.New("invalid choice")
+	}
+
+	// Return
+	return labelsValues[choice][0], labelsValues[choice][1], nil
 }

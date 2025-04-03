@@ -99,7 +99,7 @@ func handlerGetFeeds(s *state, cmd command) error {
 
 	fmt.Println("Available RSS Feeds to follow:")
 	for _, feed := range feeds {
-		printFeed(feed.FeedName, feed.Url, feed.Description)
+		printFeed(feed.FeedName, feed.Description, feed.Url)
 	}
 
 	return nil

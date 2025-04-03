@@ -118,6 +118,31 @@ func (q *Queries) GetFollowedPosts(ctx context.Context, arg GetFollowedPostsPara
 	return items, nil
 }
 
+const getPostById = `-- name: GetPostById :one
+SELECT posts.title, posts.description, posts.published_at, posts.Url
+FROM posts
+WHERE posts.id = $1
+`
+
+type GetPostByIdRow struct {
+	Title       string
+	Description string
+	PublishedAt time.Time
+	Url         string
+}
+
+func (q *Queries) GetPostById(ctx context.Context, id uuid.UUID) (GetPostByIdRow, error) {
+	row := q.db.QueryRowContext(ctx, getPostById, id)
+	var i GetPostByIdRow
+	err := row.Scan(
+		&i.Title,
+		&i.Description,
+		&i.PublishedAt,
+		&i.Url,
+	)
+	return i, err
+}
+
 const getPostsFromFeed = `-- name: GetPostsFromFeed :many
 SELECT feeds.name AS feed_name, posts.title, posts.description, posts.published_at, posts.Url
 FROM posts
@@ -170,7 +195,7 @@ func (q *Queries) GetPostsFromFeed(ctx context.Context, arg GetPostsFromFeedPara
 }
 
 const getRecentPostsFromFeed = `-- name: GetRecentPostsFromFeed :many
-SELECT feeds.name AS feed_name, posts.title, posts.description, posts.published_at, posts.Url
+SELECT feeds.name AS feed_name, posts.id, posts.title, posts.description, posts.published_at, posts.Url
 FROM posts
 INNER JOIN feeds ON feeds.id = posts.feed_id
 WHERE posts.feed_id = $1 AND posts.published_at >= $2 
@@ -186,6 +211,7 @@ type GetRecentPostsFromFeedParams struct {
 
 type GetRecentPostsFromFeedRow struct {
 	FeedName    string
+	ID          uuid.UUID
 	Title       string
 	Description string
 	PublishedAt time.Time
@@ -203,6 +229,7 @@ func (q *Queries) GetRecentPostsFromFeed(ctx context.Context, arg GetRecentPosts
 		var i GetRecentPostsFromFeedRow
 		if err := rows.Scan(
 			&i.FeedName,
+			&i.ID,
 			&i.Title,
 			&i.Description,
 			&i.PublishedAt,

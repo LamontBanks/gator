@@ -9,12 +9,13 @@ import (
 	"time"
 
 	"github.com/LamontBanks/blog-aggregator/internal/database"
+	"github.com/google/uuid"
 )
 
 func browseCommandInfo() commandInfo {
 	return commandInfo{
 		description: "Show latest posts for current user's feeds",
-		usage:       "browse",
+		usage:       "browse <max number of posts per feed>",
 		examples: []string{
 			"browse",
 			"browse 5",
@@ -24,7 +25,7 @@ func browseCommandInfo() commandInfo {
 
 // Display most recent posts from user's feeds
 func handlerBrowse(s *state, cmd command, user database.User) error {
-	// Args: <max number of posts, optional, default 3> <'-h' to only show titles, optional>
+	// Args: <max number of posts per feed, optional, default 3>
 	maxNumPosts := 3
 	if len(cmd.args) > 0 {
 		i, err := strconv.Atoi(cmd.args[0])
@@ -67,18 +68,18 @@ func handlerBrowse(s *state, cmd command, user database.User) error {
 
 func browseFeedCommandInfo() commandInfo {
 	return commandInfo{
-		description: "Read posts for the given feed URL",
-		usage:       "browseFeed <feed url> <number of posts, default: 5>",
+		description: "Read posts from a followed feed",
+		usage:       "browseFeed <max number of posts>",
 		examples: []string{
-			"browseFeed http://example.com/rss/feed",
-			"browseFeed http://example.com/rss/feed 5",
+			"browseFeed",
+			"browseFeed 10",
 		},
 	}
 }
 
 // Display recent posts from saved feeds
 func handlerBrowseFeed(s *state, cmd command, user database.User) error {
-	maxNumPosts := 3
+	maxNumPosts := 10
 
 	// Get user feeds
 	userFeeds, err := s.db.GetFeedFollowsForUser(context.Background(), user.ID)
@@ -90,28 +91,23 @@ func handlerBrowseFeed(s *state, cmd command, user database.User) error {
 		return err
 	}
 
-	// Sort by name
-	sort.Slice(userFeeds, func(i, j int) bool {
-		return userFeeds[i].FeedName < userFeeds[j].FeedName
+	// Copy feedNames+feedUrl into a slice, sort alphabetically, pass to menu generator
+	feedOptions := make([][]string, len(userFeeds))
+	for i := range userFeeds {
+		feedOptions[i] = make([]string, 2)
+		feedOptions[i][0] = userFeeds[i].FeedName
+		feedOptions[i][1] = userFeeds[i].FeedUrl
+	}
+	sort.Slice(feedOptions, func(i, j int) bool {
+		return feedOptions[i][0] < feedOptions[j][0]
 	})
 
-	// Print options
-	fmt.Println("Choose a feed:")
-	for i, feed := range userFeeds {
-		fmt.Printf("%v: %v\n", i, feed.FeedName)
-	}
-
-	// Choose a feed
-	fmt.Println("Choose a feed:")
-	var choice int
-	_, err = fmt.Scan(&choice)
+	_, feedUrl, err := listOptionsReadChoice(feedOptions, "Choose a feed:")
 	if err != nil {
 		return err
 	}
-	fmt.Printf("chose %v", userFeeds[choice])
-	feedUrl := userFeeds[choice].FeedUrl
 
-	// Get the feed posts
+	// Get the feed, then the posts
 	feed, err := s.db.GetFeedByUrl(context.Background(), feedUrl)
 	if err == sql.ErrNoRows {
 		return fmt.Errorf("failed to browseFeed %v - not yet added", feedUrl)
@@ -128,10 +124,30 @@ func handlerBrowseFeed(s *state, cmd command, user database.User) error {
 		return err
 	}
 
-	fmt.Println(feed.Name)
-	for _, post := range posts {
-		printPost(post.Title, post.Url, post.Description, post.PublishedAt)
+	// Copy postTitle+postId into a 2D slice, pass to menu generator
+	postOptions := make([][]string, len(posts))
+	for i := range posts {
+		postOptions[i] = make([]string, 2)
+		postOptions[i][0] = posts[i].Title
+		postOptions[i][1] = posts[i].ID.String()
 	}
+
+	_, postIdString, err := listOptionsReadChoice(postOptions, "Choose a post:")
+	if err != nil {
+		return err
+	}
+
+	// Get, print post
+	postUUID, err := uuid.Parse(postIdString)
+	if err != nil {
+		return err
+	}
+
+	post, err := s.db.GetPostById(context.Background(), postUUID)
+	if err != nil {
+		return nil
+	}
+	printPost(post.Title, post.Url, post.Description, post.PublishedAt)
 
 	return nil
 }
