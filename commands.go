@@ -63,9 +63,9 @@ func (c *commands) run(s *state, cmd command) error {
 func listOptionsReadChoice(labelsValues [][]string, message string) (string, string, error) {
 	fmt.Println(message)
 
-	// List options
+	// List options, start index with "1"; easier to select than "0" for choosing the first option (the most common case)
 	for i, lblVal := range labelsValues {
-		fmt.Printf("%v: %v\n", i, lblVal[0])
+		fmt.Printf("%v: %v\n", i+1, lblVal[0])
 	}
 
 	// Get user's choice
@@ -74,6 +74,9 @@ func listOptionsReadChoice(labelsValues [][]string, message string) (string, str
 	if err != nil {
 		return "", "", err
 	}
+
+	// Normalize to 0-based indexing
+	choice -= 1
 	if choice < 0 || choice >= len(labelsValues) {
 		return "", "", errors.New("invalid choice")
 	}

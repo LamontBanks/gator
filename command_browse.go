@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"sort"
 	"strconv"
 	"time"
 
@@ -91,21 +90,19 @@ func handlerBrowseFeed(s *state, cmd command, user database.User) error {
 		return err
 	}
 
-	// Copy feedNames+feedUrl into a slice, sort alphabetically, pass to menu generator
+	// Copy feedNames+feedUrl into a slice, pass to menu generator
 	feedOptions := make([][]string, len(userFeeds))
 	for i := range userFeeds {
 		feedOptions[i] = make([]string, 2)
 		feedOptions[i][0] = userFeeds[i].FeedName
 		feedOptions[i][1] = userFeeds[i].FeedUrl
 	}
-	sort.Slice(feedOptions, func(i, j int) bool {
-		return feedOptions[i][0] < feedOptions[j][0]
-	})
 
-	_, feedUrl, err := listOptionsReadChoice(feedOptions, "Choose a feed:")
+	feedName, feedUrl, err := listOptionsReadChoice(feedOptions, "Choose a feed:")
 	if err != nil {
 		return err
 	}
+	fmt.Println(feedName)
 
 	// Get the feed, then the posts
 	feed, err := s.db.GetFeedByUrl(context.Background(), feedUrl)
