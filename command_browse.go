@@ -12,8 +12,8 @@ import (
 
 func browseCommandInfo() commandInfo {
 	return commandInfo{
-		description: "Show recent posts for feeds followed by the current user",
-		usage:       "browse <max number of posts per feed, default: 10>",
+		description: "Show latest posts for current user's feeds",
+		usage:       "browse",
 		examples: []string{
 			"browse",
 			"browse 5",
@@ -23,7 +23,7 @@ func browseCommandInfo() commandInfo {
 
 // Display most recent posts from user's feeds
 func handlerBrowse(s *state, cmd command, user database.User) error {
-	// Args: <max number of posts, optional, default 3>
+	// Args: <max number of posts, optional, default 3> <'-h' to only show titles, optional>
 	maxNumPosts := 3
 	if len(cmd.args) > 0 {
 		i, err := strconv.Atoi(cmd.args[0])
@@ -33,13 +33,13 @@ func handlerBrowse(s *state, cmd command, user database.User) error {
 		maxNumPosts = i
 	}
 
+	// Get feeds
 	feeds, err := s.db.GetFeedFollowsForUser(context.Background(), user.ID)
 	if err != nil {
 		return err
 	}
 
-	// Pull posts for each feed, but only within the time window
-	// and no more posts per feed than specified
+	// Pull posts for each feed
 	for _, feed := range feeds {
 		posts, err := s.db.GetPostsFromFeed(context.Background(), database.GetPostsFromFeedParams{
 			FeedID: feed.FeedID,
@@ -49,14 +49,16 @@ func handlerBrowse(s *state, cmd command, user database.User) error {
 			return err
 		}
 
+		// Print feeds, posts
 		fmt.Printf("\n%v | %v\n", feed.FeedName, feed.FeedUrl)
 		if len(posts) > 0 {
 			for _, post := range posts {
-				printPost(post.Title, post.Description, post.Url, post.PublishedAt)
+				printPostTitle(post.Title)
 			}
 		} else {
 			fmt.Println("No posts")
 		}
+
 	}
 
 	return nil
@@ -64,12 +66,11 @@ func handlerBrowse(s *state, cmd command, user database.User) error {
 
 func browseFeedCommandInfo() commandInfo {
 	return commandInfo{
-		description: "Show posts for an RSS feed URL",
-		usage:       "browseFeed <RSS feed URL> <optional: max number of posts, default: 10>",
+		description: "Read posts for the given feed URL",
+		usage:       "browseFeed <feed url> <number of posts, default: 5>",
 		examples: []string{
 			"browseFeed http://example.com/rss/feed",
 			"browseFeed http://example.com/rss/feed 5",
-			"browseFeed http://example.com/rss/feed 10",
 		},
 	}
 }
@@ -82,7 +83,7 @@ func handlerBrowseFeed(s *state, cmd command) error {
 	}
 	feedUrl := cmd.args[0]
 
-	maxNumPosts := 10
+	maxNumPosts := 3
 	if len(cmd.args) > 1 {
 		i, err := strconv.Atoi(cmd.args[1])
 		if err != nil {
@@ -115,10 +116,13 @@ func handlerBrowseFeed(s *state, cmd command) error {
 }
 
 func printPost(title, desc, link string, published_at time.Time) {
-	s := fmt.Sprintf("- %v\n", title)
-	s += fmt.Sprintf("  %v\n", published_at.Format("3:04 PM, Monday 02 Jan 06"))
-	s += fmt.Sprintf("  %v\n", link)
+	s := fmt.Sprintf("- %v | %v\n", title, published_at.Format("Mon, 02 Jan 03:04 PM"))
 	s += fmt.Sprintf("  %v\n", desc)
+	s += fmt.Sprintf("  %v\n", link)
 
 	fmt.Println(s)
+}
+
+func printPostTitle(title string) {
+	fmt.Printf("- %v\n", title)
 }

@@ -45,7 +45,7 @@ func handlerAggregator(s *state, cmd command) error {
 	}
 }
 
-// Save updates all feeds
+// Update all feeds
 func getAllFeedUpdates(s *state) error {
 	allFeeds, err := s.db.GetFeeds(context.Background())
 	if err != nil {
@@ -75,13 +75,38 @@ func getAllFeedUpdates(s *state) error {
 	return nil
 }
 
+// Update single feed
+// TODO: Use within getAllFeedUpdates
+func getFeedUpdates(s *state, feedUrl string) error {
+	// Get feed from DB
+	feed, err := s.db.GetFeedByUrl(context.Background(), feedUrl)
+	if err != nil {
+		return err
+	}
+
+	// Download updates
+	rssFeed, err := fetchFeed(context.Background(), feed.Url)
+	if err != nil {
+		return err
+	}
+
+	err = s.db.MarkFeedAsFetched(context.Background(), feed.ID)
+	if err != nil {
+		return fmt.Errorf("failed marking %v as updated", feedUrl)
+	}
+
+	saveFeedPosts(s, rssFeed, feed.ID)
+
+	return nil
+}
+
 // Save the posts to the database
 func saveFeedPosts(s *state, rssFeed *RSSFeed, feedId uuid.UUID) error {
 	for i := range len(rssFeed.Channel.Item) {
 		// Convert published data string to time.Time
 		pubDate, err := ParseRSSPubDate(rssFeed.Channel.Item[i].PubDate)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Printf("error updating %v: %v", rssFeed.Channel.Title, err)
 			return err
 		}
 

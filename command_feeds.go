@@ -43,7 +43,8 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 		return fmt.Errorf("did not save feed %v, missing required RSS fields:\nTitle: %v\nSee https://www.rssboard.org/rss-specification#requiredChannelElements", feedUrl, feed.Channel.Title)
 	}
 
-	addFeedResult, err := s.db.CreateFeed(context.Background(), database.CreateFeedParams{
+	// Save feed info
+	newFeed, err := s.db.CreateFeed(context.Background(), database.CreateFeedParams{
 		ID:          uuid.New(),
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
@@ -55,7 +56,7 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 	if err != nil {
 		return fmt.Errorf("could not add: %v (%v) for %v - possible duplicate feed?", feedName, feedUrl, user.Name)
 	}
-	fmt.Printf("Saved \"%v\" (%v) for user %v\n", addFeedResult.Name, addFeedResult.Url, user.Name)
+	fmt.Printf("Saved \"%v\" (%v) for user %v\n", newFeed.Name, newFeed.Url, user.Name)
 
 	// Make user follow the new feed
 	newFeedFollow, err := s.db.CreateFeedFollow(context.Background(), database.CreateFeedFollowParams{
@@ -63,12 +64,15 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 		UserID:    user.ID,
-		FeedID:    addFeedResult.ID,
+		FeedID:    newFeed.ID,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to follow feed %v", newFeedFollow.FeedName)
 	}
 	fmt.Printf("%v followed %v\n", newFeedFollow.UserName, newFeedFollow.FeedName)
+
+	// Download updates
+	getFeedUpdates(s, newFeed.Url)
 
 	return nil
 }
