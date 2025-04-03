@@ -56,7 +56,7 @@ func main() {
 	appCommands.register("browse", browseCommandInfo(), middlewareLoggedIn(handlerBrowse))
 	appCommands.register("feeds", feedsCommandInfo(), handlerGetFeeds)
 	appCommands.register("addFeed", addFeedCommandInfo(), middlewareLoggedIn(handlerAddFeed))
-	appCommands.register("browseFeed", browseFeedCommandInfo(), handlerBrowseFeed)
+	appCommands.register("browseFeed", browseFeedCommandInfo(), middlewareLoggedIn(handlerBrowseFeed))
 	appCommands.register("follow", followCommandInfo(), middlewareLoggedIn(handlerFollow))
 	appCommands.register("unfollow", unfollowCommandInfo(), middlewareLoggedIn(handlerUnfollow))
 	appCommands.register("following", followingCommandInfo(), middlewareLoggedIn(handlerFollowing))

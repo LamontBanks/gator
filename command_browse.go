@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"sort"
 	"strconv"
 	"time"
 
@@ -76,22 +77,41 @@ func browseFeedCommandInfo() commandInfo {
 }
 
 // Display recent posts from saved feeds
-func handlerBrowseFeed(s *state, cmd command) error {
-	// Args: url, max number of feeds (optional)
-	if len(cmd.args) < 1 {
-		return fmt.Errorf("usage: %v <saved rss url> <num of posts, optional>", cmd.name)
-	}
-	feedUrl := cmd.args[0]
-
+func handlerBrowseFeed(s *state, cmd command, user database.User) error {
 	maxNumPosts := 3
-	if len(cmd.args) > 1 {
-		i, err := strconv.Atoi(cmd.args[1])
-		if err != nil {
-			return fmt.Errorf("usage: %v <saved rss url> <num of posts, optional>", cmd.name)
-		}
-		maxNumPosts = i
+
+	// Get user feeds
+	userFeeds, err := s.db.GetFeedFollowsForUser(context.Background(), user.ID)
+	if err == sql.ErrNoRows {
+		return fmt.Errorf("you're not following any feeds")
+	}
+	if err != nil {
+		fmt.Println("error retrieving your followed feeds")
+		return err
 	}
 
+	// Sort by name
+	sort.Slice(userFeeds, func(i, j int) bool {
+		return userFeeds[i].FeedName < userFeeds[j].FeedName
+	})
+
+	// Print options
+	fmt.Println("Choose a feed:")
+	for i, feed := range userFeeds {
+		fmt.Printf("%v: %v\n", i, feed.FeedName)
+	}
+
+	// Choose a feed
+	fmt.Println("Choose a feed:")
+	var choice int
+	_, err = fmt.Scan(&choice)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("chose %v", userFeeds[choice])
+	feedUrl := userFeeds[choice].FeedUrl
+
+	// Get the feed posts
 	feed, err := s.db.GetFeedByUrl(context.Background(), feedUrl)
 	if err == sql.ErrNoRows {
 		return fmt.Errorf("failed to browseFeed %v - not yet added", feedUrl)
@@ -108,6 +128,7 @@ func handlerBrowseFeed(s *state, cmd command) error {
 		return err
 	}
 
+	fmt.Println(feed.Name)
 	for _, post := range posts {
 		printPost(post.Title, post.Url, post.Description, post.PublishedAt)
 	}
