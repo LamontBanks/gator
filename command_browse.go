@@ -76,7 +76,7 @@ func browseFeedCommandInfo() commandInfo {
 	}
 }
 
-// Display recent posts from saved feeds
+// Display menus to view specific posts in specific feeds
 func handlerBrowseFeed(s *state, cmd command, user database.User) error {
 	maxNumPosts := 10
 
@@ -125,7 +125,7 @@ func handlerBrowseFeed(s *state, cmd command, user database.User) error {
 	postOptions := make([][]string, len(posts))
 	for i := range posts {
 		postOptions[i] = make([]string, 2)
-		postOptions[i][0] = posts[i].Title
+		postOptions[i][0] = posts[i].Title + " - " + posts[i].PublishedAt.String()
 		postOptions[i][1] = posts[i].ID.String()
 	}
 
@@ -144,15 +144,16 @@ func handlerBrowseFeed(s *state, cmd command, user database.User) error {
 	if err != nil {
 		return nil
 	}
-	printPost(post.Title, post.Url, post.Description, post.PublishedAt)
+	printPost(post.Title, post.Description, post.Url, post.PublishedAt)
 
 	return nil
 }
 
 func printPost(title, desc, link string, published_at time.Time) {
-	s := fmt.Sprintf("- %v | %v\n", title, published_at.Format("Mon, 02 Jan 03:04 PM"))
-	s += fmt.Sprintf("  %v\n", desc)
-	s += fmt.Sprintf("  %v\n", link)
+	s := fmt.Sprintf("%v\n", title)
+	s += fmt.Sprintf("%v\n\n", published_at.Format("02 Jan 03:04 PM"))
+	s += fmt.Sprintf("%v\n\n", desc)
+	s += fmt.Sprintf("%v\n", link)
 
 	fmt.Println(s)
 }

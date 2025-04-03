@@ -85,5 +85,6 @@ func ParseRSSPubDate(pubDate string) (time.Time, error) {
 		}
 	}
 
-	return time.Time{}, fmt.Errorf("unable to convert pubDate %v using these time.Layouts: %v", pubDate, timeLayoutsToTry)
+	fmt.Printf("unable to convert pubDate %v using these time.Layouts: %v", pubDate, timeLayoutsToTry)
+	return time.Now(), nil
 }

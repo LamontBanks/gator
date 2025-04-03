@@ -12,7 +12,7 @@ import (
 
 func addFeedCommandInfo() commandInfo {
 	return commandInfo{
-		description: "Add a new feed",
+		description: "Add a new feed for all users to follow",
 		usage:       "addFeed <feed name> <unique RSS feed>",
 		examples: []string{
 			"addFeed \"Example Feed Name\" http://example.com/rss/feed",
