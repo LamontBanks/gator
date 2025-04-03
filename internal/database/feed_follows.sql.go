@@ -135,3 +135,50 @@ func (q *Queries) GetFeedFollowsForUser(ctx context.Context, userID uuid.UUID) (
 	}
 	return items, nil
 }
+
+const getFeedsNotFollowedByUser = `-- name: GetFeedsNotFollowedByUser :many
+SELECT feeds.name, feeds.description, feeds.id, feeds.url
+FROM feeds
+WHERE feeds.id NOT IN (
+	SELECT feed_follows.feed_id
+	FROM feed_follows
+	WHERE feed_follows.user_id = $1
+)
+ORDER BY feeds.name ASC
+`
+
+type GetFeedsNotFollowedByUserRow struct {
+	Name        string
+	Description string
+	ID          uuid.UUID
+	Url         string
+}
+
+// Get all feeds the user is NOT following
+func (q *Queries) GetFeedsNotFollowedByUser(ctx context.Context, userID uuid.UUID) ([]GetFeedsNotFollowedByUserRow, error) {
+	rows, err := q.db.QueryContext(ctx, getFeedsNotFollowedByUser, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetFeedsNotFollowedByUserRow
+	for rows.Next() {
+		var i GetFeedsNotFollowedByUserRow
+		if err := rows.Scan(
+			&i.Name,
+			&i.Description,
+			&i.ID,
+			&i.Url,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

@@ -51,7 +51,7 @@ func handlerBrowse(s *state, cmd command, user database.User) error {
 		}
 
 		// Print feeds, posts
-		fmt.Printf("\n%v | %v\n", feed.FeedName, feed.FeedUrl)
+		fmt.Printf("%v | %v\n", feed.FeedName, feed.FeedUrl)
 		if len(posts) > 0 {
 			for _, post := range posts {
 				printPostTitle(post.Title)
@@ -78,9 +78,8 @@ func browseFeedCommandInfo() commandInfo {
 
 // Display menus to view specific posts in specific feeds
 func handlerBrowseFeed(s *state, cmd command, user database.User) error {
+	// Get feeds user is following
 	maxNumPosts := 10
-
-	// Get user feeds
 	userFeeds, err := s.db.GetFeedFollowsForUser(context.Background(), user.ID)
 	if err == sql.ErrNoRows {
 		return fmt.Errorf("you're not following any feeds")
@@ -90,7 +89,7 @@ func handlerBrowseFeed(s *state, cmd command, user database.User) error {
 		return err
 	}
 
-	// Copy feedNames+feedUrl into a slice, pass to menu generator
+	// Copy feedNames, feedUrl into a label-value 2D slive, pass to menu generator
 	feedOptions := make([][]string, len(userFeeds))
 	for i := range userFeeds {
 		feedOptions[i] = make([]string, 2)
@@ -104,7 +103,7 @@ func handlerBrowseFeed(s *state, cmd command, user database.User) error {
 	}
 	fmt.Println(feedName)
 
-	// Get the feed, then the posts
+	// Get the chosen feed and posts
 	feed, err := s.db.GetFeedByUrl(context.Background(), feedUrl)
 	if err == sql.ErrNoRows {
 		return fmt.Errorf("failed to browseFeed %v - not yet added", feedUrl)
@@ -121,11 +120,11 @@ func handlerBrowseFeed(s *state, cmd command, user database.User) error {
 		return err
 	}
 
-	// Copy postTitle+postId into a 2D slice, pass to menu generator
+	// Copy postTitle, postId into a label-value 2D slice, pass to menu generator
 	postOptions := make([][]string, len(posts))
 	for i := range posts {
 		postOptions[i] = make([]string, 2)
-		postOptions[i][0] = posts[i].Title + " - " + posts[i].PublishedAt.String()
+		postOptions[i][0] = posts[i].Title + "\n\t" + posts[i].PublishedAt.In(time.Local).Format("03:04 PM, Mon, 02 Jan 06")
 		postOptions[i][1] = posts[i].ID.String()
 	}
 
@@ -134,7 +133,7 @@ func handlerBrowseFeed(s *state, cmd command, user database.User) error {
 		return err
 	}
 
-	// Get, print post
+	// Get chosen post from postId, print it
 	postUUID, err := uuid.Parse(postIdString)
 	if err != nil {
 		return err
@@ -144,6 +143,7 @@ func handlerBrowseFeed(s *state, cmd command, user database.User) error {
 	if err != nil {
 		return nil
 	}
+
 	printPost(post.Title, post.Description, post.Url, post.PublishedAt)
 
 	return nil
@@ -151,7 +151,7 @@ func handlerBrowseFeed(s *state, cmd command, user database.User) error {
 
 func printPost(title, desc, link string, published_at time.Time) {
 	s := fmt.Sprintf("%v\n", title)
-	s += fmt.Sprintf("%v\n\n", published_at.Format("02 Jan 03:04 PM"))
+	s += fmt.Sprintf("%v\n\n", published_at.In(time.Local).Format("03:04 PM, Mon, 02 Jan 06"))
 	s += fmt.Sprintf("%v\n\n", desc)
 	s += fmt.Sprintf("%v\n", link)
 
@@ -159,5 +159,5 @@ func printPost(title, desc, link string, published_at time.Time) {
 }
 
 func printPostTitle(title string) {
-	fmt.Printf("- %v\n", title)
+	fmt.Printf("\t- %v\n", title)
 }

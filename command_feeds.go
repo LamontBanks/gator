@@ -106,9 +106,7 @@ func handlerGetFeeds(s *state, cmd command) error {
 }
 
 func printFeed(title, desc, link string) {
-	s := fmt.Sprintf("- %v\n", title)
-	s += fmt.Sprintf("  %v\n", desc)
-	s += fmt.Sprintf("  %v\n", link)
+	s := fmt.Sprintf("%v\n\t%v\n\t%v", title, desc, link)
 
 	fmt.Println(s)
 }

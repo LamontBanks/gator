@@ -30,6 +30,17 @@ INNER JOIN feeds ON feed_follows.feed_id = feeds.id
 WHERE feed_follows.user_id = $1
 ORDER BY feeds.name ASC;
 
+-- Get all feeds the user is NOT following
+-- name: GetFeedsNotFollowedByUser :many
+SELECT feeds.name, feeds.description, feeds.id, feeds.url
+FROM feeds
+WHERE feeds.id NOT IN (
+	SELECT feed_follows.feed_id
+	FROM feed_follows
+	WHERE feed_follows.user_id = $1
+)
+ORDER BY feeds.name ASC;
+
 -- name: DeleteFeedFollowForUser :exec
 DELETE FROM feed_follows
 WHERE user_id = $1

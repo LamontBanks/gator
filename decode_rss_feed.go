@@ -76,6 +76,11 @@ func ParseRSSPubDate(pubDate string) (time.Time, error) {
 		time.RFC822,
 	}
 
+	// User current time if none is provided
+	if pubDate == "" {
+		return time.Now(), nil
+	}
+
 	for _, layout := range timeLayoutsToTry {
 		convertedDate, err := time.ParseInLocation(layout, pubDate, time.Local)
 		if err != nil {
@@ -85,6 +90,5 @@ func ParseRSSPubDate(pubDate string) (time.Time, error) {
 		}
 	}
 
-	fmt.Printf("unable to convert pubDate %v using these time.Layouts: %v", pubDate, timeLayoutsToTry)
-	return time.Now(), nil
+	return time.Time{}, fmt.Errorf("unable to convert pubDate %v using these time.Layouts: %v", pubDate, timeLayoutsToTry)
 }
