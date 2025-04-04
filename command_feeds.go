@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"sort"
 	"time"
 
 	"github.com/LamontBanks/gator/internal/database"
@@ -91,12 +90,6 @@ func handlerGetFeeds(s *state, cmd command) error {
 	if err != nil {
 		return err
 	}
-
-	// Sort by Feed name
-	// Could do this as part of the SQL query, but including to demonstrate interacting with SQLC-returned values
-	sort.Slice(feeds, func(i, j int) bool {
-		return feeds[i].FeedName < feeds[j].FeedName
-	})
 
 	fmt.Println("All RSS Feeds")
 	for _, feed := range feeds {
