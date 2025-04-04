@@ -56,7 +56,7 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 	if err != nil {
 		return fmt.Errorf("could not add: %v (%v) for %v - possible duplicate feed?", feedName, feedUrl, user.Name)
 	}
-	fmt.Printf("Saved \"%v\" (%v) for user %v\n", newFeed.Name, newFeed.Url, user.Name)
+	fmt.Printf("Saved \"%v\" (%v) for %v\n", newFeed.Name, newFeed.Url, user.Name)
 
 	// Make user follow the new feed
 	newFeedFollow, err := s.db.CreateFeedFollow(context.Background(), database.CreateFeedFollowParams{
@@ -97,7 +97,7 @@ func handlerGetFeeds(s *state, cmd command) error {
 		return feeds[i].FeedName < feeds[j].FeedName
 	})
 
-	fmt.Println("Available RSS Feeds to follow:")
+	fmt.Println("All RSS Feeds")
 	for _, feed := range feeds {
 		printFeed(feed.FeedName, feed.Description, feed.Url)
 	}

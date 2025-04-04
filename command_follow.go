@@ -40,6 +40,10 @@ func handlerFollow(s *state, cmd command, user database.User) error {
 		}
 
 		fmt.Println("\nAlready following:")
+		if len(feedsAlreadyFollowed) == 0 {
+			fmt.Println("no feeds")
+		}
+
 		for _, feed := range feedsAlreadyFollowed {
 			printFeed(feed.FeedName, feed.Description, feed.FeedUrl)
 		}

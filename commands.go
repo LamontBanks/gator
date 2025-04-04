@@ -65,7 +65,7 @@ func listOptionsReadChoice(labelsValues [][]string, message string) (string, str
 
 	// List options, start index with "1"; easier to select than "0" for choosing the first option (the most common case)
 	for i, lblVal := range labelsValues {
-		fmt.Printf("%v: %v\n\n", i+1, lblVal[0])
+		fmt.Printf("%v: %v\n", i+1, lblVal[0])
 	}
 
 	// Get user's choice
