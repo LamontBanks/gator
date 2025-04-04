@@ -478,6 +478,21 @@ Use the program:
                 - X-ray Clues Reveal Destroyed Planet
                 - Studying Ice for the Future of Flight
 
+## Install for local use
+
+From the base directory:
+
+        $ go install .
+
+Now `gator` can be run directly (may need to launch a new shell session):
+
+        $ gator agg 15m &
+        Updating RSS feeds..
+
+        $ gator browse
+        etc...
+
+
 ## Improvements
 - Tests, unit/integration
 - Process HTML info RSS feed posts
