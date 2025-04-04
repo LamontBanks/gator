@@ -6,7 +6,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/LamontBanks/blog-aggregator/internal/database"
+	"github.com/LamontBanks/gator/internal/database"
 	"github.com/google/uuid"
 )
 
@@ -93,6 +93,7 @@ func handlerGetFeeds(s *state, cmd command) error {
 	}
 
 	// Sort by Feed name
+	// Could do this as part of the SQL query, but including to demonstrate interacting with SQLC-returned values
 	sort.Slice(feeds, func(i, j int) bool {
 		return feeds[i].FeedName < feeds[j].FeedName
 	})

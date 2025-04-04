@@ -5,14 +5,15 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/LamontBanks/blog-aggregator/internal/database"
+	"github.com/LamontBanks/gator/internal/database"
 )
 
 func unfollowCommandInfo() commandInfo {
 	return commandInfo{
 		description: "Stop following a feed",
-		usage:       "unfollow <feed url>",
+		usage:       "unfollow <feed url, optional>",
 		examples: []string{
+			"unfollow\n<choose from list of feeds>",
 			"unfollow http://example.com/rss/feed",
 		},
 	}
@@ -20,12 +21,40 @@ func unfollowCommandInfo() commandInfo {
 
 // Unfollows the given RSS feel URL
 func handlerUnfollow(s *state, cmd command, user database.User) error {
-	// Args: url
-	if len(cmd.args) < 1 {
-		return fmt.Errorf("usage: %v <url>", cmd.name)
-	}
-	feedUrl := cmd.args[0]
+	// Args: url, optional
+	var feedUrl string
+	if len(cmd.args) > 0 {
+		feedUrl = cmd.args[0]
+	} else {
+		// If no URL is provided, choose from list of followed feeds
+		followedFeeds, err := s.db.GetFeedFollowsForUser(context.Background(), user.ID)
+		if err != nil {
+			return err
+		}
 
+		if len(followedFeeds) == 0 {
+			fmt.Println("not following any feeds")
+			return nil
+		}
+
+		// Create label-value 2D array for the option picker
+		feedOptions := make([][]string, len(followedFeeds))
+		for i := range followedFeeds {
+			feedOptions[i] = make([]string, 2)
+			feedOptions[i][0] = followedFeeds[i].FeedName + "\n\t" + followedFeeds[i].Description + "\n\t" + followedFeeds[i].FeedUrl
+			feedOptions[i][1] = followedFeeds[i].FeedUrl
+		}
+
+		// Choose feed to unfollow
+		choice, err := listOptionsReadChoice(feedOptions, "- Choose an RSS feed to unfollow")
+		if err != nil {
+			return err
+		}
+
+		feedUrl = followedFeeds[choice].FeedUrl
+	}
+
+	// Get all feed info from the url
 	feed, err := s.db.GetFeedByUrl(context.Background(), feedUrl)
 	if err == sql.ErrNoRows {
 		return fmt.Errorf("failed to unfollow %v - not yet added", feedUrl)
@@ -34,6 +63,7 @@ func handlerUnfollow(s *state, cmd command, user database.User) error {
 		return err
 	}
 
+	// Unfollow the feed
 	err = s.db.DeleteFeedFollowForUser(context.Background(), database.DeleteFeedFollowForUserParams{
 		UserID: user.ID,
 		FeedID: feed.ID,

@@ -7,8 +7,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/LamontBanks/blog-aggregator/internal/config"
-	"github.com/LamontBanks/blog-aggregator/internal/database"
+	"github.com/LamontBanks/gator/internal/config"
+	"github.com/LamontBanks/gator/internal/database"
 
 	// Leading underscore means the package will be used, but not directly
 	_ "github.com/lib/pq"

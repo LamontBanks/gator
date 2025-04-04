@@ -7,8 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/LamontBanks/blog-aggregator/internal/database"
-	"github.com/google/uuid"
+	"github.com/LamontBanks/gator/internal/database"
 )
 
 func browseCommandInfo() commandInfo {
@@ -89,7 +88,7 @@ func handlerBrowseFeed(s *state, cmd command, user database.User) error {
 		return err
 	}
 
-	// Copy feedNames, feedUrl into a label-value 2D slive, pass to menu generator
+	// Copy feedNames, feedUrl into a label-value 2D slive, pass to the option picker, select the feed
 	feedOptions := make([][]string, len(userFeeds))
 	for i := range userFeeds {
 		feedOptions[i] = make([]string, 2)
@@ -97,30 +96,22 @@ func handlerBrowseFeed(s *state, cmd command, user database.User) error {
 		feedOptions[i][1] = userFeeds[i].FeedUrl
 	}
 
-	feedName, feedUrl, err := listOptionsReadChoice(feedOptions, "Choose a feed:")
+	choice, err := listOptionsReadChoice(feedOptions, "Choose a feed:")
 	if err != nil {
 		return err
 	}
-	fmt.Println(feedName)
+	fmt.Println(userFeeds[choice].FeedName)
 
-	// Get the chosen feed and posts
-	feed, err := s.db.GetFeedByUrl(context.Background(), feedUrl)
-	if err == sql.ErrNoRows {
-		return fmt.Errorf("failed to browseFeed %v - not yet added", feedUrl)
-	}
-	if err != nil {
-		return err
-	}
-
+	// Get posts for the selected feed
 	posts, err := s.db.GetRecentPostsFromFeed(context.Background(), database.GetRecentPostsFromFeedParams{
-		FeedID: feed.ID,
+		FeedID: userFeeds[choice].FeedID,
 		Limit:  int32(maxNumPosts),
 	})
 	if err != nil {
 		return err
 	}
 
-	// Copy postTitle, postId into a label-value 2D slice, pass to menu generator
+	// Copy postTitle, postId into a label-value 2D slice, pass to the option picker, select the post
 	postOptions := make([][]string, len(posts))
 	for i := range posts {
 		postOptions[i] = make([]string, 2)
@@ -128,23 +119,12 @@ func handlerBrowseFeed(s *state, cmd command, user database.User) error {
 		postOptions[i][1] = posts[i].ID.String()
 	}
 
-	_, postIdString, err := listOptionsReadChoice(postOptions, "Choose a post:")
+	choice, err = listOptionsReadChoice(postOptions, "Choose a post:")
 	if err != nil {
 		return err
 	}
 
-	// Get chosen post from postId, print it
-	postUUID, err := uuid.Parse(postIdString)
-	if err != nil {
-		return err
-	}
-
-	post, err := s.db.GetPostById(context.Background(), postUUID)
-	if err != nil {
-		return nil
-	}
-
-	printPost(post.Title, post.Description, post.Url, post.PublishedAt)
+	printPost(posts[choice].Title, posts[choice].Description, posts[choice].Url, posts[choice].PublishedAt)
 
 	return nil
 }

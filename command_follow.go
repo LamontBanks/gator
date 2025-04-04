@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/LamontBanks/blog-aggregator/internal/database"
+	"github.com/LamontBanks/gator/internal/database"
 	"github.com/google/uuid"
 )
 
 func followCommandInfo() commandInfo {
 	return commandInfo{
 		description: "Follow a registered feed",
-		usage:       "follow <RSS feed URL, optional>",
+		usage:       "follow <feed URL, optional>",
 		examples: []string{
 			"follow\n<choose from list of feeds>",
 			"follow http://example.com/rss/feed",
@@ -27,10 +27,14 @@ func handlerFollow(s *state, cmd command, user database.User) error {
 	if len(cmd.args) > 0 {
 		feedUrl = cmd.args[0]
 	} else {
-		// If no URL is provided, make user choose from feed they're not following
+		// If no URL is provided, choose from list of available feeds
 		feedsNotFollowed, err := s.db.GetFeedsNotFollowedByUser(context.Background(), user.ID)
 		if err != nil {
 			return err
+		}
+		if len(feedsNotFollowed) == 0 {
+			fmt.Println("no feeds to follow")
+			return nil
 		}
 
 		// Show followed feeds to remind the user of what they already have
@@ -38,10 +42,10 @@ func handlerFollow(s *state, cmd command, user database.User) error {
 		if err != nil {
 			return err
 		}
-
 		fmt.Println("\nAlready following:")
+
 		if len(feedsAlreadyFollowed) == 0 {
-			fmt.Println("no feeds")
+			fmt.Println("not following any feeds")
 		}
 
 		for _, feed := range feedsAlreadyFollowed {
@@ -49,7 +53,7 @@ func handlerFollow(s *state, cmd command, user database.User) error {
 		}
 		fmt.Println()
 
-		// Create label-value 2D array for the menu generator
+		// Create label-value 2D array for the option picker, choose feed to follow
 		feedOptions := make([][]string, len(feedsNotFollowed))
 		for i := range feedsNotFollowed {
 			feedOptions[i] = make([]string, 2)
@@ -57,14 +61,15 @@ func handlerFollow(s *state, cmd command, user database.User) error {
 			feedOptions[i][1] = feedsNotFollowed[i].Url
 		}
 
-		// Choose feed
-		_, feedUrl, err = listOptionsReadChoice(feedOptions, "- Choose a new RSS feed to follow:")
+		choice, err := listOptionsReadChoice(feedOptions, "- Choose a new RSS feed to follow:")
 		if err != nil {
 			return err
 		}
+
+		feedUrl = feedsNotFollowed[choice].Url
 	}
 
-	// Get feed, make user follow
+	// Get feed by url, follow it
 	feed, err := s.db.GetFeedByUrl(context.Background(), feedUrl)
 	if err != nil {
 		return err

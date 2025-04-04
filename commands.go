@@ -60,7 +60,11 @@ func (c *commands) run(s *state, cmd command) error {
 //		{"Label 2", {"Value 2"},
 //		...
 //	}
-func listOptionsReadChoice(labelsValues [][]string, message string) (string, string, error) {
+//
+// Returns:
+//
+//	int - the index of the choice
+func listOptionsReadChoice(labelsValues [][]string, message string) (int, error) {
 	fmt.Println(message)
 
 	// List options, start index with "1"; easier to select than "0" for choosing the first option (the most common case)
@@ -72,15 +76,15 @@ func listOptionsReadChoice(labelsValues [][]string, message string) (string, str
 	var choice int
 	_, err := fmt.Scan(&choice)
 	if err != nil {
-		return "", "", err
+		return 0, err
 	}
 
 	// Normalize to 0-based indexing
 	choice -= 1
 	if choice < 0 || choice >= len(labelsValues) {
-		return "", "", errors.New("invalid choice")
+		return 0, errors.New("invalid choice")
 	}
 
 	// Return
-	return labelsValues[choice][0], labelsValues[choice][1], nil
+	return choice, nil
 }

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/LamontBanks/blog-aggregator/internal/database"
+	"github.com/LamontBanks/gator/internal/database"
 )
 
 func followingCommandInfo() commandInfo {

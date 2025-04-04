@@ -1,4 +1,4 @@
-module github.com/LamontBanks/blog-aggregator
+module github.com/LamontBanks/gator
 
 go 1.23.1
 
