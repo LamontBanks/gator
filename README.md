@@ -5,12 +5,25 @@ A CLI tool to:
 - Support multple users, each having saved, custom RSS feed
 - Follow and unfollow RSS feeds that other users have added
 
+## Tools required
+- PostgresQL - Data storage
+
+        $ brew install postgresql@15
+
+- Goose: Database migrations
+
+        $ go install github.com/pressly/goose/v3/cmd/goose@latest
+
+- SQLC - Generate Go code from SQL queries
+    
+        $ go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+
 ## Usage
 ### Start gator
 
-Start `gator` as a background process, provide an update frequency `(30s, 1m, 5, 1h, 24h, etc.)`:
+Start `gator` as a background process, providing an update frequency, `(30s, 1m, 5, 1h, 24h, etc.)`:
         
-        $ gator agg 15m &
+        $ gator agg 15m &       # Update RSS feeds every 15 minutes
         Updating RSS feeds...
 
 ### Register/login a user
@@ -26,6 +39,14 @@ Or, login an existing user:
         $ gator login Alice
         Logged in as Alice
 
+### List users
+
+`$ gator users`
+
+        * Alice (current)
+        * Bob
+
+
 ### Add RSS feeds
  `$ gator addFeed <url>`
  
@@ -38,11 +59,8 @@ Or, login an existing user:
         Saved "Dwarf Fortress" (https://store.steampowered.com/feeds/news/app/975370) for Alice
         Alice followed Dwarf Fortress
 
-
 ### See RSS Feeds overview
-`$ gator browse`
-
-        $ gator browse
+`$ gator browse`:
 
         Dwarf Fortress | https://store.steampowered.com/feeds/news/app/975370
                 - Hotfix: Patch 51.10
@@ -83,8 +101,6 @@ Provide a number to change the number of posts per feed:
 ### Read posts
 1. `$ gator browseFeed` to navigate into your feeds:
 
-        $ gator browseFeed
-
         Choose a feed:
         1: Dwarf Fortress
         2: Nasa Image of the Day
@@ -116,10 +132,8 @@ Provide a number to change the number of posts per feed:
 
         https://www.nasa.gov/image-detail/grc-2024-c-12100-2/
 
-### List feeds you follow
+### List feeds being followed
 `$ gator following`
-
-        $ gator following
 
         Dwarf Fortress
                 Events and Announcements for 975370
@@ -132,8 +146,6 @@ Provide a number to change the number of posts per feed:
 ### List all available feeds
 `$ gator feeds`
 
-        # gator feeds
-
         All RSS Feeds
         Dwarf Fortress
                 Events and Announcements for 975370
@@ -143,7 +155,9 @@ Provide a number to change the number of posts per feed:
                 https://www.nasa.gov/feeds/iotd-feed/
 
 ### Follow additional feeds
-Users can follow RSS feeds that others have added. For example, Bob is currenetly not following any feeds:
+Users can follow RSS feeds that others have added. 
+
+For example, Bob is currently not following any feeds:
 
         $ gator login Bob
         Logged in as Bob
@@ -165,33 +179,57 @@ Users can follow RSS feeds that others have added. For example, Bob is currenetl
                 The latest NASA "Image of the Day" image.
                 https://www.nasa.gov/feeds/iotd-feed/
 
-Enter the number of the desired option:
+Enter the number of the desired feed:
 
         1 (user input)
 
         Bob followed Dwarf Fortress (https://store.steampowered.com/feeds/news/app/975370)
 
-View updates:
+View updates for Bob:
 
         $ gator browse
 
         Dwarf Fortress | https://store.steampowered.com/feeds/news/app/975370
-	- Hotfix: Patch 51.10
-	- Update 51.09: Forbidden Coffins now unusable
-	- Hotfix: Patch 51.08
+                - Hotfix: Patch 51.10
+                - Update 51.09: Forbidden Coffins now unusable
+                - Hotfix: Patch 51.08
 
-## Tools required
-- PostgresQL - Data storage
+### Unfollow feeds
 
-        $ brew install postgresql@15
+TODO
 
-- Goose: Database migrations
+### Help
 
-        $ go install github.com/pressly/goose/v3/cmd/goose@latest
+Show all commands:
 
-- SQLC - Generate Go code from SQL queries
-    
-        $ go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+        $ gator help
+
+        gator is a tool for viewing RSS feeds in the console.
+
+        Usage:
+
+                gator <command> [arguments]
+
+                addFeed		Add a new feed for all users to follow
+                agg		Aggregate all feeds, poll for updates, useful when run in the background with '*'
+                browse		Show latest posts for current user's feeds
+                browseFeed		Read posts from a followed feed
+                feeds		List all feeds
+                ...
+
+
+Show help for specific command:
+
+        $ gator help browse
+
+        usage: gator browse <max number of posts per feed>
+
+        Show latest posts for current user's feeds
+
+        Examples:
+                gator browse
+                gator browse 5
+
 
 
 
