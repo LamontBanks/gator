@@ -33,7 +33,7 @@ func handlerUnfollow(s *state, cmd command, user database.User) error {
 		}
 
 		if len(followedFeeds) == 0 {
-			fmt.Println("not following any feeds")
+			fmt.Println("Not following any feeds")
 			return nil
 		}
 

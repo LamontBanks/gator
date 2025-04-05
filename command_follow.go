@@ -33,7 +33,7 @@ func handlerFollow(s *state, cmd command, user database.User) error {
 			return err
 		}
 		if len(feedsNotFollowed) == 0 {
-			fmt.Println("no feeds to follow")
+			fmt.Println("No feeds to follow")
 			return nil
 		}
 
@@ -42,10 +42,10 @@ func handlerFollow(s *state, cmd command, user database.User) error {
 		if err != nil {
 			return err
 		}
-		fmt.Println("\nAlready following:")
+		fmt.Println("Already following:")
 
 		if len(feedsAlreadyFollowed) == 0 {
-			fmt.Println("not following any feeds")
+			fmt.Println("Not following any feeds")
 		}
 
 		for _, feed := range feedsAlreadyFollowed {

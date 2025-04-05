@@ -40,7 +40,7 @@ func handlerAggregator(s *state, cmd command) error {
 	// Periodic updates
 	ticker := time.NewTicker(freq)
 	for ; ; <-ticker.C {
-		fmt.Println("Updating RSS feeds...")
+		// fmt.Println("Updating RSS feeds...")
 		getAllFeedUpdates(s)
 	}
 }
@@ -106,7 +106,6 @@ func saveFeedPosts(s *state, rssFeed *RSSFeed, feedId uuid.UUID) error {
 		// Convert published data string to time.Time
 		pubDate, err := ParseRSSPubDate(rssFeed.Channel.Item[i].PubDate)
 		if err != nil {
-			fmt.Printf("error updating %v: %v", rssFeed.Channel.Title, err)
 			return err
 		}
 

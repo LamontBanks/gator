@@ -22,7 +22,7 @@ func handlerFollowing(s *state, cmd command, user database.User) error {
 		return err
 	}
 	if len(feedDetails) == 0 {
-		fmt.Println("you are not following any feeds")
+		fmt.Println("You are not following any feeds")
 		return nil
 	}
 

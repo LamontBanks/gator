@@ -60,7 +60,7 @@ func handlerGetUsers(s *state, cmd command) error {
 	}
 
 	if len(users) == 0 {
-		fmt.Println("no users registered")
+		fmt.Println("No users registered")
 		return nil
 	}
 

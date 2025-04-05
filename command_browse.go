@@ -93,7 +93,6 @@ func handlerBrowseFeed(s *state, cmd command, user database.User) error {
 		return fmt.Errorf("you're not following any feeds")
 	}
 	if err != nil {
-		fmt.Println("error retrieving your followed feeds")
 		return err
 	}
 

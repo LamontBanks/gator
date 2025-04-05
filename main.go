@@ -98,7 +98,7 @@ func middlewareLoggedIn(handler func(s *state, cmd command, user database.User) 
 
 		user, err := s.db.GetUser(context.Background(), username)
 		if err != nil {
-			return fmt.Errorf("%v not registered", username)
+			return fmt.Errorf("user z%v not registered", username)
 		}
 
 		// pass user into the handler function
