@@ -36,7 +36,7 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 		return fmt.Errorf("failed to add feed: %v", err)
 	}
 
-	// If feed is missing any required elements, also don't save it
+	// If feed is missing a title, don't save it (avoid saving regular URLs?)
 	// https://www.rssboard.org/rss-specification#requiredChannelElements
 	if feed.Channel.Title == "" {
 		return fmt.Errorf("did not save feed %v, missing required RSS fields:\nTitle: %v\nSee https://www.rssboard.org/rss-specification#requiredChannelElements", feedUrl, feed.Channel.Title)

@@ -67,7 +67,7 @@ func handlerBrowse(s *state, cmd command, user database.User) error {
 func browseFeedCommandInfo() commandInfo {
 	return commandInfo{
 		description: "Read posts from a followed feed",
-		usage:       "browseFeed <max number of posts>",
+		usage:       "browseFeed <max number of posts, optional, default 3>",
 		examples: []string{
 			"browseFeed",
 			"browseFeed 10",
@@ -77,8 +77,17 @@ func browseFeedCommandInfo() commandInfo {
 
 // Display menus to view specific posts in specific feeds
 func handlerBrowseFeed(s *state, cmd command, user database.User) error {
-	// Get feeds user is following
-	maxNumPosts := 10
+	maxNumPosts := 3
+
+	// Args: Max number of post, optional
+	if len(cmd.args) > 0 {
+		i, err := strconv.Atoi(cmd.args[0])
+		if err != nil {
+			return fmt.Errorf(browseFeedCommandInfo().usage)
+		}
+		maxNumPosts = i
+	}
+
 	userFeeds, err := s.db.GetFeedFollowsForUser(context.Background(), user.ID)
 	if err == sql.ErrNoRows {
 		return fmt.Errorf("you're not following any feeds")
