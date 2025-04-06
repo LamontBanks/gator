@@ -52,7 +52,7 @@ func getAllFeedUpdates(s *state) error {
 		return err
 	}
 
-	// Goroutine to update all feeds at once
+	// Update all feeds at once
 	feedUpdatedCh := make(chan struct{})
 
 	for _, feed := range allFeeds {

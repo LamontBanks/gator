@@ -32,8 +32,9 @@ func handlerFollow(s *state, cmd command, user database.User) error {
 		if err != nil {
 			return err
 		}
+
 		if len(feedsNotFollowed) == 0 {
-			fmt.Println("No feeds to follow")
+			fmt.Println("No feeds to follow available to follow")
 			return nil
 		}
 
