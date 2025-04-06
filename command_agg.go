@@ -52,31 +52,26 @@ func getAllFeedUpdates(s *state) error {
 		return err
 	}
 
-	for range len(allFeeds) {
-		// Start with the most out-of-date feed
-		oldestFeed, err := s.db.GetNextFeedToFetch(context.Background())
-		if err != nil {
-			return err
-		}
+	// Goroutine to update all feeds at once
+	feedUpdatedCh := make(chan struct{})
 
-		rssFeed, err := fetchFeed(context.Background(), oldestFeed.Url)
-		if err != nil {
-			return err
-		}
-
-		err = s.db.MarkFeedAsFetched(context.Background(), oldestFeed.ID)
-		if err != nil {
-			return fmt.Errorf("failed marking %v as updated", oldestFeed.Name)
-		}
-
-		saveFeedPosts(s, rssFeed, oldestFeed.ID)
+	for _, feed := range allFeeds {
+		go func() {
+			getFeedUpdates(s, feed.Url)
+			feedUpdatedCh <- struct{}{}
+		}()
 	}
 
+	// Wait for all feeds to update
+	for range allFeeds {
+		<-feedUpdatedCh
+	}
+
+	fmt.Printf("Feeds updated at %v\n", time.Now().Format("3:04PM"))
 	return nil
 }
 
 // Update single feed
-// TODO: Use within getAllFeedUpdates
 func getFeedUpdates(s *state, feedUrl string) error {
 	// Get feed from DB
 	feed, err := s.db.GetFeedByUrl(context.Background(), feedUrl)
