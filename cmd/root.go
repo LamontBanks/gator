@@ -4,7 +4,9 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"context"
 	"database/sql"
+	"fmt"
 	"os"
 
 	"github.com/LamontBanks/gator/internal/config"
@@ -91,4 +93,19 @@ func initAppState() {
 
 func closeDB() {
 	db.Close()
+}
+
+func getCurrentUser(s *state) (database.User, error) {
+	username := s.config.CurrentUserName
+
+	if username == "" {
+		return database.User{}, fmt.Errorf("no user logged in")
+	}
+
+	user, err := s.db.GetUser(context.Background(), username)
+	if err != nil {
+		return database.User{}, fmt.Errorf("user %v not registered", username)
+	}
+
+	return user, nil
 }

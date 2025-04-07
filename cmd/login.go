@@ -25,7 +25,7 @@ to quickly create a Cobra application.`,
 		username := args[0]
 
 		// User must be registered to log in
-		if !userExists(appState, username) {
+		if !userRegistered(appState, username) {
 			return fmt.Errorf("%v not registered", username)
 		}
 

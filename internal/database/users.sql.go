@@ -73,19 +73,6 @@ func (q *Queries) GetUser(ctx context.Context, name string) (User, error) {
 	return i, err
 }
 
-const getUserCount = `-- name: GetUserCount :one
-SELECT COUNT(*)
-FROM users
-WHERE users.name = $1
-`
-
-func (q *Queries) GetUserCount(ctx context.Context, name string) (int64, error) {
-	row := q.db.QueryRowContext(ctx, getUserCount, name)
-	var count int64
-	err := row.Scan(&count)
-	return count, err
-}
-
 const getUsers = `-- name: GetUsers :many
 SELECT name FROM users
 ORDER BY name ASC

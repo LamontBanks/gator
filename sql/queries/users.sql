@@ -24,11 +24,6 @@ WHERE name = $1;
 SELECT name FROM users
 ORDER BY name ASC;
 
--- name: GetUserCount :one
-SELECT COUNT(*)
-FROM users
-WHERE users.name = $1;
-
 -- DEV/TESTING ONLY
 -- name: Reset :exec
 DELETE FROM USERS *;

@@ -64,11 +64,8 @@ func init() {
 	// usersCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-func userExists(s *state, username string) bool {
-	userCount, err := s.db.GetUserCount(context.Background(), username)
-	if err != nil {
-		return false
-	}
+func userRegistered(s *state, username string) bool {
+	_, err := s.db.GetUser(context.Background(), username)
 
-	return userCount == 1
+	return err != nil
 }
