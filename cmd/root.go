@@ -24,8 +24,9 @@ type state struct {
 
 var (
 	// Used by gator
-	appState *state
-	db       *sql.DB
+	appState  *state
+	db        *sql.DB
+	resetFlag bool // TODO: DEV ONLY
 
 	// rootCmd represents the base command when called without any subcommands
 	rootCmd = &cobra.Command{
@@ -39,7 +40,12 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 		// Uncomment the following line if your bare application
 		// has an action associated with it:
-		// Run: func(cmd *cobra.Command, args []string) { },
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if resetFlag {
+				return reset()
+			}
+			return nil
+		},
 	}
 )
 
@@ -63,7 +69,7 @@ func init() {
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.Flags().BoolVar(&resetFlag, "reset", false, "Deletes all users, effectively clearing the database (DEV ONLY)")
 }
 
 func initAppState() {
@@ -112,4 +118,9 @@ func getCurrentUser(s *state) (database.User, error) {
 	}
 
 	return user, nil
+}
+
+// DEV ONLY - Delet all users
+func reset() error {
+	return appState.db.Reset(context.Background())
 }
