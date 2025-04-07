@@ -90,13 +90,14 @@ func (q *Queries) GetFeedByUrl(ctx context.Context, url string) (Feed, error) {
 }
 
 const getFeeds = `-- name: GetFeeds :many
-SELECT feeds.name AS feed_name, feeds.url, feeds.description, users.name AS user_name
+SELECT feeds.id, feeds.name AS feed_name, feeds.url, feeds.description, users.name AS user_name
 FROM feeds
 LEFT JOIN users ON feeds.user_id = users.id
 ORDER BY feeds.name ASC
 `
 
 type GetFeedsRow struct {
+	ID          uuid.UUID
 	FeedName    string
 	Url         string
 	Description string
@@ -113,6 +114,7 @@ func (q *Queries) GetFeeds(ctx context.Context) ([]GetFeedsRow, error) {
 	for rows.Next() {
 		var i GetFeedsRow
 		if err := rows.Scan(
+			&i.ID,
 			&i.FeedName,
 			&i.Url,
 			&i.Description,

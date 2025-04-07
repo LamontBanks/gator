@@ -67,5 +67,5 @@ func init() {
 func userRegistered(s *state, username string) bool {
 	_, err := s.db.GetUser(context.Background(), username)
 
-	return err != nil
+	return err == nil
 }
