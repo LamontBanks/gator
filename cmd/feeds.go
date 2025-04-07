@@ -1,6 +1,3 @@
-/*
-Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -14,7 +11,8 @@ import (
 // feedsCmd represents the feeds command
 var (
 	// Feed flags
-	showAllFeeds bool
+	showAllFeeds    bool
+	numPostsPerFeed int
 
 	feedsCmd = &cobra.Command{
 		Use:   "feeds",
@@ -23,10 +21,7 @@ var (
 	and usage of using your command. For example:
 	
 	feeds			Show recent posts from all feeds you're following
-	
-	Cobra is a CLI library for Go that empowers applications.
-	This application is a tool to generate the needed files
-	to quickly create a Cobra application.`,
+	`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if showAllFeeds {
 				return printAllFeeds()
@@ -40,18 +35,15 @@ var (
 func init() {
 	rootCmd.AddCommand(feedsCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// feedsCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
 	feedsCmd.Flags().BoolVarP(&showAllFeeds, "all", "a", false, "Show all feeds added to gator")
+	feedsCmd.Flags().IntVarP(&numPostsPerFeed, "numPosts", "n", 2, "maximum number of posts per feed")
 }
 
 func printFollowedFeeds() error {
+	if numPostsPerFeed < 0 {
+		return fmt.Errorf("number of posts must be >= 0")
+	}
+
 	user, err := getCurrentUser(appState)
 	if err != nil {
 		return err
@@ -74,7 +66,7 @@ func printFollowedFeeds() error {
 	for _, feed := range feeds {
 		posts, err := appState.db.GetPostsFromFeed(context.Background(), database.GetPostsFromFeedParams{
 			FeedID: feed.FeedID,
-			Limit:  3,
+			Limit:  int32(numPostsPerFeed),
 		})
 		if err != nil {
 			return err
@@ -95,6 +87,10 @@ func printFollowedFeeds() error {
 }
 
 func printAllFeeds() error {
+	if numPostsPerFeed < 0 {
+		return fmt.Errorf("number of posts must be >= 0")
+	}
+
 	feeds, err := appState.db.GetFeeds(context.Background())
 	if err != nil {
 		return err
@@ -106,7 +102,7 @@ func printAllFeeds() error {
 	for _, feed := range feeds {
 		posts, err := appState.db.GetPostsFromFeed(context.Background(), database.GetPostsFromFeedParams{
 			FeedID: feed.ID,
-			Limit:  3,
+			Limit:  int32(numPostsPerFeed),
 		})
 		if err != nil {
 			return err
