@@ -69,6 +69,7 @@ func printFollowedFeeds() error {
 	}
 
 	// Pull posts for each feed
+	// TODO: Print function for feeds, posts
 	fmt.Println("Your RSS Feeds:")
 	for _, feed := range feeds {
 		posts, err := appState.db.GetPostsFromFeed(context.Background(), database.GetPostsFromFeedParams{
@@ -83,7 +84,7 @@ func printFollowedFeeds() error {
 		fmt.Printf("%v | %v\n", feed.FeedName, feed.FeedUrl)
 		if len(posts) > 0 {
 			for _, post := range posts {
-				printPostTitle(post.Title)
+				fmt.Printf("\t- %v\n", post.Title)
 			}
 		} else {
 			fmt.Println("No posts")
@@ -99,8 +100,8 @@ func printAllFeeds() error {
 		return err
 	}
 
-	// TODO: Print function for feeds, posts
 	// Print posts for each feed
+	// TODO: Print function for feeds, posts
 	fmt.Println("All RSS Feeds:")
 	for _, feed := range feeds {
 		posts, err := appState.db.GetPostsFromFeed(context.Background(), database.GetPostsFromFeedParams{
@@ -115,7 +116,7 @@ func printAllFeeds() error {
 		fmt.Printf("%v | %v\n", feed.FeedName, feed.Url)
 		if len(posts) > 0 {
 			for _, post := range posts {
-				printPostTitle(post.Title)
+				fmt.Printf("\t- %v\n", post.Title)
 			}
 		} else {
 			fmt.Println("No posts")
@@ -123,8 +124,4 @@ func printAllFeeds() error {
 	}
 
 	return nil
-}
-
-func printPostTitle(title string) {
-	fmt.Printf("\t- %v\n", title)
 }
