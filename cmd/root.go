@@ -103,8 +103,12 @@ func getCurrentUser(s *state) (database.User, error) {
 	}
 
 	user, err := s.db.GetUser(context.Background(), username)
-	if err != nil {
+
+	if err == sql.ErrNoRows {
 		return database.User{}, fmt.Errorf("user %v not registered", username)
+	}
+	if err != nil {
+		return database.User{}, err
 	}
 
 	return user, nil
