@@ -28,16 +28,11 @@ to quickly create a Cobra application.`,
 		username := args[0]
 
 		// Check if user is already registered
-		userCount, err := appState.db.GetUserCount(context.Background(), username)
-		if err != nil {
-			return err
-		}
-
-		if userCount > 0 {
+		if userExists(appState, username) {
 			return fmt.Errorf("%v is already registered", username)
 		}
 
-		// If not registered, add the them
+		// If not registered, add them
 		user, err := appState.db.CreateUser(context.Background(), database.CreateUserParams{
 			ID:        uuid.New(),
 			CreatedAt: time.Now(),

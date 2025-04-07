@@ -63,3 +63,12 @@ func init() {
 	// is called directly, e.g.:
 	// usersCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
+
+func userExists(s *state, username string) bool {
+	userCount, err := s.db.GetUserCount(context.Background(), username)
+	if err != nil {
+		return false
+	}
+
+	return userCount == 1
+}

@@ -1,6 +1,5 @@
 /*
 Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
@@ -13,15 +12,32 @@ import (
 // loginCmd represents the login command
 var loginCmd = &cobra.Command{
 	Use:   "login",
-	Short: "A brief description of your command",
+	Short: "Logs in the user",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("login called")
+	Args: cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		// Args: username
+		username := args[0]
+
+		// User must be registered to log in
+		if !userExists(appState, username) {
+			return fmt.Errorf("%v not registered", username)
+		}
+
+		// "Log in" the user by writing their name to the config file
+		appState.config.CurrentUserName = username
+		if err := appState.config.SetConfig(); err != nil {
+			return err
+		}
+
+		fmt.Printf("Logged in as %v\n", username)
+
+		return nil
 	},
 }
 
