@@ -6,6 +6,7 @@ package cmd
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"os"
 
@@ -59,16 +60,9 @@ func Execute() {
 }
 
 func init() {
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
 	cobra.OnInitialize(initAppState)
 	cobra.OnFinalize(closeDB)
 
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.gator.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
 	rootCmd.Flags().BoolVar(&resetFlag, "reset", false, "Deletes all users, effectively clearing the database (DEV ONLY)")
 }
 
@@ -120,7 +114,45 @@ func getCurrentUser(s *state) (database.User, error) {
 	return user, nil
 }
 
-// DEV ONLY - Delet all users
+// Return the user's choice from a 2D slice of labels-values
+// Ex:
+//
+//	labelsValues := [][]string{
+//		{"Label 1", {"Value 1"},
+//		{"Label 2", {"Value 2"},
+//		...
+//	}
+//
+// Returns:
+//
+//	int - the index of the choice
+//	error - if choice out of range
+func listOptionsReadChoice(labelsValues [][]string, message string) (int, error) {
+	fmt.Println(message)
+
+	// List options, start index with "1"; easier to select than "0" for choosing the first option (the most common case)
+	for i, lblVal := range labelsValues {
+		fmt.Printf("%v: %v\n", i+1, lblVal[0])
+	}
+
+	// Get user's choice
+	var choice int
+	_, err := fmt.Scan(&choice)
+	if err != nil {
+		return 0, err
+	}
+
+	// Normalize to 0-based indexing
+	choice -= 1
+	if choice < 0 || choice >= len(labelsValues) {
+		return 0, errors.New("invalid choice")
+	}
+
+	// Return
+	return choice, nil
+}
+
+// DEV ONLY - Delete all users
 func reset() error {
 	return appState.db.Reset(context.Background())
 }

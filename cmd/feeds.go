@@ -16,7 +16,7 @@ var (
 
 	feedsCmd = &cobra.Command{
 		Use:   "feeds",
-		Short: "View and managed your feeds",
+		Short: "View and manage your feeds",
 		Long: `A longer description that spans multiple lines and likely contains examples
 	and usage of using your command. For example:
 	
@@ -56,7 +56,7 @@ func printFollowedFeeds() error {
 	}
 
 	if len(feeds) == 0 {
-		fmt.Println("Not following any feeds")
+		fmt.Println("- Not following any feeds")
 		return nil
 	}
 

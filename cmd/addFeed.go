@@ -32,11 +32,9 @@ var addFeedCmd = &cobra.Command{
 			return err
 		}
 		if err != sql.ErrNoRows {
-			fmt.Printf("Feed already added to gator:\n%v (%v)\n", existingFeed.Name, existingFeed.Url)
+			fmt.Printf("Feed already exists:\n%v (%v)\n", existingFeed.Name, existingFeed.Url)
 			return nil
 		}
-
-		fmt.Println(existingFeed)
 
 		// Add the feed
 		newFeed, err := appState.db.CreateFeed(context.Background(), database.CreateFeedParams{
@@ -48,9 +46,9 @@ var addFeedCmd = &cobra.Command{
 			UserID:    user.ID,
 		})
 		if err != nil {
-			return fmt.Errorf("could not add RSS feed %v (%v): %v", feedNameArg, feedUrlArg, err)
+			return fmt.Errorf("could not add RSS feed %v (%v)", feedNameArg, feedUrlArg)
 		}
-		fmt.Printf("Added RSS feed \"%v\" (%v) to gator\n", newFeed.Name, newFeed.Url)
+		fmt.Printf("Added RSS feed \"%v\" (%v)\n", newFeed.Name, newFeed.Url)
 
 		return nil
 	},
