@@ -24,9 +24,9 @@ var (
 	`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if showAllFeeds {
-				return printAllFeeds()
+				return printAllFeeds(appState)
 			} else {
-				return printFollowedFeeds()
+				return userAuthCall(printFollowedFeeds)(appState)
 			}
 		},
 	}
@@ -39,18 +39,13 @@ func init() {
 	feedsCmd.Flags().IntVarP(&numPostsPerFeed, "numPosts", "n", 2, "maximum number of posts per feed")
 }
 
-func printFollowedFeeds() error {
+func printFollowedFeeds(s *state, user database.User) error {
 	if numPostsPerFeed < 0 {
 		return fmt.Errorf("number of posts must be >= 0")
 	}
 
-	user, err := getCurrentUser(appState)
-	if err != nil {
-		return err
-	}
-
 	// Get feeds followed by user
-	feeds, err := appState.db.GetFeedsForUser(context.Background(), user.ID)
+	feeds, err := s.db.GetFeedsForUser(context.Background(), user.ID)
 	if err != nil {
 		return err
 	}
@@ -61,10 +56,10 @@ func printFollowedFeeds() error {
 	}
 
 	// Pull posts for each feed
-	// TODO: Print function for feeds, posts
+
 	fmt.Println("Your RSS Feeds:")
 	for _, feed := range feeds {
-		posts, err := appState.db.GetPostsFromFeed(context.Background(), database.GetPostsFromFeedParams{
+		posts, err := s.db.GetPostsFromFeed(context.Background(), database.GetPostsFromFeedParams{
 			FeedID: feed.FeedID,
 			Limit:  int32(numPostsPerFeed),
 		})
@@ -72,26 +67,27 @@ func printFollowedFeeds() error {
 			return err
 		}
 
+		// TODO: Print function for feeds, posts
 		// Print feeds, posts
-		fmt.Printf("%v | %v\n", feed.FeedName, feed.FeedUrl)
+		fmt.Printf("%v | %v\n", feed.FeedName, feed.Description)
 		if len(posts) > 0 {
 			for _, post := range posts {
 				fmt.Printf("\t- %v\n", post.Title)
 			}
 		} else {
-			fmt.Println("No posts")
+			fmt.Println("- No posts")
 		}
 	}
 
 	return nil
 }
 
-func printAllFeeds() error {
+func printAllFeeds(s *state) error {
 	if numPostsPerFeed < 0 {
 		return fmt.Errorf("number of posts must be >= 0")
 	}
 
-	feeds, err := appState.db.GetFeeds(context.Background())
+	feeds, err := s.db.GetFeeds(context.Background())
 	if err != nil {
 		return err
 	}
@@ -100,7 +96,7 @@ func printAllFeeds() error {
 	// TODO: Print function for feeds, posts
 	fmt.Println("All RSS Feeds:")
 	for _, feed := range feeds {
-		posts, err := appState.db.GetPostsFromFeed(context.Background(), database.GetPostsFromFeedParams{
+		posts, err := s.db.GetPostsFromFeed(context.Background(), database.GetPostsFromFeedParams{
 			FeedID: feed.ID,
 			Limit:  int32(numPostsPerFeed),
 		})
@@ -109,13 +105,13 @@ func printAllFeeds() error {
 		}
 
 		// Print feeds, posts
-		fmt.Printf("%v | %v\n", feed.FeedName, feed.Url)
+		fmt.Printf("%v | %v\n", feed.FeedName, feed.Description)
 		if len(posts) > 0 {
 			for _, post := range posts {
 				fmt.Printf("\t- %v\n", post.Title)
 			}
 		} else {
-			fmt.Println("No posts")
+			fmt.Println("- No posts")
 		}
 	}
 

@@ -25,42 +25,34 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		username := args[0]
-
-		// Check if user is already registered
-		if userRegistered(appState, username) {
-			return fmt.Errorf("%v is already registered", username)
-		}
-
-		// If not registered, add them
-		user, err := appState.db.CreateUser(context.Background(), database.CreateUserParams{
-			ID:        uuid.New(),
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-			Name:      username,
-		})
-		if err != nil {
-			return fmt.Errorf("error saving the user %v: %v", username, err)
-		}
-
-		fmt.Printf("Registered %v\n", user.Name)
-
-		// TODO: Log the user in
-
-		return nil
+		return register(appState, args[0])
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(registerCmd)
+}
 
-	// Here you will define your flags and configuration settings.
+func register(s *state, username string) error {
+	// Check if user is already registered
+	if userRegistered(s, username) {
+		return fmt.Errorf("%v is already registered", username)
+	}
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// registerCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// If not registered, add them
+	user, err := s.db.CreateUser(context.Background(), database.CreateUserParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		Name:      username,
+	})
+	if err != nil {
+		return fmt.Errorf("error saving the user %v: %v", username, err)
+	}
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// registerCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	fmt.Printf("Registered %v\n", user.Name)
+
+	// TODO: Log the user in
+
+	return nil
 }

@@ -95,25 +95,6 @@ func closeDB() {
 	db.Close()
 }
 
-func getCurrentUser(s *state) (database.User, error) {
-	username := s.config.CurrentUserName
-
-	if username == "" {
-		return database.User{}, fmt.Errorf("no user logged in")
-	}
-
-	user, err := s.db.GetUser(context.Background(), username)
-
-	if err == sql.ErrNoRows {
-		return database.User{}, fmt.Errorf("user %v not registered", username)
-	}
-	if err != nil {
-		return database.User{}, err
-	}
-
-	return user, nil
-}
-
 // Return the user's choice from a 2D slice of labels-values
 // Ex:
 //
@@ -150,6 +131,28 @@ func listOptionsReadChoice(labelsValues [][]string, message string) (int, error)
 
 	// Return
 	return choice, nil
+}
+
+// A closure wrapping a function requiring a user, gets the user, then returns the function
+func userAuthCall(f func(s *state, user database.User) error) func(*state) error {
+	return func(s *state) error {
+		username := s.config.CurrentUserName
+
+		if username == "" {
+			return fmt.Errorf("logged in user required for this command")
+		}
+
+		u, err := s.db.GetUser(context.Background(), username)
+		if err == sql.ErrNoRows {
+			return fmt.Errorf("user %v not registered", username)
+		}
+		if err != nil {
+			return err
+		}
+
+		return f(s, u)
+	}
+
 }
 
 // DEV ONLY - Delete all users

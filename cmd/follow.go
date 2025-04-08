@@ -24,7 +24,7 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return interactiveFollowFeed()
+		return userAuthCall(interactiveFollowFeed)(appState)
 	},
 }
 
@@ -42,14 +42,9 @@ func init() {
 	// followFeedCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-func interactiveFollowFeed() error {
-	user, err := getCurrentUser(appState)
-	if err != nil {
-		return err
-	}
-
+func interactiveFollowFeed(s *state, user database.User) error {
 	// Get feeds not followed...
-	feedsNotFollowed, err := appState.db.GetFeedsNotFollowedByUser(context.Background(), user.ID)
+	feedsNotFollowed, err := s.db.GetFeedsNotFollowedByUser(context.Background(), user.ID)
 	if err != nil {
 		return err
 	}
@@ -60,7 +55,7 @@ func interactiveFollowFeed() error {
 	}
 
 	// ...and followed feeds to show the user what they already have
-	feedsAlreadyFollowed, err := appState.db.GetFeedsForUser(context.Background(), user.ID)
+	feedsAlreadyFollowed, err := s.db.GetFeedsForUser(context.Background(), user.ID)
 	if err != nil {
 		return err
 	}
@@ -91,12 +86,12 @@ func interactiveFollowFeed() error {
 	feedUrl := feedsNotFollowed[choice].Url
 
 	// Get desired feed by url, follow it
-	feed, err := appState.db.GetFeedByUrl(context.Background(), feedUrl)
+	feed, err := s.db.GetFeedByUrl(context.Background(), feedUrl)
 	if err != nil {
 		return err
 	}
 
-	newFeedFollow, err := appState.db.CreateFeedFollow(context.Background(), database.CreateFeedFollowParams{
+	newFeedFollow, err := s.db.CreateFeedFollow(context.Background(), database.CreateFeedFollowParams{
 		ID:        uuid.New(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
