@@ -28,8 +28,8 @@ var addFeedCmd = &cobra.Command{
 func init() {
 	feedsCmd.AddCommand(addFeedCmd)
 
-	addFeedCmd.Flags().StringVarP(&feedNameArg, "name", "n", "", "Name of new feed (required)")
-	addFeedCmd.Flags().StringVarP(&feedUrlArg, "url", "u", "", "Url of new feed (required)")
+	addFeedCmd.Flags().StringVarP(&feedNameArg, "name", "n", "", "Name of the  RSS feed (required)")
+	addFeedCmd.Flags().StringVarP(&feedUrlArg, "url", "u", "", "Url to the RSS feed (required)")
 
 	addFeedCmd.MarkFlagRequired("name")
 	addFeedCmd.MarkFlagRequired("url")
@@ -62,5 +62,6 @@ func addFeed(s *state, user database.User) error {
 	}
 	fmt.Printf("Added RSS feed \"%v\" (%v)\n", newFeed.Name, newFeed.Url)
 
-	return nil
+	// User should follow feed they just added
+	return followFeedByUrl(s, user, newFeed.Url)
 }

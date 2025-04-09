@@ -1,6 +1,3 @@
-/*
-Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -13,6 +10,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Follow params
+var feedUrlParam string
+
 // followCmd represents the followFeed command
 var followCmd = &cobra.Command{
 	Use:   "follow",
@@ -24,7 +24,11 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return userAuthCall(interactiveFollowFeed)(appState)
+		if feedUrlParam != "" {
+			return userAuthCall(followFeedByUrlInternal)(appState)
+		} else {
+			return userAuthCall(interactiveFollowFeed)(appState)
+		}
 	},
 }
 
@@ -39,7 +43,7 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// followFeedCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	followCmd.Flags().StringVarP(&feedUrlParam, "url", "u", "", "RSS feed link added to fator")
 }
 
 func interactiveFollowFeed(s *state, user database.User) error {
@@ -50,7 +54,7 @@ func interactiveFollowFeed(s *state, user database.User) error {
 	}
 
 	if len(feedsNotFollowed) == 0 {
-		fmt.Println("No feeds to follow")
+		fmt.Println("- No feeds to follow")
 		return nil
 	}
 
@@ -66,7 +70,7 @@ func interactiveFollowFeed(s *state, user database.User) error {
 	}
 
 	for _, feed := range feedsAlreadyFollowed {
-		fmt.Printf("- %v", feed.FeedName)
+		fmt.Printf("* %v", feed.FeedName)
 	}
 	fmt.Println()
 
@@ -83,9 +87,19 @@ func interactiveFollowFeed(s *state, user database.User) error {
 		return err
 	}
 
-	feedUrl := feedsNotFollowed[choice].Url
+	return followFeedByUrl(s, user, feedsNotFollowed[choice].Url)
+}
 
-	// Get desired feed by url, follow it
+// Wrapper function to use the feed URL from the CLI flag
+// Only for use within this command
+// Done this way to make the actual function - followFeedByUrl - callable outside of this command
+// For ex: Add a feed, then auto follow it
+// TODO: Better function name, or better way to handle this
+func followFeedByUrlInternal(s *state, user database.User) error {
+	return followFeedByUrl(s, user, feedUrlParam)
+}
+
+func followFeedByUrl(s *state, user database.User, feedUrl string) error {
 	feed, err := s.db.GetFeedByUrl(context.Background(), feedUrl)
 	if err != nil {
 		return err
