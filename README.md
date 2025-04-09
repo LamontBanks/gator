@@ -354,7 +354,7 @@ Find SQLC's config file in the base project directory:
 
 ### Debugging
 
-Visual Studio Code debugger is useful - a plain/standard setup should be sufficient. Here is a sample `launch.json` config:
+Sample Go `launch.json` config for Visual Studio Code:
 
 ```json
 launch.json:
@@ -364,8 +364,8 @@ launch.json:
         "type": "go",
         "request": "launch",
         "mode": "auto",
-        "program": "/<path>/gator/.",
-        "args": "addFeed \"Nasa Image of the Day\" https://www.nasa.gov/feeds/iotd-feed/",
+        "program": "/<path>/gator/go run main.go",
+        "args": "add \"Nasa Image of the Day\" https://www.nasa.gov/feeds/iotd-feed/",
         "console": "integratedTerminal"
 }
 ```
