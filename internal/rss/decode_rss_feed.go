@@ -1,5 +1,5 @@
 // Reads RSS feed info into custom structs
-package main
+package rss
 
 import (
 	"context"
@@ -29,7 +29,7 @@ type RSSItem struct {
 }
 
 // Downloads the feed
-func fetchFeed(ctx context.Context, feedUrl string) (*RSSFeed, error) {
+func FetchFeed(ctx context.Context, feedUrl string) (*RSSFeed, error) {
 	req, err := http.NewRequestWithContext(ctx, "GET", feedUrl, nil)
 	if err != nil {
 		return nil, err
