@@ -54,7 +54,6 @@ to quickly create a Cobra application.`,
 					return userAuthCall(printFollowedFeeds)(appState)
 				}
 			}
-			return nil
 		},
 	}
 )
