@@ -26,7 +26,7 @@ var addFeedCmd = &cobra.Command{
 }
 
 func init() {
-	feedsCmd.AddCommand(addFeedCmd)
+	rootCmd.AddCommand(addFeedCmd)
 
 	addFeedCmd.Flags().StringVarP(&feedNameArg, "name", "n", "", "Name of the  RSS feed (required)")
 	addFeedCmd.Flags().StringVarP(&feedUrlArg, "url", "u", "", "Url to the RSS feed (required)")

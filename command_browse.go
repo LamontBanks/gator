@@ -56,7 +56,7 @@ func handlerBrowse(s *state, cmd command, user database.User) error {
 				printPostTitle(post.Title)
 			}
 		} else {
-			fmt.Println("No posts")
+			fmt.Println("No recent posts")
 		}
 
 	}
