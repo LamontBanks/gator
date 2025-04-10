@@ -52,7 +52,7 @@ func register(s *state, username string) error {
 
 	fmt.Printf("Registered %v\n", user.Name)
 
-	// TODO: Log the user in
+	login(s, username)
 
 	return nil
 }
