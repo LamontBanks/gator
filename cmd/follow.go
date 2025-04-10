@@ -17,13 +17,12 @@ var feedUrlParam string
 var followCmd = &cobra.Command{
 	Use:   "follow",
 	Short: "Follow a feed to see its updates",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Long:  ``,
+	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if len(args) == 1 {
+			feedUrlParam = args[0]
+		}
 		if feedUrlParam != "" {
 			return userAuthCall(followFeedByUrlInternal)(appState)
 		} else {
@@ -34,20 +33,9 @@ to quickly create a Cobra application.`,
 
 func init() {
 	rootCmd.AddCommand(followCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// followFeedCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	followCmd.Flags().StringVarP(&feedUrlParam, "url", "u", "", "RSS feed link added to fator")
 }
 
 func interactiveFollowFeed(s *state, user database.User) error {
-	// Get feeds not followed...
 	feedsNotFollowed, err := s.db.GetFeedsNotFollowedByUser(context.Background(), user.ID)
 	if err != nil {
 		return err
@@ -58,7 +46,7 @@ func interactiveFollowFeed(s *state, user database.User) error {
 		return nil
 	}
 
-	// ...and followed feeds to show the user what they already have
+	// Show user what feeds they're already following
 	feedsAlreadyFollowed, err := s.db.GetFeedsForUser(context.Background(), user.ID)
 	if err != nil {
 		return err
@@ -74,7 +62,7 @@ func interactiveFollowFeed(s *state, user database.User) error {
 	}
 	fmt.Println()
 
-	// Create label-value 2D array for the option picker, choose feed to follow
+	// Create label-value 2D array for the option picker
 	feedOptions := make([][]string, len(feedsNotFollowed))
 	for i := range feedsNotFollowed {
 		feedOptions[i] = make([]string, 2)
@@ -91,10 +79,11 @@ func interactiveFollowFeed(s *state, user database.User) error {
 }
 
 // Wrapper function to use the feed URL from the CLI flag
-// Only for use within this command
+// Only for use within this cobra command - it relies on the url param being set from this command
+//
 // Done this way to make the actual function - followFeedByUrl - callable outside of this command
-// For ex: Add a feed, then auto follow it
-// TODO: Better function name, or better way to handle this
+// For ex: Use the `add` command to add a feed, then auto follow it
+// TODO: Better function name, or better way to handle this?
 func followFeedByUrlInternal(s *state, user database.User) error {
 	return followFeedByUrl(s, user, feedUrlParam)
 }

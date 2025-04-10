@@ -204,8 +204,9 @@ func printFollowedFeeds(s *state, user database.User) error {
 				fmt.Printf("\t- %v\n", post.Title)
 			}
 		} else {
-			fmt.Println("\t- No recent posts")
+			fmt.Println("- No recent posts")
 		}
+		fmt.Println()
 	}
 
 	return nil
@@ -224,6 +225,11 @@ func printAllFeeds(s *state) error {
 	// Print posts for each feed
 	// TODO: Print function for feeds, posts
 	fmt.Println("All RSS Feeds:")
+	if len(feeds) == 0 {
+		fmt.Println("- No feeds added")
+		return nil
+	}
+
 	for _, feed := range feeds {
 		posts, err := s.db.GetPostsFromFeed(context.Background(), database.GetPostsFromFeedParams{
 			FeedID: feed.ID,
@@ -240,8 +246,9 @@ func printAllFeeds(s *state) error {
 				fmt.Printf("\t- %v\n", post.Title)
 			}
 		} else {
-			fmt.Println("\t- No recent posts")
+			fmt.Println("- No recent posts")
 		}
+		fmt.Println()
 	}
 
 	return nil
