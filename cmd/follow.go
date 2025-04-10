@@ -16,9 +16,10 @@ var feedUrlParam string
 // followCmd represents the followFeed command
 var followCmd = &cobra.Command{
 	Use:   "follow",
-	Short: "Follow a feed to see its updates",
-	Long:  ``,
-	Args:  cobra.MaximumNArgs(1),
+	Short: "Follow updates from a feed",
+	Long: `Follow updates from a feed
+	`,
+	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 1 {
 			feedUrlParam = args[0]

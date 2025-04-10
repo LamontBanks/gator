@@ -1,6 +1,3 @@
-/*
-Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -29,19 +26,15 @@ var (
 	db        *sql.DB
 	resetFlag bool // TODO: DEV ONLY
 
+	// Command flags/parameters
 	showAllFeeds    bool
 	numPostsPerFeed int
 
 	// rootCmd represents the base command when called without any subcommands
 	rootCmd = &cobra.Command{
 		Use:   "gator",
-		Short: "A CLI RSS Feed reader",
-		Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+		Short: "Gator is a terminal-based RSS reader",
+		Long:  `The program is best ran in the `,
 		// Uncomment the following line if your bare application
 		// has an action associated with it:
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -71,13 +64,10 @@ func init() {
 	cobra.OnInitialize(initAppState)
 	cobra.OnFinalize(closeDB)
 
-	rootCmd.Flags().BoolVar(&resetFlag, "reset", false, "Deletes all users, effectively clearing the database (DEV ONLY)")
-
 	rootCmd.Flags().BoolVarP(&showAllFeeds, "all", "a", false, "Show all feeds added to gator")
 	rootCmd.Flags().IntVarP(&numPostsPerFeed, "numPosts", "n", 2, "maximum number of posts per feed")
 
-	rootCmd.MarkFlagsMutuallyExclusive("reset", "numPosts")
-	rootCmd.MarkFlagsMutuallyExclusive("reset", "all")
+	rootCmd.Flags().BoolVar(&resetFlag, "reset", false, "Deletes all users, effectively clearing the database (DEV ONLY)")
 }
 
 func initAppState() {

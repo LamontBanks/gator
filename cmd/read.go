@@ -16,8 +16,14 @@ import (
 // readCmd represents the read command
 var readCmd = &cobra.Command{
 	Use:   "read",
-	Short: "Read a post",
-	Long:  ``,
+	Short: "Read feed posts",
+	Long: `Read feed posts.
+A interactive menu will help navigate your followed feeds, then to the posts within a feed.
+	
+Currently only a plaintext <description> is readable in the terminal.
+Images will not render, HTML will be raw, etc.
+The full-text of the post, if any, will have to be viewed in a web browser.
+	`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return userAuthCall(readPosts)(appState)
 	},

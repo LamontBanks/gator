@@ -18,8 +18,8 @@ var unfollowfeedUrlParam string
 // unfollowCmd represents the unfollow command
 var unfollowCmd = &cobra.Command{
 	Use:   "unfollow",
-	Short: "A brief description of your command",
-	Long:  ``,
+	Short: "Stop following updates from a feed",
+	Long:  `Stop following updates from a feed`,
 	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 1 {

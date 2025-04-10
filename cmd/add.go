@@ -19,7 +19,7 @@ var feedUrlArg string
 // addCmd represents the add command
 var addCmd = &cobra.Command{
 	Use:   "add",
-	Short: "Adds an RSS feed to gator",
+	Short: "Add a feed",
 	Long:  ``,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return userAuthCall(addFeed)(appState)
