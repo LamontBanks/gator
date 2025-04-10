@@ -78,7 +78,7 @@ func interactiveFollowFeed(s *state, user database.User) error {
 	return followFeedByUrl(s, user, feedsNotFollowed[choice].Url)
 }
 
-// Wrapper function to use the feed URL from the CLI flag
+// Wrapper function to use the feed URL supplied with this command
 // Only for use within this cobra command - it relies on the url param being set from this command
 //
 // Done this way to make the actual function - followFeedByUrl - callable outside of this command
