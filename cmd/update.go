@@ -10,40 +10,34 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// update commands
-var updateFreq string
-var forceUpdateFlag bool
-
 // updateCmd represents the update command
 var updateCmd = &cobra.Command{
 	Use:   "update",
 	Short: "Update all feeds",
 	Long:  ``,
+	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		freq, err := time.ParseDuration(updateFreq)
-		if err != nil {
-			return err
+		if len(args) == 1 {
+			freq, err := time.ParseDuration(args[0])
+			if err != nil {
+				return err
+			}
+
+			fmt.Printf("Updating feeds every %v\n", freq)
+			ticker := time.NewTicker(freq)
+			for ; ; <-ticker.C {
+				fmt.Println("Updating RSS feeds...")
+				updateAllFeeds(appState)
+			}
 		}
 
-		if forceUpdateFlag {
-			fmt.Println("Updating feeds...")
-			return updateAllFeeds(appState)
-		}
-
-		fmt.Printf("Updating feeds every %v\n", updateFreq)
-		ticker := time.NewTicker(freq)
-		for ; ; <-ticker.C {
-			fmt.Println("Updating RSS feeds...")
-			updateAllFeeds(appState)
-		}
+		fmt.Println("Updating feeds...")
+		return updateAllFeeds(appState)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(updateCmd)
-
-	updateCmd.Flags().StringVarP(&updateFreq, "time", "t", "15m", "feed update frequency")
-	updateCmd.Flags().BoolVarP(&forceUpdateFlag, "force", "f", false, "force an immediate update of all feeds")
 }
 
 func updateAllFeeds(s *state) error {
