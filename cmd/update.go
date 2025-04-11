@@ -12,6 +12,7 @@ import (
 
 // update commands
 var updateFreq string
+var forceUpdateFlag bool
 
 // updateCmd represents the update command
 var updateCmd = &cobra.Command{
@@ -24,8 +25,12 @@ var updateCmd = &cobra.Command{
 			return err
 		}
 
-		fmt.Printf("Updating feeds every %v\n", updateFreq)
+		if forceUpdateFlag {
+			fmt.Println("Updating feeds...")
+			return updateAllFeeds(appState)
+		}
 
+		fmt.Printf("Updating feeds every %v\n", updateFreq)
 		ticker := time.NewTicker(freq)
 		for ; ; <-ticker.C {
 			fmt.Println("Updating RSS feeds...")
@@ -38,6 +43,7 @@ func init() {
 	rootCmd.AddCommand(updateCmd)
 
 	updateCmd.Flags().StringVarP(&updateFreq, "time", "t", "15m", "feed update frequency")
+	updateCmd.Flags().BoolVarP(&forceUpdateFlag, "force", "f", false, "force an immediate update of all feeds")
 }
 
 func updateAllFeeds(s *state) error {

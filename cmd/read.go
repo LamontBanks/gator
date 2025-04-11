@@ -16,8 +16,8 @@ import (
 // readCmd represents the read command
 var readCmd = &cobra.Command{
 	Use:   "read",
-	Short: "Read feed posts",
-	Long: `Read feed posts.
+	Short: "Read posts in your feeds",
+	Long: `Read posts in your feeds.
 A interactive menu will help navigate your followed feeds, then to the posts within a feed.
 	
 Currently only a plaintext <description> is readable in the terminal.

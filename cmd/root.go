@@ -194,7 +194,7 @@ func printFollowedFeeds(s *state, user database.User) error {
 				fmt.Printf("\t- %v\n", post.Title)
 			}
 		} else {
-			fmt.Println("- No recent posts")
+			fmt.Println("\t- No recent posts")
 		}
 		fmt.Println()
 	}
@@ -236,7 +236,7 @@ func printAllFeeds(s *state) error {
 				fmt.Printf("\t- %v\n", post.Title)
 			}
 		} else {
-			fmt.Println("- No recent posts")
+			fmt.Println("\t- No recent posts")
 		}
 		fmt.Println()
 	}
