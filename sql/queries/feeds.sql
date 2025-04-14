@@ -31,13 +31,10 @@ UPDATE feeds
 SET last_fetched_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
 WHERE id = $1;
 
--- Gets oldest feed to update
--- Feeds that have never been updated (last_fetched_at = NULL) are prioritized (though no specific order can be gauranteed)
--- name: GetNextFeedToFetch :one
-SELECT id, name, url, last_fetched_at
-FROM feeds
-ORDER BY last_fetched_at ASC
-NULLS FIRST;
+-- name: UpdateFeedDescription :exec
+UPDATE feeds
+SET description = $2
+WHERE id = $1;
 
 -- name: GetFeedsEligibleForDeletion :many
 -- 1. Get feeds created by a given user

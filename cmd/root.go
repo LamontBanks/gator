@@ -121,6 +121,7 @@ func listOptionsReadChoice(labelsValues [][]string, message string) (int, error)
 	}
 
 	// Get user's choice
+	fmt.Println()
 	var choice int
 	_, err := fmt.Scan(&choice)
 	if err != nil {

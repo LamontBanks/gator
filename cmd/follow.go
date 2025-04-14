@@ -56,13 +56,14 @@ func interactiveFollowFeed(s *state, user database.User) error {
 		return err
 	}
 
-	fmt.Println("Saved feeds")
+	fmt.Println("Saved feeds:")
+
 	if len(feedsAlreadyFollowed) == 0 {
 		fmt.Println("- No saved feeds")
 	}
 
 	for _, feed := range feedsAlreadyFollowed {
-		fmt.Printf("* %v", feed.FeedName)
+		fmt.Printf("* %v\n", feed.FeedName)
 	}
 	fmt.Println()
 
@@ -70,7 +71,7 @@ func interactiveFollowFeed(s *state, user database.User) error {
 	feedOptions := make([][]string, len(feedsNotFollowed))
 	for i := range feedsNotFollowed {
 		feedOptions[i] = make([]string, 2)
-		feedOptions[i][0] = feedsNotFollowed[i].Name
+		feedOptions[i][0] = feedsNotFollowed[i].Name + " | " + feedsNotFollowed[i].Description
 		feedOptions[i][1] = feedsNotFollowed[i].Url
 	}
 
@@ -109,7 +110,7 @@ func followFeedByUrl(s *state, user database.User, feedUrl string) error {
 		return err
 	}
 
-	fmt.Printf("Following %v (%v)\n", newFeedFollow.FeedName, feed.Url)
+	fmt.Printf("Following \"%v\" (%v)\n", newFeedFollow.FeedName, feed.Url)
 
 	return nil
 }

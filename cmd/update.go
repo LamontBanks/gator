@@ -93,6 +93,16 @@ func updateSingleFeed(s *state, feedUrl string) error {
 
 // Save posts to the database
 func saveFeedPosts(s *state, rssFeed *RSSFeed, feedId uuid.UUID) error {
+	// Update feed description
+	err := s.db.UpdateFeedDescription(context.Background(), database.UpdateFeedDescriptionParams{
+		ID:          feedId,
+		Description: rssFeed.Channel.Description,
+	})
+	if err != nil {
+		return fmt.Errorf("error updating feed %v description, %v", rssFeed.Channel.Title, err)
+	}
+
+	// Update posts
 	for i := range len(rssFeed.Channel.Item) {
 		pubDate, err := ParseRSSPubDate(rssFeed.Channel.Item[i].PubDate)
 		if err != nil {

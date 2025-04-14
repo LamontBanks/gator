@@ -23,7 +23,7 @@ var feedUrlArg string
 var addCmd = &cobra.Command{
 	Use:   "add",
 	Short: "Add a feed",
-	Long:  ``,
+	Long:  `Add a feed directly using the required flags.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return userAuthCall(addFeed)(appState)
 	},
@@ -55,10 +55,22 @@ func addFeed(s *state, user database.User) error {
 		return nil
 	}
 
+	// Attempt to download feed before adding entry
+	rssFeed, err := FetchFeed(context.Background(), feedUrlArg)
+	if err != nil {
+		return fmt.Errorf("could not add feed %v, %v", feedUrlArg, err)
+	}
+
 	// Save the feed to the database
 	newFeed, err := saveFeed(s, feedNameArg, feedUrlArg, user)
 	if err != nil {
 		return err
+	}
+
+	// Immediately download feed updates
+	err = saveFeedPosts(s, rssFeed, newFeed.ID)
+	if err != nil {
+		return fmt.Errorf("error updating feed %v, %v", rssFeed.Channel.Title, err)
 	}
 
 	// Make user follow feed they just added
