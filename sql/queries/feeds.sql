@@ -38,3 +38,32 @@ SELECT id, name, url, last_fetched_at
 FROM feeds
 ORDER BY last_fetched_at ASC
 NULLS FIRST;
+
+-- name: GetFeedsEligibleForDeletion :many
+-- 1. Get feeds created by a given user
+-- 2. Get feed follower counts for feed created by user
+-- 3. Select feeds with either: 0 followers, or the user is the only follower
+WITH feeds_created_by_user AS (
+    SELECT feeds.id as feed_id, feeds.name AS feed_name, feeds.user_id
+    FROM feeds
+    INNER JOIN users ON feeds.user_id = users.id
+    WHERE feeds.user_id = sqlc.arg(user_id)::uuid
+),
+num_followers_per_feed AS (
+    SELECT feed_follows.feed_id, COUNT(*) AS num_followers
+    FROM feed_follows
+    WHERE feed_follows.feed_id IN (SELECT feeds_created_by_user.feed_id FROM feeds_created_by_user)
+    GROUP BY feed_follows.feed_id
+)
+SELECT feeds.name, num_followers_per_feed.feed_id, num_followers_per_feed.num_followers
+    FROM num_followers_per_feed
+    INNER JOIN feeds ON feeds.id = num_followers_per_feed.feed_id
+    WHERE 
+        (num_followers_per_feed.num_followers = 0)
+        OR
+        (num_followers_per_feed.num_followers = 1 AND sqlc.arg(user_id)::uuid IN (SELECT feed_follows.user_id FROM feed_follows) )
+    ORDER BY feeds.name;
+
+-- name: DeleteFeedById :exec
+DELETE FROM feeds
+WHERE feeds.id = $1;

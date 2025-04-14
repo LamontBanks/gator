@@ -68,6 +68,16 @@ func (q *Queries) CreateFeed(ctx context.Context, arg CreateFeedParams) (Feed, e
 	return i, err
 }
 
+const deleteFeedById = `-- name: DeleteFeedById :exec
+DELETE FROM feeds
+WHERE feeds.id = $1
+`
+
+func (q *Queries) DeleteFeedById(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteFeedById, id)
+	return err
+}
+
 const getFeedByUrl = `-- name: GetFeedByUrl :one
 SELECT id, created_at, updated_at, name, url, user_id, last_fetched_at, description FROM feeds
 WHERE url = $1
@@ -120,6 +130,61 @@ func (q *Queries) GetFeeds(ctx context.Context) ([]GetFeedsRow, error) {
 			&i.Description,
 			&i.UserName,
 		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getFeedsEligibleForDeletion = `-- name: GetFeedsEligibleForDeletion :many
+WITH feeds_created_by_user AS (
+    SELECT feeds.id as feed_id, feeds.name AS feed_name, feeds.user_id
+    FROM feeds
+    INNER JOIN users ON feeds.user_id = users.id
+    WHERE feeds.user_id = $1::uuid
+),
+num_followers_per_feed AS (
+    SELECT feed_follows.feed_id, COUNT(*) AS num_followers
+    FROM feed_follows
+    WHERE feed_follows.feed_id IN (SELECT feeds_created_by_user.feed_id FROM feeds_created_by_user)
+    GROUP BY feed_follows.feed_id
+)
+SELECT feeds.name, num_followers_per_feed.feed_id, num_followers_per_feed.num_followers
+    FROM num_followers_per_feed
+    INNER JOIN feeds ON feeds.id = num_followers_per_feed.feed_id
+    WHERE 
+        (num_followers_per_feed.num_followers = 0)
+        OR
+        (num_followers_per_feed.num_followers = 1 AND $1::uuid IN (SELECT feed_follows.user_id FROM feed_follows) )
+    ORDER BY feeds.name
+`
+
+type GetFeedsEligibleForDeletionRow struct {
+	Name         string
+	FeedID       uuid.UUID
+	NumFollowers int64
+}
+
+// 1. Get feeds created by a given user
+// 2. Get feed follower counts for feed created by user
+// 3. Select feeds with either: 0 followers, or the user is the only follower
+func (q *Queries) GetFeedsEligibleForDeletion(ctx context.Context, userID uuid.UUID) ([]GetFeedsEligibleForDeletionRow, error) {
+	rows, err := q.db.QueryContext(ctx, getFeedsEligibleForDeletion, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetFeedsEligibleForDeletionRow
+	for rows.Next() {
+		var i GetFeedsEligibleForDeletionRow
+		if err := rows.Scan(&i.Name, &i.FeedID, &i.NumFollowers); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
