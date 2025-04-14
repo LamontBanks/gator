@@ -1,3 +1,6 @@
+/*
+Add an RSS feed
+*/
 package cmd
 
 import (
@@ -38,6 +41,9 @@ func init() {
 	addCmd.MarkFlagsRequiredTogether("name", "url")
 }
 
+// Adds a feed record to gator
+// Other user's can follow the feed to see updates when they're logged in.
+// Does NOT download the posts
 func addFeed(s *state, user database.User) error {
 	// Don't do anything if the feed url has already been added, or there's any other error
 	existingFeed, err := s.db.GetFeedByUrl(context.Background(), feedUrlArg)
@@ -49,6 +55,7 @@ func addFeed(s *state, user database.User) error {
 		return nil
 	}
 
+	// Save the feed to the database
 	newFeed, err := saveFeed(s, feedNameArg, feedUrlArg, user)
 	if err != nil {
 		return err
@@ -77,7 +84,7 @@ func saveFeed(s *state, feedName, feedUrl string, user database.User) (database.
 }
 
 // Keep prompting for feed name and url until confirmed by user
-// TODO: Scanline not working
+// TODO:Scan multiple words a part of string
 func addFeedInteractive(s *state, user database.User) error {
 	var newFeedName string
 	var newFeedUrl string

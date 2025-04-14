@@ -1,3 +1,6 @@
+/*
+Download the latest posts for RSS feeds
+*/
 package cmd
 
 import (

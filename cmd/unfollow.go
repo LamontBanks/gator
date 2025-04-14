@@ -1,6 +1,5 @@
 /*
-Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-*/
+ */
 package cmd
 
 import (
@@ -77,7 +76,8 @@ func interactiveUnfollowFeed(s *state, user database.User) error {
 func unfollowFeedByUrl(s *state, user database.User, feedUrl string) error {
 	feed, err := s.db.GetFeedByUrl(context.Background(), feedUrl)
 	if err == sql.ErrNoRows {
-		return fmt.Errorf("Failed to unfollow %v - has not been added", feedUrl)
+		fmt.Printf("- Can't to unfollow %v - has not been added\n", feedUrl)
+		return nil
 	}
 	if err != nil {
 		return err

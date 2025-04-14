@@ -1,3 +1,5 @@
+// Default 'gator' command will print RSS feeds the user is following
+// It can also be used to see all feed available to follw.
 package cmd
 
 import (
@@ -34,9 +36,8 @@ var (
 	rootCmd = &cobra.Command{
 		Use:   "gator",
 		Short: "Gator is a terminal-based RSS reader",
-		Long:  `The program is best ran in the `,
-		// Uncomment the following line if your bare application
-		// has an action associated with it:
+		Long: `The program is best ran as a terminal background process (ex: gator ... &).
+		Then, post can be read`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if resetFlag {
 				return reset()
@@ -62,7 +63,7 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initAppState)
-	cobra.OnFinalize(closeDB)
+	cobra.OnFinalize(closeDB) // Closing database using Cobra instead of the usual "defer ..."
 
 	rootCmd.Flags().BoolVarP(&showAllFeeds, "all", "a", false, "Show all feeds added to gator")
 	rootCmd.Flags().IntVarP(&numPostsPerFeed, "numPosts", "n", 2, "maximum number of posts per feed")
@@ -70,8 +71,8 @@ func init() {
 	rootCmd.Flags().BoolVar(&resetFlag, "reset", false, "Deletes all users, effectively clearing the database (DEV ONLY)")
 }
 
+// Initialize info for the application state
 func initAppState() {
-	// Initialize info for the application state
 	cfg, err := config.ReadConfig()
 	if err != nil {
 		panic(err)
@@ -83,9 +84,8 @@ func initAppState() {
 	if err != nil {
 		panic(err)
 	}
-	// Database is closed by Cobra using 'closeDB()'
 
-	// Using the SQLC `database` wrapper instead of the native Go SQL db directly
+	// Using the SQLC database wrapper instead of the native Go SQL db directly
 	dbQueries := database.New(db)
 
 	// Set state
@@ -137,7 +137,7 @@ func listOptionsReadChoice(labelsValues [][]string, message string) (int, error)
 	return choice, nil
 }
 
-// A closure wrapping a function requiring a user, gets the user, then returns the function
+// A closure for wrapping functions requiring a user
 func userAuthCall(f func(s *state, user database.User) error) func(*state) error {
 	return func(s *state) error {
 		username := s.config.CurrentUserName
@@ -186,7 +186,6 @@ func printFollowedFeeds(s *state, user database.User) error {
 			return err
 		}
 
-		// TODO: Print function for feeds, posts
 		// Print feeds, posts
 		fmt.Printf("%v | %v\n", feed.FeedName, feed.FeedUrl)
 		if len(posts) > 0 {
@@ -213,7 +212,6 @@ func printAllFeeds(s *state) error {
 	}
 
 	// Print posts for each feed
-	// TODO: Print function for feeds, posts
 	fmt.Println("All RSS Feeds:")
 	if len(feeds) == 0 {
 		fmt.Println("- No feeds added")

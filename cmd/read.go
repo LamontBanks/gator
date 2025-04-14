@@ -1,6 +1,5 @@
 /*
-Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-*/
+ */
 package cmd
 
 import (
@@ -33,6 +32,9 @@ func init() {
 	rootCmd.AddCommand(readCmd)
 }
 
+// Display option picker for user to select a feed, then select the post to read it's RSS description.
+// Some RSS feeds contain the full post test in the description, others have only a snippet.
+// This is dependent on the creators of the feed itself, not a limitation of this program.
 func readPosts(s *state, user database.User) error {
 	userFeeds, err := s.db.GetFeedsForUser(context.Background(), user.ID)
 	if err == sql.ErrNoRows {
@@ -78,16 +80,12 @@ func readPosts(s *state, user database.User) error {
 		return err
 	}
 
-	printPost(posts[choice].Title, posts[choice].Description, posts[choice].Url, posts[choice].PublishedAt)
+	// Display the post
+	postText := fmt.Sprintf("%v\n", posts[choice].Title)
+	postText += fmt.Sprintf("%v\n\n", posts[choice].PublishedAt.In(time.Local).Format("03:04 PM, Monday, 02 Jan"))
+	postText += fmt.Sprintf("%v\n\n", posts[choice].Description)
+	postText += fmt.Sprintf("%v\n", posts[choice].Url)
+	fmt.Println(postText)
 
 	return nil
-}
-
-func printPost(title, desc, link string, published_at time.Time) {
-	s := fmt.Sprintf("%v\n", title)
-	s += fmt.Sprintf("%v\n\n", published_at.In(time.Local).Format("03:04 PM, Mon, 02 Jan 06"))
-	s += fmt.Sprintf("%v\n\n", desc)
-	s += fmt.Sprintf("%v\n", link)
-
-	fmt.Println(s)
 }

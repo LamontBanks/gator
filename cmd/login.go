@@ -1,5 +1,5 @@
 /*
-Copyright © 2025 NAME HERE <EMAIL ADDRESS>
+Log in a user
 */
 package cmd
 
@@ -24,13 +24,13 @@ func init() {
 	rootCmd.AddCommand(loginCmd)
 }
 
+// "Log in" the user by writing their name to the config file
+// Users only need to enter their username; there are no passwords
 func login(s *state, username string) error {
-	// User must be registered to log in
 	if !userRegistered(s, username) {
 		return fmt.Errorf("%v not registered", username)
 	}
 
-	// "Log in" the user by writing their name to the config file
 	s.config.CurrentUserName = username
 	if err := s.config.SetConfig(); err != nil {
 		return err

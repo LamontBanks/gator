@@ -1,4 +1,6 @@
-// Reads RSS feed info into custom structs
+/*
+Reads RSS feed info into custom structs
+*/
 package cmd
 
 import (

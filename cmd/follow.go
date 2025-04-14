@@ -1,3 +1,6 @@
+/*
+See custom RSS feed updates
+*/
 package cmd
 
 import (
