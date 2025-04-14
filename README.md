@@ -1,9 +1,9 @@
 # Blog Aggregator
 
-A CLI tool to aggregate RSS feeds:
+A CLI tool for read RSS feeds in the terminal, built using the [cobra-cli](https://github.com/spf13/cobra) CLI library.
 
 - Read RSS feeds
-- Supports multple users, each with custom RSS feed subscriptions
+- Supports multple users, each with their own custom RSS feed subscriptions
 
 ## Setup
 
@@ -100,9 +100,9 @@ Append `?sslmode=disable` (local use only) to connection string:
 
 ### Run gator
 
-Start `gator` as a background process, providing an update frequency, `(30s, 1m, 5, 1h, 24h, etc.)`:
+Start `gator`, preferably as a background process, providing an update frequency: `(30s, 1m, 5, 1h, 24h, etc.)`:
         
-        $ gator agg 15m &       # Update RSS feeds every 15 minutes
+        $ gator update 15m &       # Update RSS feeds every 15 minutes
         Updating RSS feeds...
 
 ### Register/login a user
@@ -127,32 +127,35 @@ Or, login an existing user:
 
 
 ### Add RSS feeds
- `$ gator addFeed <url>`
+ `$ gator add -n <custom name of feed> -u <url>`
  
- Newly added feeds will immediately download updates:
+        # The user will automatically follow feeds they add
+        Added RSS feed "Nasa Image of the Day" (https://www.nasa.gov/feeds/iotd-feed/)
+        Following "Nasa Image of the Day" (https://www.nasa.gov/feeds/iotd-feed/)
 
-        $ gator addFeed "Nasa Image of the Day" https://www.nasa.gov/feeds/iotd-feed/
-        Saved "Nasa Image of the Day" (https://www.nasa.gov/feeds/iotd-feed/) for Alice
+### See followed RSS Feeds overview
 
-        $ gator addFeed "Dwarf Fortress" https://store.steampowered.com/feeds/news/app/975370
-        Saved "Dwarf Fortress" (https://store.steampowered.com/feeds/news/app/975370) for Alice
-        Alice followed Dwarf Fortress
-
-### See RSS Feeds overview
-`$ gator browse`:
+`$ gator`
 
         Dwarf Fortress | https://store.steampowered.com/feeds/news/app/975370
                 - Hotfix: Patch 51.10
                 - Update 51.09: Forbidden Coffins now unusable
-                - Hotfix: Patch 51.08
+
+        Guild Wars 2 | https://www.guildwars2.com/en/feed/
+                - Snack on the Job with the Sweet Treat Gathering Tools
+                - Stop and Smell the Flowers with the Wisteria Arborscale Skyscale Skin
+
         Nasa Image of the Day | https://www.nasa.gov/feeds/iotd-feed/
-                - Artemis II Insignia Honors All
-                - X-ray Clues Reveal Destroyed Planet
-                - Studying Ice for the Future of Flight
+                - Apollo 13 Launch: 55 Years Ago
+                - Linear Sand Dunes in the Great Sandy Desert
+
+        Pivot To AI | https://pivot-to-ai.com/feed/
+                - New York mayoral candidate Andrew Cuomo writes his housing plan with ChatGPT
+                - How to sell AI slop to the US military — with Vannevar Labs and MIT Tech Review
 
 Provide a number to change the number of posts per feed:
 
-`$ gator browse 10`:
+`$ gator -n 10`:
 
         Dwarf Fortress | https://store.steampowered.com/feeds/news/app/975370
                 - Hotfix: Patch 51.10
@@ -162,54 +165,54 @@ Provide a number to change the number of posts per feed:
                 - Lua Beta + Patch 51.06 ⛏ Dwarf Fortress Dev News
                 - Next Steps for Dwarf Fortress + Patch 51.05 ⛏ Dwarf Fortress Dev News
                 - Hotfix: Patch 51.04
-                - Hotfix: Patch 51.03
-                - Adventure Mode is Out NOW!
-                - Adventure Mode Beta Patch Notes (All of them)
+
+        Guild Wars 2 | https://www.guildwars2.com/en/feed/
+                - Snack on the Job with the Sweet Treat Gathering Tools
+                - Stop and Smell the Flowers with the Wisteria Arborscale Skyscale Skin
+                - Our New Avian Aspect Helm Skin Is a Real Feather in Your Cap
+                - Shine on the Tyrian Runway This Week with Our New Emote Tome!
+                - Spring into Adventure with the Guild Wars 2 Spring Sale!
+                - “Repentance” Is Now Live
+                - Ferocious New Mounts and an Otherworldly Black Lion Chest Update!
+
         Nasa Image of the Day | https://www.nasa.gov/feeds/iotd-feed/
-                - Artemis II Insignia Honors All
-                - X-ray Clues Reveal Destroyed Planet
-                - Studying Ice for the Future of Flight
-                - Artemis II Core Stage Integration – Complete!
-                - Turning Vanes inside the Altitude Wind Tunnel
-                - NEO Surveyor Instrument Enclosure Inside Historic Chamber A
-                - Norman Rockwell Commemorates Gemini Program with Grissom and Young
-                - NASA’s Spirit Rover Gets Looked Over
-                - Like Sands Through the Hourglass…
-                - Making Ripples
+                - Apollo 13 Launch: 55 Years Ago
+                - Linear Sand Dunes in the Great Sandy Desert
+                - Expedition 73 Crew Launches to International Space Station
+                etc...
 
 ### Read posts
-1. `$ gator browseFeed` to navigate into your feeds:
+1. `$ gator read` to navigate into your feeds:
 
         Choose a feed:
         1: Dwarf Fortress
-        2: Nasa Image of the Day
+        2: Guild Wars 2
+        3: Nasa Image of the Day
+        4: Pivot To AI
 
 1. Enter the corresponding number to display recent posts:
 
-        2       // user input
+        3       // user input
 
         Nasa Image of the Day
         Choose a post:
-        1: Artemis II Insignia Honors All
-                01:55 PM, Thu, 03 Apr 25
-        2: X-ray Clues Reveal Destroyed Planet
-                01:10 PM, Wed, 02 Apr 25
-        3: Studying Ice for the Future of Flight
-                12:52 PM, Tue, 01 Apr 25
-        4: Artemis II Core Stage Integration – Complete!
-                02:42 PM, Mon, 31 Mar 25
-        ...
+        1: Apollo 13 Launch: 55 Years Ago
+                11:59 AM, Fri, 11 Apr 25
+        2: Linear Sand Dunes in the Great Sandy Desert
+                11:49 AM, Thu, 10 Apr 25
+        3: Expedition 73 Crew Launches to International Space Station
+                02:42 PM, Wed, 09 Apr 25
 
 1. Enter the number corresponding to read the post:
 
-        3       // user input
+        1       // user input
 
-        Studying Ice for the Future of Flight
-        12:52 PM, Tue, 01 Apr 25
+        Apollo 13 Launch: 55 Years Ago
+        11:59 AM, Fri, 11 Apr 25
 
-        Thomas Ozoroski, a researcher at NASA’s Glenn Research Center in Cleveland, takes icing accretion measurements in October 2024 as part of transonic truss-braced wing concept research. Researchers at NASA Glenn conducted another test campaign in March 2025.
+        NASA astronauts Jim Lovell, Fred Haise, and Jack Swigert launch aboard the Apollo 13 spacecraft from NASA’s Kennedy Space Center in Florida on April 11, 1970.
 
-        https://www.nasa.gov/image-detail/grc-2024-c-12100-2/
+        https://www.nasa.gov/image-detail/apollo-13-launch-ref-msfc-70-msg-2200-13-mix-file-2/
 
 ### List feeds being followed
 `$ gator following`
@@ -223,7 +226,7 @@ Provide a number to change the number of posts per feed:
 
 
 ### List all available feeds
-`$ gator feeds`
+`$ gator -a`
 
         All RSS Feeds
         Dwarf Fortress
@@ -236,44 +239,29 @@ Provide a number to change the number of posts per feed:
 ### Follow additional feeds
 Users can follow RSS feeds that others have added. 
 
-For example, Bob is currently not following any feeds:
+For example, Alice is following 2 feeds:
 
-        $ gator login Bob
-        Logged in as Bob
-
-        $ gator following
-        you are not following any feeds
+        * Nasa Image of the Day
+        * Pivot To AI
 
 
-1. `$ gator follow` to select additional RSS feeds to follow:
+1. `$ gator follow` to follow additional RSS feeds:
 
-        Already following:
-        no feeds
+        Saved feeds:
+        * Nasa Image of the Day
+        * Pivot To AI
 
-        - Choose a new RSS feed to follow:
+        Choose a new RSS feed to follow:
         1: Dwarf Fortress
-                Events and Announcements for 975370
-                https://store.steampowered.com/feeds/news/app/975370
-        2: Nasa Image of the Day
-                The latest NASA "Image of the Day" image.
-                https://www.nasa.gov/feeds/iotd-feed/
+        2: Guild Wars 2
 
 1. Enter the number of the desired feed:
 
         1       // user input
 
-        Bob followed Dwarf Fortress (https://store.steampowered.com/feeds/news/app/975370)
+        Alice followed Dwarf Fortress (https://store.steampowered.com/feeds/news/app/975370)
 
-1. View updates for Bob:
-
-        $ gator browse
-
-        Dwarf Fortress | https://store.steampowered.com/feeds/news/app/975370
-                - Hotfix: Patch 51.10
-                - Update 51.09: Forbidden Coffins now unusable
-                - Hotfix: Patch 51.08
-
-Saved feeds can also be followed directly by providing the feed url:
+Feeds can also be followed directly by providing the feed url. The feed must have already been added to `gator`:
 
 `$ gator follow https://www.nasa.gov/feeds/iotd-feed/`
 
@@ -284,12 +272,9 @@ Saved feeds can also be followed directly by providing the feed url:
         $ gator unfollow
 
         - Choose an RSS feed to unfollow
-        1: Dwarf Fortress
-                Events and Announcements for 975370
-                https://store.steampowered.com/feeds/news/app/975370
+        1: Guild Wars 2
         2: Nasa Image of the Day
-                The latest NASA "Image of the Day" image.
-                https://www.nasa.gov/feeds/iotd-feed/
+        3: Pivot To AI
 
 Enter the number of feed:
 
@@ -297,48 +282,28 @@ Enter the number of feed:
 
         Unfollowed Dwarf Fortress | https://store.steampowered.com/feeds/news/app/975370
 
-View current feeds:
-
-        $ gator following
-
-        Nasa Image of the Day
-                The latest NASA "Image of the Day" image.
-                https://www.nasa.gov/feeds/iotd-feed/
-
 ### Help
 
 Show all commands:
 
-        $ gator help
+$ `gator -h` | `gator --help`
 
-        gator is a tool for viewing RSS feeds in the console.
+        Gator is a terminal-based RSS reader.
+        It is best ran as a terminal background process (ex: gator ... &).
+        Then, interact with the tool to read and manage RSS feeds.
 
         Usage:
+        gator [flags]
+        gator [command]
 
-                gator <command> [arguments]
-
-                addFeed		Add a new feed for all users to follow
-                agg		Aggregate all feeds, poll for updates, useful when run in the background with '*'
-                browse		Show latest posts for current user's feeds
-                browseFeed		Read posts from a followed feed
-                feeds		List all feeds
-                ...
-
-
-Show help for specific command:
-
-        $ gator help browse
-
-        usage: gator browse <max number of posts per feed>
-
-        Show latest posts for current user's feeds
-
-        Examples:
-                gator browse
-                gator browse 5
-
-
-
+        Available Commands:
+        add         Add a feed
+        completion  Generate the autocompletion script for the specified shell
+        delete      Delete a feed
+        follow      Follow updates from a feed
+        following   Lists all feeds a user if following
+        help        Help about any command
+        ...
 
 ## Development
 
@@ -360,12 +325,12 @@ Sample Go `launch.json` config for Visual Studio Code:
 launch.json:
 
 {
-        "name": "addFeed",
+        "name": "add",
         "type": "go",
         "request": "launch",
         "mode": "auto",
         "program": "/<path>/gator/go run main.go",
-        "args": "add \"Nasa Image of the Day\" https://www.nasa.gov/feeds/iotd-feed/",
+        "args": "add -n \"Nasa Image of the Day\" -u https://www.nasa.gov/feeds/iotd-feed/",
         "console": "integratedTerminal"
 }
 ```
@@ -374,14 +339,14 @@ launch.json:
 `$ go run . <command>`
 
 Examples:
-- `$ go run . agg 15m &`
+- `$ go run . update 15m &`
 - `$ go run . login Alice`
 
 ### Test data
 
-A shell script can add users and feeds, see `sampleData.sh`.
+A shell script can quickly add users and feeds, see `test-data.sh`, etc.
 
-### `gator reset`
+### `gator --reset`
 
 `gator` has a `reset` command that deletes all users from the database. Since all the the tables have `CASCADE`-ing deletes on the `users.id` field, this effectively clears the entire database (see: https://www.postgresql.org/docs/15/sql-createtable.html, search `CASCADE`).
 
@@ -396,107 +361,85 @@ Only use `reset` for development/local-use - it should (obviously) be commented-
 1. Add/edit `.sql` files in `sql/queries`. Reference existing queries for the needed `SQLC` syntax (i.e., `-- name: CreateFeed :one`), etc.
 2. Run `$ sqlc generate` from the base project directory to generate Go code. Files within `internal/database` will be generated, including a new function based on your SQL statement. For example, a query named `CreateFeed` will generate a function: `func CreateFeed(...) ...`
 
-#### Create a new command Go file
-1. Command files are named "command_\<name of command\>.go", placed at the base project directory.
+#### Create a new command
+1. Use cobra-cli to add a new command:
 
-#### Handler and info functions
-2. Each command needs 2 functions:
+        $ cobra-cli add <name of new command>
 
-- A handler function to read user args, read/write the database, and print output:
-                
-```go
-func (s *state, cmd command) error { ... }
-```
+If the command is a sub-command (ex: `gator <existing command> <new command>`):
 
-- A "command help" function to print usage info. The gator `help` command will call this to display info in a CLI-styled help output.
+        $ cobra-cli add <name of new command> -p <parent command>
 
-```go
-func () commandInfo { ... }
-```
+Refer to [cobra-cli's README](https://github.com/spf13/cobra/blob/main/site/content/user_guide.md) for more details.
 
-The `handlerGetFeeds()` and `feedsCommandInfo()` functions (mapped to `$ gator feeds`) are good references.
+2. Cobra-cli creates an easy-to-use template for commands with just 2 cobra-specific sections.
+
+Using `add.go` (add a feed) as an example:
+
+- Set the command description and the code the actually run when the command is called:
+        ```
+        // addCmd represents the add command
+        var addCmd = &cobra.Command{
+                Use:   "add",
+                Short: "Add a feed",
+                Long:  `Add a feed directly using the required flags.`,
+                RunE: func(cmd *cobra.Command, args []string) error {
+                        return userAuthCall(addFeed)(appState)
+                },
+        }
+        ```
+- init() - Set command-line flags. Refer to cobra-cli documentation on available functions:
+
+        func init() {
+                rootCmd.AddCommand(addCmd)
+
+                addCmd.Flags().StringVarP(&feedNameArg, "name", "n", "", "Name of the  RSS feed (required)")
+                addCmd.Flags().StringVarP(&feedUrlArg, "url", "u", "", "Url to the RSS feed (required)")
+
+                addCmd.MarkFlagRequired("name")
+                addCmd.MarkFlagRequired("url")
+
+                addCmd.MarkFlagsRequiredTogether("name", "url")
+        }
+
+All other code are just plain Go functions.
 
 #### User-authenticated commands
-Commands that require a user id (ex: `gator browse`) should use the handler function signature:
+Commands that require a user id (ex: `gator add`) should use the handler function signature:
 
 ```go
-func (s *state, cmd command, user database.User) error { ... }
+func (s *state, user database.User) error { ... }
 ```
 
-Then, in `main.go` the handler function will be wrapped in `middlewareLoggedIn(...)` closure. The closure will provide the currently logged-in user to the handler function. 
+Then, in `main.go` the handler function will be wrapped in `userAuthCall(...)` closure. The closure will provide the currently logged-in user to the handler function. 
 
 Commands should *not* need to duplicate manually retrieving the current user from the database.
-
-The `handlerAddFeed()` function (mapped to `$ gator addFeed`) is a good reference of a user-authenticated command. Also, see `middlewareLoggedIn()` in "main.go".
-
-#### Enabling the command
-
-Once the handler and info functions are created, they need to be added to `main.go`.
-
-There are many comands already:
-
-```go
-// Register the CLI commands
-appCommands := commands{
-        cmds: make(map[string]commandDetails),
-}
-...
-appCommands.register("feeds", feedsCommandInfo(), handlerGetFeeds)
-appCommands.register("addFeed", addFeedCommandInfo(), middlewareLoggedIn(handlerAddFeed))
-...
-```
-
-Simply copy-paste the `register` line, adding your command's name, info function *call*, and handler function. Commands that require a user should be wrapped in `middlewareLoggedIn(...)` - see the section "User-authenticated commands":
-
-```go
-...
-appCommands.register("myCommand", myCommandInfo(), middlewareLoggedIn(handlerMyCommand))
-...
-```
 
 ### Manually test
 From the base directory, run:
 
         $ go run . agg 15m &
-        $ go run . addFeed...
+        $ go run . add...
         $ go run . etc...
 
-### Build the program
+### Build/install the program
 From the base directory:
 
         $ go build .
+        $ go install .
 
 Use the program:
 
-        $ ./gator agg 15m &
+        $ gator update 15m &
         [1] 4015
         Updating RSS feeds...
 
-        $ ./gator browse
+        $ gator
         Nasa Image of the Day | https://www.nasa.gov/feeds/iotd-feed/
                 - Artemis II Insignia Honors All
                 - X-ray Clues Reveal Destroyed Planet
-                - Studying Ice for the Future of Flight
-
-## Install for local use
-
-From the base directory:
-
-        $ go install .
-
-Now `gator` can be run directly (may need to launch a new shell session):
-
-        $ gator agg 15m &
-        Updating RSS feeds..
-
-        $ gator browse
-        etc...
-
 
 ## Improvements
 - Tests, unit/integration
 - Process HTML info RSS feed posts
 - Retrieve full blog posts from feed URL
-- Formal handling of CLI args
-- Improve feed/post navigation/viewing
-        - Keep CLI output minimum, but still display sufficient output at a glance

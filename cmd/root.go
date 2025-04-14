@@ -36,8 +36,9 @@ var (
 	rootCmd = &cobra.Command{
 		Use:   "gator",
 		Short: "Gator is a terminal-based RSS reader",
-		Long: `The program is best ran as a terminal background process (ex: gator ... &).
-		Then, post can be read`,
+		Long: `Gator is a terminal-based RSS reader.
+It is best ran as a terminal background process (ex: gator ... &).
+Then, interact with the tool to read and manage RSS feeds.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if resetFlag {
 				return reset()
