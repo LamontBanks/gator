@@ -144,7 +144,7 @@ func (q *Queries) GetPostById(ctx context.Context, id uuid.UUID) (GetPostByIdRow
 }
 
 const getPostsFromFeed = `-- name: GetPostsFromFeed :many
-SELECT feeds.name AS feed_name, posts.title, posts.description, posts.published_at, posts.Url
+SELECT feeds.name AS feed_name, posts.id, posts.title, posts.description, posts.published_at, posts.Url
 FROM posts
 INNER JOIN feeds ON feeds.id = posts.feed_id
 WHERE posts.feed_id = $1
@@ -159,6 +159,7 @@ type GetPostsFromFeedParams struct {
 
 type GetPostsFromFeedRow struct {
 	FeedName    string
+	ID          uuid.UUID
 	Title       string
 	Description string
 	PublishedAt time.Time
@@ -174,59 +175,6 @@ func (q *Queries) GetPostsFromFeed(ctx context.Context, arg GetPostsFromFeedPara
 	var items []GetPostsFromFeedRow
 	for rows.Next() {
 		var i GetPostsFromFeedRow
-		if err := rows.Scan(
-			&i.FeedName,
-			&i.Title,
-			&i.Description,
-			&i.PublishedAt,
-			&i.Url,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getRecentPostsFromFeed = `-- name: GetRecentPostsFromFeed :many
-SELECT feeds.name AS feed_name, posts.id, posts.title, posts.description, posts.published_at, posts.Url
-FROM posts
-INNER JOIN feeds ON feeds.id = posts.feed_id
-WHERE posts.feed_id = $1 AND posts.published_at >= $2 
-ORDER BY posts.published_at DESC
-LIMIT $3
-`
-
-type GetRecentPostsFromFeedParams struct {
-	FeedID      uuid.UUID
-	PublishedAt time.Time
-	Limit       int32
-}
-
-type GetRecentPostsFromFeedRow struct {
-	FeedName    string
-	ID          uuid.UUID
-	Title       string
-	Description string
-	PublishedAt time.Time
-	Url         string
-}
-
-func (q *Queries) GetRecentPostsFromFeed(ctx context.Context, arg GetRecentPostsFromFeedParams) ([]GetRecentPostsFromFeedRow, error) {
-	rows, err := q.db.QueryContext(ctx, getRecentPostsFromFeed, arg.FeedID, arg.PublishedAt, arg.Limit)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []GetRecentPostsFromFeedRow
-	for rows.Next() {
-		var i GetRecentPostsFromFeedRow
 		if err := rows.Scan(
 			&i.FeedName,
 			&i.ID,

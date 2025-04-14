@@ -59,7 +59,7 @@ func readPosts(s *state, user database.User) error {
 	fmt.Println(userFeeds[choice].FeedName)
 
 	// Get posts for the selected feed
-	posts, err := s.db.GetRecentPostsFromFeed(context.Background(), database.GetRecentPostsFromFeedParams{
+	posts, err := s.db.GetPostsFromFeed(context.Background(), database.GetPostsFromFeedParams{
 		FeedID: userFeeds[choice].FeedID,
 		Limit:  int32(3),
 	})
