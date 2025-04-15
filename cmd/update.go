@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -50,11 +51,34 @@ func updateAllFeeds(s *state) error {
 	}
 
 	// Update all feeds at once using goroutines
+	// Indicate if there are any new posts
 	feedUpdatedCh := make(chan struct{})
 	for _, feed := range allFeeds {
-		go func() {
+		go func() error {
+			// Check number of post before...
+			beforeUpdate, err := s.db.GetNumPostsByFeedId(context.Background(), feed.ID)
+			numPostsBefore := 0
+			if err != nil && err != sql.ErrNoRows {
+				return fmt.Errorf("error getting number of posts for feed %v, %v", feed.FeedName, err)
+			}
+			numPostsBefore = int(beforeUpdate.NumPosts)
+
 			updateSingleFeed(s, feed.Url)
+
+			// ...and after updating
+			afterUpdate, err := s.db.GetNumPostsByFeedId(context.Background(), feed.ID)
+			numPostsAfter := 0
+			if err != nil && err != sql.ErrNoRows {
+				return fmt.Errorf("error getting number of posts for feed %v, %v", feed.FeedName, err)
+			}
+			numPostsAfter = int(afterUpdate.NumPosts)
+
+			if numPostsAfter > numPostsBefore {
+				fmt.Printf("- %v: %v new posts\n", feed.FeedName, numPostsAfter-numPostsBefore)
+			}
+
 			feedUpdatedCh <- struct{}{}
+			return nil
 		}()
 	}
 
@@ -67,6 +91,8 @@ func updateAllFeeds(s *state) error {
 	return nil
 }
 
+// Download all current posts for the given feed
+// Returns true/false if there are additional posts since the last update
 func updateSingleFeed(s *state, feedUrl string) error {
 	fmt.Printf("Updating %v\n", feedUrl)
 
@@ -86,9 +112,7 @@ func updateSingleFeed(s *state, feedUrl string) error {
 		return fmt.Errorf("failed marking %v as updated", feedUrl)
 	}
 
-	saveFeedPosts(s, rssFeed, feed.ID)
-
-	return nil
+	return saveFeedPosts(s, rssFeed, feed.ID)
 }
 
 // Save posts to the database

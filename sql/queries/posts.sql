@@ -39,3 +39,10 @@ INNER JOIN feeds ON feeds.id = posts.feed_id
 WHERE posts.feed_id = $1
 ORDER BY posts.published_at DESC
 LIMIT $2;
+
+-- name: GetNumPostsByFeedId :one
+SELECT feeds.name, COUNT(*) AS num_posts
+FROM feeds
+INNER JOIN posts ON feeds.id = posts.feed_id
+WHERE feeds.id = $1
+GROUP BY feeds.name;

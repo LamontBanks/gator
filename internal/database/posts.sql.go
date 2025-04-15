@@ -118,6 +118,26 @@ func (q *Queries) GetFollowedPosts(ctx context.Context, arg GetFollowedPostsPara
 	return items, nil
 }
 
+const getNumPostsByFeedId = `-- name: GetNumPostsByFeedId :one
+SELECT feeds.name, COUNT(*) AS num_posts
+FROM feeds
+INNER JOIN posts ON feeds.id = posts.feed_id
+WHERE feeds.id = $1
+GROUP BY feeds.name
+`
+
+type GetNumPostsByFeedIdRow struct {
+	Name     string
+	NumPosts int64
+}
+
+func (q *Queries) GetNumPostsByFeedId(ctx context.Context, id uuid.UUID) (GetNumPostsByFeedIdRow, error) {
+	row := q.db.QueryRowContext(ctx, getNumPostsByFeedId, id)
+	var i GetNumPostsByFeedIdRow
+	err := row.Scan(&i.Name, &i.NumPosts)
+	return i, err
+}
+
 const getPostById = `-- name: GetPostById :one
 SELECT posts.title, posts.description, posts.published_at, posts.Url
 FROM posts
