@@ -7,7 +7,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/LamontBanks/gator/internal/database"
@@ -93,66 +92,4 @@ func saveFeed(s *state, feedName, feedUrl string, user database.User) (database.
 
 	fmt.Printf("Added RSS feed \"%v\" (%v)\n", newFeed.Name, newFeed.Url)
 	return newFeed, nil
-}
-
-// Keep prompting for feed name and url until confirmed by user
-// TODO:Scan multiple words a part of string
-func addFeedInteractive(s *state, user database.User) error {
-	var newFeedName string
-	var newFeedUrl string
-
-	for feedDetailsCorrect := false; !feedDetailsCorrect; {
-		fmt.Println()
-
-		// User enters feed name, url
-		fmt.Println("Enter the feed name:")
-		_, err := fmt.Scanln(&newFeedName)
-		if err != nil {
-			return err
-		}
-
-		fmt.Println("Enter the feed url:")
-		_, err = fmt.Scanln(&newFeedUrl)
-		if err != nil {
-			return err
-		}
-
-		// Confirm the details
-		fmt.Println()
-		fmt.Println("Confirm the new feed details:")
-		fmt.Printf("Name:\n\t%v\n", newFeedName)
-		fmt.Printf("RSS Url:\n\t%v\n", newFeedUrl)
-		fmt.Println()
-
-		var userChoice string
-		fmt.Println("Are these values correct?")
-		fmt.Printf("[y]es, [n]o, [q]uit: ")
-		_, err = fmt.Scan(&userChoice)
-		if err != nil {
-			return err
-		}
-
-		switch strings.ToLower(userChoice) {
-		case "y":
-			feedDetailsCorrect = true
-		case "q":
-			return nil
-		}
-		continue
-	}
-
-	// Attempt to get the feed
-	_, err := FetchFeed(context.Background(), newFeedUrl)
-	if err != nil {
-		return err
-	}
-
-	// Add the feed, attributed to the user
-	newFeed, err := saveFeed(s, feedNameArg, feedUrlArg, user)
-	if err != nil {
-		return err
-	}
-
-	// Make user follow feed they just added
-	return followFeedByUrl(s, user, newFeed.Url)
 }
