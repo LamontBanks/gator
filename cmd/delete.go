@@ -28,7 +28,7 @@ func init() {
 }
 
 func interactiveDelete(s *state, user database.User) error {
-	fmt.Println("You can only delete feeds, you've added and have no other followers")
+	fmt.Println("You can only delete feeds you've added and have no other followers")
 
 	feedsToDelete, err := s.db.GetFeedsEligibleForDeletion(context.Background(), user.ID)
 	if len(feedsToDelete) == 0 {
