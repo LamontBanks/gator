@@ -55,26 +55,33 @@ func updateAllFeeds(s *state) error {
 	feedUpdatedCh := make(chan struct{})
 	for _, feed := range allFeeds {
 		go func() error {
-			// Check number of post before...
-			beforeUpdate, err := s.db.GetNumPostsByFeedId(context.Background(), feed.ID)
-			numPostsBefore := 0
-			if err != nil && err != sql.ErrNoRows {
-				return fmt.Errorf("error getting number of posts for feed %v, %v", feed.FeedName, err)
+			// Get last post timestamp
+			// Default to .Now() if there aren't any posts, ex: a new feed
+			lastPostTimestamp, err := s.db.GetLastPostTimestamp(context.Background(), feed.ID)
+			if err == sql.ErrNoRows {
+				lastPostTimestamp = time.Now()
 			}
-			numPostsBefore = int(beforeUpdate.NumPosts)
+			if err != nil && err != sql.ErrNoRows {
+				feedUpdatedCh <- struct{}{}
+				return fmt.Errorf("error checking post timestamp for feed %v, %v", feed.FeedName, err)
+			}
 
+			// Save posts
+			// Ignoring errors as posts will constantly conflict with already-saved posts
+			// TODO: Only attempt to save new posts (ex: if published timestamp > latest -> save)
 			updateSingleFeed(s, feed.Url)
 
-			// ...and after updating
-			afterUpdate, err := s.db.GetNumPostsByFeedId(context.Background(), feed.ID)
-			numPostsAfter := 0
-			if err != nil && err != sql.ErrNoRows {
-				return fmt.Errorf("error getting number of posts for feed %v, %v", feed.FeedName, err)
+			// Count number of posts since latest timestamp
+			countPostsSinceTimestamp, err := s.db.NumPostsSinceTimestamp(context.Background(), database.NumPostsSinceTimestampParams{
+				FeedID:      feed.ID,
+				PublishedAt: lastPostTimestamp,
+			})
+			if err != nil {
+				return fmt.Errorf("error getting number of new posts %v, %v", feed.FeedName, err)
 			}
-			numPostsAfter = int(afterUpdate.NumPosts)
 
-			if numPostsAfter > numPostsBefore {
-				fmt.Printf("- %v: %v new posts\n", feed.FeedName, numPostsAfter-numPostsBefore)
+			if int(countPostsSinceTimestamp) > 0 {
+				fmt.Printf("- %v: %v new posts\n", feed.FeedName, int(countPostsSinceTimestamp))
 			}
 
 			feedUpdatedCh <- struct{}{}
@@ -94,7 +101,6 @@ func updateAllFeeds(s *state) error {
 // Download all current posts for the given feed
 // Returns true/false if there are additional posts since the last update
 func updateSingleFeed(s *state, feedUrl string) error {
-	fmt.Printf("Updating %v\n", feedUrl)
 
 	feed, err := s.db.GetFeedByUrl(context.Background(), feedUrl)
 	if err != nil {

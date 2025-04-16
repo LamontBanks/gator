@@ -118,24 +118,20 @@ func (q *Queries) GetFollowedPosts(ctx context.Context, arg GetFollowedPostsPara
 	return items, nil
 }
 
-const getNumPostsByFeedId = `-- name: GetNumPostsByFeedId :one
-SELECT feeds.name, COUNT(*) AS num_posts
-FROM feeds
-INNER JOIN posts ON feeds.id = posts.feed_id
-WHERE feeds.id = $1
-GROUP BY feeds.name
+const getLastPostTimestamp = `-- name: GetLastPostTimestamp :one
+SELECT posts.published_at
+FROM posts
+INNER JOIN feeds ON feeds.id = posts.feed_id
+WHERE posts.feed_id = $1
+ORDER BY posts.published_at DESC
+LIMIT 1
 `
 
-type GetNumPostsByFeedIdRow struct {
-	Name     string
-	NumPosts int64
-}
-
-func (q *Queries) GetNumPostsByFeedId(ctx context.Context, id uuid.UUID) (GetNumPostsByFeedIdRow, error) {
-	row := q.db.QueryRowContext(ctx, getNumPostsByFeedId, id)
-	var i GetNumPostsByFeedIdRow
-	err := row.Scan(&i.Name, &i.NumPosts)
-	return i, err
+func (q *Queries) GetLastPostTimestamp(ctx context.Context, feedID uuid.UUID) (time.Time, error) {
+	row := q.db.QueryRowContext(ctx, getLastPostTimestamp, feedID)
+	var published_at time.Time
+	err := row.Scan(&published_at)
+	return published_at, err
 }
 
 const getPostById = `-- name: GetPostById :one
@@ -214,4 +210,23 @@ func (q *Queries) GetPostsFromFeed(ctx context.Context, arg GetPostsFromFeedPara
 		return nil, err
 	}
 	return items, nil
+}
+
+const numPostsSinceTimestamp = `-- name: NumPostsSinceTimestamp :one
+SELECT COUNT(*)
+FROM posts
+WHERE posts.feed_id = $1
+  AND posts.published_at > $2
+`
+
+type NumPostsSinceTimestampParams struct {
+	FeedID      uuid.UUID
+	PublishedAt time.Time
+}
+
+func (q *Queries) NumPostsSinceTimestamp(ctx context.Context, arg NumPostsSinceTimestampParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, numPostsSinceTimestamp, arg.FeedID, arg.PublishedAt)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
 }
