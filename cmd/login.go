@@ -12,9 +12,12 @@ import (
 // loginCmd represents the login command
 var loginCmd = &cobra.Command{
 	Use:   "login",
-	Short: "Log in a register user",
-	Long:  `Log in a register user`,
-	Args:  cobra.ExactArgs(1),
+	Short: "Log in a registered user",
+	Long: `Log in a registered user.
+
+	gator login Alice
+`,
+	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return login(appState, args[0])
 	},

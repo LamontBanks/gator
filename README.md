@@ -443,3 +443,4 @@ Use the program:
 - Tests, unit/integration
 - Process HTML info RSS feed posts
 - Retrieve full blog posts from feed URL
+- Relative timestmps: 15 min ago, 1 hr ago, 3 days ago, etc.

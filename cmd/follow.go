@@ -19,8 +19,29 @@ var feedUrlParam string
 // followCmd represents the followFeed command
 var followCmd = &cobra.Command{
 	Use:   "follow",
-	Short: "Follow updates from a feed",
-	Long: `Follow updates from a feed
+	Short: "Follow updates from a saved feed.",
+	Long: `Follow updates from a saved feed.
+The feed must have already been added to gator.
+
+Feeds can be added either directly or interactively:
+
+	gator follow <url>
+	gator follow https://phys.org/rss-feed/space-news/
+	Following "Phys.org | Space News" (https://phys.org/rss-feed/space-news/)
+
+	gator follow
+
+	Saved feeds:
+	* Guild Wars 2
+	* Pivot To AI
+
+	Choose a new RSS feed to follow:
+	1: Nasa Image of the Day | The latest NASA "Image of the Day" image.
+	2: Phys.org | Space News | The latest science news on astronomy, astrobiology,  and space exploration from Phys.org.
+
+	2	# User choice
+
+	Following "Phys.org | Space News" (https://phys.org/rss-feed/space-news/)
 	`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {

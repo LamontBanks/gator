@@ -18,8 +18,20 @@ var unfollowfeedUrlParam string
 var unfollowCmd = &cobra.Command{
 	Use:   "unfollow",
 	Short: "Stop following updates from a feed",
-	Long:  `Stop following updates from a feed`,
-	Args:  cobra.MaximumNArgs(1),
+	Long: `Stop following updates from a feed.
+
+	gator unfollow
+
+	- Choose an RSS feed to unfollow
+	1: Guild Wars 2
+	2: Phys.org | Space News
+	3: Pivot To AI
+
+	2	# User choice
+
+	Unfollowed Phys.org | Space News | https://phys.org/rss-feed/space-news/
+`,
+	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 1 {
 			unfollowfeedUrlParam = args[0]

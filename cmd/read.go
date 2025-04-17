@@ -17,8 +17,33 @@ var readCmd = &cobra.Command{
 	Use:   "read",
 	Short: "Read posts in your feeds",
 	Long: `Read posts in your feeds.
-A interactive menu will help navigate your followed feeds, then to the posts within a feed.
-	
+A interactive menu will help navigate through your followed feeds, then to the posts within a feed.
+
+	gator read
+
+	Choose a feed:
+	1: Nasa Image of the Day
+	2: Phys.org | Space News
+	3: Pivot To AI
+
+	1	# Choice
+
+	Nasa Image of the Day
+	Choose a post:
+	1: Testing NASA’s IMAP (Interstellar Mapping and Acceleration Probe)
+			12:08 PM, Tue, 15 Apr 25
+	2: Sculpted by Luminous Stars
+			02:23 PM, Mon, 14 Apr 25
+	3: Apollo 13 Launch: 55 Years Ago
+			11:59 AM, Fri, 11 Apr 25
+
+	2	# Choice
+
+	Sculpted by Luminous Stars
+	02:23 PM, Monday, 14 Apr
+
+	This new image showcases the dazzling young star cluster NGC 346. Although both the James Webb Space Telescope...
+
 Currently only a plaintext <description> is readable in the terminal.
 Images will not render, HTML will be raw, etc.
 The full-text of the post, if any, will have to be viewed in a web browser.

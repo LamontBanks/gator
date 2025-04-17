@@ -18,8 +18,22 @@ import (
 var updateCmd = &cobra.Command{
 	Use:   "update",
 	Short: "Update all feeds",
-	Long:  ``,
-	Args:  cobra.MaximumNArgs(1),
+	Long: `Update all feeds.
+Run without arguments to immediately update all feeds:
+
+	gator update
+
+	Updating RSS feeds...
+	- Phys.org | Space News: 1 new posts
+	Feeds updated at 10:22AM
+
+Run with a time frequency format <number><seconds | minutes | hours>
+
+	gator update 15m	# 15 minutes
+	gator update 30s	# 30 seconds
+	gator update 2h		# 2 hours
+`,
+	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 1 {
 			freq, err := time.ParseDuration(args[0])

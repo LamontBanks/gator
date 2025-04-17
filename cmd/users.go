@@ -14,7 +14,14 @@ import (
 var usersCmd = &cobra.Command{
 	Use:   "users",
 	Short: "List all users",
-	Long:  `List all users`,
+	Long: `List all users:
+	
+	gator users
+
+	* Alice
+	* Bob (current)
+	* Cat
+`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return printAllUsers(appState)
 	},

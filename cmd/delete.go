@@ -15,9 +15,19 @@ import (
 var deleteCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "Delete a feed",
-	Long: `Deletes a feed:
+	Long: `Deletes a feed interactively.
+A feed can only be delete by its creator and must have either no followers other than (optionally) the creator:
 
-A feed can only be delete by its creator and must have either no followers other than (optionally) the creator.`,
+	gator delete
+
+	You can only delete feeds you've added and have no other followers
+	Choose a feed to delete:
+	1: Phys.org | Space News
+
+	1	# User choice
+
+	Deleted feed Phys.org | Space News
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		userAuthCall(interactiveDelete)(appState)
 	},

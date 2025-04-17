@@ -17,7 +17,9 @@ var registerCmd = &cobra.Command{
 	Use:   "register",
 	Short: "Create a user",
 	Long: `Username must be unique and are case-sensitive.
-	There is currenetly no option to delete users.`,
+	
+	gator register <username>
+`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return register(appState, args[0])

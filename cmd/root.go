@@ -37,7 +37,33 @@ var (
 		Use:   "gator",
 		Short: "Gator is a terminal-based RSS reader",
 		Long: `Gator is a terminal-based RSS reader.
-It is best ran as a terminal background process (ex: gator ... &).
+
+Examples:
+
+		gator
+
+
+		Guild Wars 2 | https://www.guildwars2.com/en/feed/
+			- Celebrating 20 Years of Guild Wars
+			- Pull a Rabbit (or a Choya) Out of Your Hat with Our New Magic Trick Emote
+
+		Phys.org | Space News | https://phys.org/rss-feed/space-news/
+			- Astronomers detect strongest sign yet of possible life on a planet beyond our own
+			- Astronomers explore globular cluster system of ultra-diffuse galaxy NGC5846_UDG1
+
+		Pivot To AI | https://pivot-to-ai.com/feed/
+			- Cursor’s AI-powered tech support vibe-codes a customer revolt
+			- H&M’s ‘AI models’ campaign makes impossible claims
+
+It is best ran as a terminal background process (ex: gator ... &):
+
+		gator update 15m &
+
+		Updating RSS feeds...
+		- Phys.org | Space News: 1 new posts
+		- Guild Wars 2: 3 new posts
+		Feeds updated at 9:52AM
+
 Then, interact with the tool to read and manage RSS feeds.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if resetFlag {

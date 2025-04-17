@@ -22,7 +22,13 @@ var feedUrlArg string
 var addCmd = &cobra.Command{
 	Use:   "add",
 	Short: "Add a feed",
-	Long:  `Add a feed directly using the required flags.`,
+	Long: `Add a feed directly using the required flags:
+
+	gator add -n "Space News" -u "https://phys.org/rss-feed/space-news/"
+	
+	Added RSS feed "Space News" (https://phys.org/rss-feed/space-news/)
+	Following "Space News" (https://phys.org/rss-feed/space-news/)
+	`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return userAuthCall(addFeed)(appState)
 	},
