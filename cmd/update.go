@@ -112,10 +112,9 @@ func updateAllFeeds(s *state) error {
 	return nil
 }
 
-// Download all current posts for the given feed
+// Download and save all current posts for the given feed
 // Returns true/false if there are additional posts since the last update
 func updateSingleFeed(s *state, feedUrl string) error {
-
 	feed, err := s.db.GetFeedByUrl(context.Background(), feedUrl)
 	if err != nil {
 		return err
@@ -136,8 +135,8 @@ func updateSingleFeed(s *state, feedUrl string) error {
 }
 
 // Save posts to the database
+// Only saves posts newer than the previous latest post
 func saveFeedPosts(s *state, rssFeed *RSSFeed, feedId uuid.UUID) error {
-	// Update feed description
 	err := s.db.UpdateFeedDescription(context.Background(), database.UpdateFeedDescriptionParams{
 		ID:          feedId,
 		Description: rssFeed.Channel.Description,
@@ -146,11 +145,22 @@ func saveFeedPosts(s *state, rssFeed *RSSFeed, feedId uuid.UUID) error {
 		return fmt.Errorf("error updating feed %v description, %v", rssFeed.Channel.Title, err)
 	}
 
-	// Update posts
+	// Save new posts
+	lastPostTimestamp, err := s.db.GetLastPostTimestamp(context.Background(), feedId)
+	if err == sql.ErrNoRows {
+		lastPostTimestamp = time.Now()
+	}
+
 	for i := range len(rssFeed.Channel.Item) {
 		pubDate, err := ParseRSSPubDate(rssFeed.Channel.Item[i].PubDate)
 		if err != nil {
 			return err
+		}
+
+		// Assumes RSS posts are in descending order (latest to oldest)
+		// So, only new posts should be written
+		if pubDate.Before(lastPostTimestamp) || pubDate.Equal(lastPostTimestamp) {
+			break
 		}
 
 		err = s.db.CreatePost(context.Background(), database.CreatePostParams{
@@ -167,5 +177,6 @@ func saveFeedPosts(s *state, rssFeed *RSSFeed, feedId uuid.UUID) error {
 			return err
 		}
 	}
+
 	return nil
 }
