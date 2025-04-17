@@ -148,7 +148,8 @@ func saveFeedPosts(s *state, rssFeed *RSSFeed, feedId uuid.UUID) error {
 	// Save new posts
 	lastPostTimestamp, err := s.db.GetLastPostTimestamp(context.Background(), feedId)
 	if err == sql.ErrNoRows {
-		lastPostTimestamp = time.Now()
+		var earliestTimestamp int64 = 0
+		lastPostTimestamp = time.Unix(earliestTimestamp, 0)
 	}
 
 	for i := range len(rssFeed.Channel.Item) {
