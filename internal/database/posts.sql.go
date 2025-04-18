@@ -160,7 +160,7 @@ func (q *Queries) GetPostById(ctx context.Context, id uuid.UUID) (GetPostByIdRow
 }
 
 const getPostsFromFeed = `-- name: GetPostsFromFeed :many
-SELECT feeds.name AS feed_name, posts.id, posts.title, posts.description, posts.published_at, posts.Url
+SELECT feeds.name AS feed_name, posts.id, posts.created_at, posts.updated_at, posts.title, posts.url, posts.description, posts.published_at, posts.feed_id
 FROM posts
 INNER JOIN feeds ON feeds.id = posts.feed_id
 WHERE posts.feed_id = $1
@@ -176,10 +176,13 @@ type GetPostsFromFeedParams struct {
 type GetPostsFromFeedRow struct {
 	FeedName    string
 	ID          uuid.UUID
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 	Title       string
+	Url         string
 	Description string
 	PublishedAt time.Time
-	Url         string
+	FeedID      uuid.UUID
 }
 
 func (q *Queries) GetPostsFromFeed(ctx context.Context, arg GetPostsFromFeedParams) ([]GetPostsFromFeedRow, error) {
@@ -194,10 +197,13 @@ func (q *Queries) GetPostsFromFeed(ctx context.Context, arg GetPostsFromFeedPara
 		if err := rows.Scan(
 			&i.FeedName,
 			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
 			&i.Title,
+			&i.Url,
 			&i.Description,
 			&i.PublishedAt,
-			&i.Url,
+			&i.FeedID,
 		); err != nil {
 			return nil, err
 		}

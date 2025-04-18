@@ -47,3 +47,14 @@ type User struct {
 	UpdatedAt time.Time
 	Name      string
 }
+
+type UsersPostsHistory struct {
+	ID           uuid.UUID
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	UserID       uuid.UUID
+	FeedID       uuid.UUID
+	PostID       uuid.UUID
+	HasViewed    bool
+	IsBookmarked bool
+}

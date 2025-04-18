@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/LamontBanks/gator/internal/database"
+	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 )
 
@@ -105,12 +106,59 @@ func readPosts(s *state, user database.User) error {
 		return err
 	}
 
+	// Mark as read for user
+	if err = markPostAsRead(s, user, posts[choice].FeedID, posts[choice].ID); err != nil {
+		return err
+	}
+
 	// Display the post
 	postText := fmt.Sprintf("%v\n", posts[choice].Title)
 	postText += fmt.Sprintf("%v\n\n", posts[choice].PublishedAt.In(time.Local).Format("03:04 PM, Monday, 02 Jan"))
 	postText += fmt.Sprintf("%v\n\n", posts[choice].Description)
 	postText += fmt.Sprintf("%v\n", posts[choice].Url)
 	fmt.Println(postText)
+
+	return nil
+}
+
+func markPostAsRead(s *state, user database.User, feedID, postID uuid.UUID) error {
+	_, err := s.db.GetPostFromUserReadHisory(context.Background(), database.GetPostFromUserReadHisoryParams{
+		UserID: user.ID,
+		FeedID: feedID,
+		PostID: postID,
+	})
+
+	if err != nil && err != sql.ErrNoRows {
+		return fmt.Errorf("error getting post %v from history, %v", postID, err)
+	}
+
+	// Save post to history if not present
+	if err == sql.ErrNoRows {
+		_, err = s.db.CreatePostInUserReadHistory(context.Background(), database.CreatePostInUserReadHistoryParams{
+			ID:           uuid.New(),
+			CreatedAt:    time.Now(),
+			UpdatedAt:    time.Now(),
+			UserID:       user.ID,
+			FeedID:       feedID,
+			PostID:       postID,
+			HasViewed:    false,
+			IsBookmarked: false,
+		})
+
+		if err != nil {
+			return fmt.Errorf("error saving post %v to history, %v", postID, err)
+		}
+	}
+
+	// Mark as read
+	err = s.db.MarkPostAsViewed(context.Background(), database.MarkPostAsViewedParams{
+		UserID: user.ID,
+		FeedID: feedID,
+		PostID: postID,
+	})
+	if err != nil {
+		return fmt.Errorf("error marking post %v as viewed %v", postID, err)
+	}
 
 	return nil
 }
