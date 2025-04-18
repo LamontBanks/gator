@@ -6,6 +6,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/LamontBanks/gator/internal/database"
@@ -13,14 +14,22 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var numReadPosts int
+
 // readCmd represents the read command
 var readCmd = &cobra.Command{
-	Use:   "read",
+	Use: "read",
+
 	Short: "Read posts in your feeds",
 	Long: `Read posts in your feeds.
 A interactive menu will help navigate through your followed feeds, then to the posts within a feed.
 
 	gator read
+	gator read <number of posts to display, default: 3>
+
+Examples:
+
+	gator
 
 	Choose a feed:
 	1: Nasa Image of the Day
@@ -49,13 +58,25 @@ Currently only a plaintext <description> is readable in the terminal.
 Images will not render, HTML will be raw, etc.
 The full-text of the post, if any, will have to be viewed in a web browser.
 	`,
+	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		numReadPosts = 3
+
+		if len(args) == 1 {
+			i, err := strconv.Atoi(args[0])
+			if err != nil {
+				return err
+			}
+
+			numReadPosts = i
+		}
 		return userAuthCall(readPosts)(appState)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(readCmd)
+
 }
 
 // Display option picker for user to select a feed, then select the post to read it's RSS description.
@@ -87,7 +108,7 @@ func readPosts(s *state, user database.User) error {
 	// Get posts for the selected feed
 	posts, err := s.db.GetPostsFromFeed(context.Background(), database.GetPostsFromFeedParams{
 		FeedID: userFeeds[choice].FeedID,
-		Limit:  int32(3),
+		Limit:  int32(numReadPosts),
 	})
 	if err != nil {
 		return err
