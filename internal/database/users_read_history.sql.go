@@ -92,6 +92,56 @@ func (q *Queries) GetPostFromUserReadHisory(ctx context.Context, arg GetPostFrom
 	return i, err
 }
 
+const getUnreadPostsForFeed = `-- name: GetUnreadPostsForFeed :many
+SELECT posts.id, posts.feed_id, posts.title
+FROM posts
+WHERE posts.feed_id = $2
+AND
+posts.id NOT IN
+	(SELECT post_id
+		FROM users_posts_history
+		WHERE users_posts_history.id = $1
+        AND feed_id = $2
+		AND has_viewed = true)
+ORDER BY posts.published_at DESC
+`
+
+type GetUnreadPostsForFeedParams struct {
+	ID     uuid.UUID
+	FeedID uuid.UUID
+}
+
+type GetUnreadPostsForFeedRow struct {
+	ID     uuid.UUID
+	FeedID uuid.UUID
+	Title  string
+}
+
+// - Get all posts for a given feed...
+// - ...but only posts user has not read
+func (q *Queries) GetUnreadPostsForFeed(ctx context.Context, arg GetUnreadPostsForFeedParams) ([]GetUnreadPostsForFeedRow, error) {
+	rows, err := q.db.QueryContext(ctx, getUnreadPostsForFeed, arg.ID, arg.FeedID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetUnreadPostsForFeedRow
+	for rows.Next() {
+		var i GetUnreadPostsForFeedRow
+		if err := rows.Scan(&i.ID, &i.FeedID, &i.Title); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const markPostAsViewed = `-- name: MarkPostAsViewed :exec
 UPDATE users_posts_history
 SET has_viewed = true

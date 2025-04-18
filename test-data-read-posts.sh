@@ -32,8 +32,11 @@ go run main.go add -n "Guild Wars 2" -u https://www.guildwars2.com/en/feed/
 # A scrub jay perches on a branch near the Vehicle Assembly Building at NASA’s Kennedy Space Center in Florida on June 22, 2020.
 
 # https://www.nasa.gov/image-detail/afs-8-101-1017/
-echo "2\n3" | go run main.go read 
+echo "2\n6" | go run main.go read 10
 
-echo "3\n1" | go run main.go read 
-echo "3\n2" | go run main.go read 
-echo "2\n1" | go run main.go read 
+echo "3\n2" | go run main.go read 10
+echo "3\n7" | go run main.go read 10
+echo "2\n3" | go run main.go read 10
+echo "1\n3" | go run main.go read 10
+echo "1\n4" | go run main.go read 10
+echo "1\n5" | go run main.go read 10

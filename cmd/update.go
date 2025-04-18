@@ -35,6 +35,7 @@ Run with a time frequency format <number><seconds | minutes | hours>
 `,
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		// Update preiodically using provided frequency
 		if len(args) == 1 {
 			freq, err := time.ParseDuration(args[0])
 			if err != nil {
@@ -45,12 +46,13 @@ Run with a time frequency format <number><seconds | minutes | hours>
 			ticker := time.NewTicker(freq)
 			for ; ; <-ticker.C {
 				fmt.Println("Updating RSS feeds...")
-				updateAllFeeds(appState)
+				userAuthCall(updateAllFeeds)(appState)
 			}
 		}
 
+		// Or, do single update
 		fmt.Println("Updating feeds...")
-		return updateAllFeeds(appState)
+		return userAuthCall(updateAllFeeds)(appState)
 	},
 }
 
@@ -58,44 +60,29 @@ func init() {
 	rootCmd.AddCommand(updateCmd)
 }
 
-func updateAllFeeds(s *state) error {
+func updateAllFeeds(s *state, user database.User) error {
 	allFeeds, err := s.db.GetFeeds(context.Background())
 	if err != nil {
 		return err
 	}
 
 	// Update all feeds at once using goroutines
-	// Indicate if there are any new posts
+	// And prints the unread feed count
 	feedUpdatedCh := make(chan struct{})
 	for _, feed := range allFeeds {
 		go func() error {
-			// Get last post timestamp
-			// Default to .Now() if there aren't any posts, ex: a new feed
-			lastPostTimestamp, err := s.db.GetLastPostTimestamp(context.Background(), feed.ID)
-			if err == sql.ErrNoRows {
-				lastPostTimestamp = time.Now()
-			}
-			if err != nil && err != sql.ErrNoRows {
-				feedUpdatedCh <- struct{}{}
-				return fmt.Errorf("error checking post timestamp for feed %v, %v", feed.FeedName, err)
-			}
 
 			// Save posts
 			// Ignoring errors as posts will constantly conflict with already-saved posts
-			// TODO: Only attempt to save new posts (ex: if published timestamp > latest -> save)
 			updateSingleFeed(s, feed.Url)
 
-			// Count number of posts since latest timestamp
-			countPostsSinceTimestamp, err := s.db.NumPostsSinceTimestamp(context.Background(), database.NumPostsSinceTimestampParams{
-				FeedID:      feed.ID,
-				PublishedAt: lastPostTimestamp,
-			})
+			unreadPostCount, err := getUnreadPostCount(s, user, feed.ID)
 			if err != nil {
-				return fmt.Errorf("error getting number of new posts %v, %v", feed.FeedName, err)
+				return err
 			}
 
-			if int(countPostsSinceTimestamp) > 0 {
-				fmt.Printf("- %v: %v new posts\n", feed.FeedName, int(countPostsSinceTimestamp))
+			if unreadPostCount > 0 {
+				fmt.Printf("- %v\n\t%v unread posts\n", feed.FeedName, unreadPostCount)
 			}
 
 			feedUpdatedCh <- struct{}{}
@@ -180,4 +167,16 @@ func saveFeedPosts(s *state, rssFeed *RSSFeed, feedId uuid.UUID) error {
 	}
 
 	return nil
+}
+
+func getUnreadPostCount(s *state, user database.User, feedID uuid.UUID) (int, error) {
+	unreadPosts, err := s.db.GetUnreadPostsForFeed(context.Background(), database.GetUnreadPostsForFeedParams{
+		ID:     user.ID,
+		FeedID: feedID,
+	})
+	if err != nil {
+		return 0, fmt.Errorf("error getting unread posts, %v", err)
+	}
+
+	return len(unreadPosts), nil
 }

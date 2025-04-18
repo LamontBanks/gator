@@ -24,3 +24,18 @@ SET has_viewed = true
 WHERE user_id = $1 
     AND feed_id = $2
     AND post_id = $3;
+
+-- name: GetUnreadPostsForFeed :many
+--- Get all posts for a given feed...
+SELECT posts.id, posts.feed_id, posts.title
+FROM posts
+WHERE posts.feed_id = $2
+AND
+--- ...but only posts user has not read
+posts.id NOT IN
+	(SELECT post_id
+		FROM users_posts_history
+		WHERE users_posts_history.id = $1
+        AND feed_id = $2
+		AND has_viewed = true)
+ORDER BY posts.published_at DESC;
