@@ -100,14 +100,14 @@ AND
 posts.id NOT IN
 	(SELECT post_id
 		FROM users_posts_history
-		WHERE users_posts_history.id = $1
+		WHERE users_posts_history.user_id = $1
         AND feed_id = $2
 		AND has_viewed = true)
 ORDER BY posts.published_at DESC
 `
 
 type GetUnreadPostsForFeedParams struct {
-	ID     uuid.UUID
+	UserID uuid.UUID
 	FeedID uuid.UUID
 }
 
@@ -120,7 +120,7 @@ type GetUnreadPostsForFeedRow struct {
 // - Get all posts for a given feed...
 // - ...but only posts user has not read
 func (q *Queries) GetUnreadPostsForFeed(ctx context.Context, arg GetUnreadPostsForFeedParams) ([]GetUnreadPostsForFeedRow, error) {
-	rows, err := q.db.QueryContext(ctx, getUnreadPostsForFeed, arg.ID, arg.FeedID)
+	rows, err := q.db.QueryContext(ctx, getUnreadPostsForFeed, arg.UserID, arg.FeedID)
 	if err != nil {
 		return nil, err
 	}

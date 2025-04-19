@@ -40,6 +40,14 @@ WHERE posts.feed_id = $1
 ORDER BY posts.published_at DESC
 LIMIT $2;
 
+-- name: GetAllPostsFromFeed :many
+SELECT feeds.name AS feed_name, posts.*
+FROM posts
+INNER JOIN feeds ON feeds.id = posts.feed_id
+WHERE posts.feed_id = $1
+ORDER BY posts.published_at DESC;
+
+
 -- name: GetLastPostTimestamp :one
 SELECT posts.published_at
 FROM posts

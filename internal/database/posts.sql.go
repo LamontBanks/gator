@@ -51,6 +51,59 @@ func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) error {
 	return err
 }
 
+const getAllPostsFromFeed = `-- name: GetAllPostsFromFeed :many
+SELECT feeds.name AS feed_name, posts.id, posts.created_at, posts.updated_at, posts.title, posts.url, posts.description, posts.published_at, posts.feed_id
+FROM posts
+INNER JOIN feeds ON feeds.id = posts.feed_id
+WHERE posts.feed_id = $1
+ORDER BY posts.published_at DESC
+`
+
+type GetAllPostsFromFeedRow struct {
+	FeedName    string
+	ID          uuid.UUID
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	Title       string
+	Url         string
+	Description string
+	PublishedAt time.Time
+	FeedID      uuid.UUID
+}
+
+func (q *Queries) GetAllPostsFromFeed(ctx context.Context, feedID uuid.UUID) ([]GetAllPostsFromFeedRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAllPostsFromFeed, feedID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllPostsFromFeedRow
+	for rows.Next() {
+		var i GetAllPostsFromFeedRow
+		if err := rows.Scan(
+			&i.FeedName,
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Title,
+			&i.Url,
+			&i.Description,
+			&i.PublishedAt,
+			&i.FeedID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getFollowedPosts = `-- name: GetFollowedPosts :many
 WITH user_followed_feeds AS (
     SELECT feeds.name AS feed_name, feeds.id AS feed_id

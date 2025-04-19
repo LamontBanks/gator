@@ -73,16 +73,16 @@ func updateAllFeeds(s *state, user database.User) error {
 		go func() error {
 
 			// Save posts
-			// Ignoring errors as posts will constantly conflict with already-saved posts
 			updateSingleFeed(s, feed.Url)
 
+			// Display unread posts for each feed
 			unreadPostCount, err := getUnreadPostCount(s, user, feed.ID)
 			if err != nil {
 				return err
 			}
 
 			if unreadPostCount > 0 {
-				fmt.Printf("- %v\n\t%v unread posts\n", feed.FeedName, unreadPostCount)
+				fmt.Printf("%v\n\t- %v unread posts\n", feed.FeedName, unreadPostCount)
 			}
 
 			feedUpdatedCh <- struct{}{}
@@ -171,7 +171,7 @@ func saveFeedPosts(s *state, rssFeed *RSSFeed, feedId uuid.UUID) error {
 
 func getUnreadPostCount(s *state, user database.User, feedID uuid.UUID) (int, error) {
 	unreadPosts, err := s.db.GetUnreadPostsForFeed(context.Background(), database.GetUnreadPostsForFeedParams{
-		ID:     user.ID,
+		UserID: user.ID,
 		FeedID: feedID,
 	})
 	if err != nil {

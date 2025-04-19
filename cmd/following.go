@@ -39,6 +39,11 @@ func followedFeeds(s *state, user database.User) error {
 		return err
 	}
 
+	if len(feedsAlreadyFollowed) == 0 {
+		fmt.Println("- Not following any feeds")
+		return nil
+	}
+
 	for _, feed := range feedsAlreadyFollowed {
 		fmt.Printf("* %v\n", feed.FeedName)
 	}
