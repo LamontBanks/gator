@@ -67,7 +67,7 @@ func interactiveFollowFeed(s *state, user database.User) error {
 	}
 
 	if len(feedsNotFollowed) == 0 {
-		fmt.Println("- No feeds to follow")
+		fmt.Println("- No additional feeds to follow")
 		return nil
 	}
 

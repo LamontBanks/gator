@@ -68,13 +68,8 @@ Then, interact with the tool to read and manage RSS feeds.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if resetFlag {
 				return reset()
-			} else {
-				if showAllFeeds {
-					return printAllFeeds(appState)
-				} else {
-					return userAuthCall(printFollowedFeeds)(appState)
-				}
 			}
+			return userAuthCall(printFollowedFeeds)(appState)
 		},
 	}
 )
