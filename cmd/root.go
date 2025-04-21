@@ -224,47 +224,6 @@ func printFollowedFeeds(s *state, user database.User) error {
 	return nil
 }
 
-func printAllFeeds(s *state) error {
-	if numPostsPerFeed < 0 {
-		return fmt.Errorf("number of posts must be >= 0")
-	}
-
-	feeds, err := s.db.GetFeeds(context.Background())
-	if err != nil {
-		return err
-	}
-
-	// Print posts for each feed
-	fmt.Println("All RSS Feeds:")
-	if len(feeds) == 0 {
-		fmt.Println("- No feeds added")
-		return nil
-	}
-
-	for _, feed := range feeds {
-		posts, err := s.db.GetPostsFromFeed(context.Background(), database.GetPostsFromFeedParams{
-			FeedID: feed.ID,
-			Limit:  int32(numPostsPerFeed),
-		})
-		if err != nil {
-			return err
-		}
-
-		// Print feeds, posts
-		fmt.Printf("%v | %v\n", feed.FeedName, feed.Url)
-		if len(posts) > 0 {
-			for _, post := range posts {
-				fmt.Printf("\t- %v\n", post.Title)
-			}
-		} else {
-			fmt.Println("\t- No recent posts")
-		}
-		fmt.Println()
-	}
-
-	return nil
-}
-
 // DEV ONLY - Delete all users
 func reset() error {
 	return appState.db.Reset(context.Background())
