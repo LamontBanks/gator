@@ -16,7 +16,19 @@ import (
 var clearCmd = &cobra.Command{
 	Use:   "clear",
 	Short: "Marks all posts as read",
-	Long:  `Marks all posts as read`,
+	Long: `Marks all posts as read
+
+	gator read clear
+
+	Choose a feed:
+	1: Guild Wars 2
+	2: Nasa Image of the Day
+	3: Pivot To AI
+
+	1	# User choice
+
+	All Guild Wars 2 posts marked as read
+	`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return userAuthCall(markAllPostsAsRead)(appState)
 	},
