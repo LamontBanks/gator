@@ -23,9 +23,12 @@ Run without arguments to immediately update all feeds:
 
 	gator update
 
-	Updating RSS feeds...
-	- Phys.org | Space News: 1 new posts
-	Feeds updated at 10:22AM
+	Guild Wars 2
+			- 1 unread posts
+	Nasa Image of the Day
+			- 3 unread posts
+	Pivot To AI
+			- 2 unread posts
 
 Run with a time frequency format <number><seconds | minutes | hours>
 

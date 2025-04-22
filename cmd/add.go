@@ -15,35 +15,28 @@ import (
 )
 
 // addCmd flags
-var feedNameArg string
 var feedUrlArg string
 
 // addCmd represents the add command
 var addCmd = &cobra.Command{
 	Use:   "add",
 	Short: "Add a feed",
-	Long: `Add a feed directly using the required flags:
+	Long: `Add a feed by providing the URL:
 
-	gator add -n "Space News" -u "https://phys.org/rss-feed/space-news/"
+	gator add "https://phys.org/rss-feed/space-news/"
 	
 	Added RSS feed "Space News" (https://phys.org/rss-feed/space-news/)
 	Following "Space News" (https://phys.org/rss-feed/space-news/)
 	`,
+	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		feedUrlArg = args[0]
 		return userAuthCall(addFeed)(appState)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(addCmd)
-
-	addCmd.Flags().StringVarP(&feedNameArg, "name", "n", "", "Name of the  RSS feed (required)")
-	addCmd.Flags().StringVarP(&feedUrlArg, "url", "u", "", "Url to the RSS feed (required)")
-
-	addCmd.MarkFlagRequired("name")
-	addCmd.MarkFlagRequired("url")
-
-	addCmd.MarkFlagsRequiredTogether("name", "url")
 }
 
 // Adds a feed record to gator
@@ -60,14 +53,14 @@ func addFeed(s *state, user database.User) error {
 		return nil
 	}
 
-	// Attempt to download feed before adding entry
+	// Attempt to download feed
 	rssFeed, err := FetchFeed(context.Background(), feedUrlArg)
 	if err != nil {
-		return fmt.Errorf("could not add feed %v, %v", feedUrlArg, err)
+		return fmt.Errorf("could not download feed %v: %v", feedUrlArg, err)
 	}
 
 	// Save the feed to the database
-	newFeed, err := saveFeed(s, feedNameArg, feedUrlArg, user)
+	newFeed, err := saveFeed(s, rssFeed.Channel.Title, rssFeed.Channel.Link, user)
 	if err != nil {
 		return err
 	}
@@ -75,7 +68,7 @@ func addFeed(s *state, user database.User) error {
 	// Immediately download feed updates
 	err = saveFeedPosts(s, rssFeed, newFeed.ID)
 	if err != nil {
-		return fmt.Errorf("error updating feed %v, %v", rssFeed.Channel.Title, err)
+		return fmt.Errorf("error saving feed posts, %v", err)
 	}
 
 	// Make user follow feed they just added
@@ -93,9 +86,9 @@ func saveFeed(s *state, feedName, feedUrl string, user database.User) (database.
 		UserID:    user.ID,
 	})
 	if err != nil {
-		return database.Feed{}, fmt.Errorf("could not add RSS feed %v (%v)", feedNameArg, feedUrlArg)
+		return database.Feed{}, fmt.Errorf("could not save new feed entry, %v", err)
 	}
 
-	fmt.Printf("Added RSS feed \"%v\" (%v)\n", newFeed.Name, newFeed.Url)
+	fmt.Printf("Added RSS feed \"%v\"\n", newFeed.Name)
 	return newFeed, nil
 }

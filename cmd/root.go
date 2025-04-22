@@ -210,7 +210,7 @@ func printFollowedFeeds(s *state, user database.User) error {
 		}
 
 		// Print feeds, posts
-		fmt.Printf("%v | %v\n", feed.FeedName, feed.FeedUrl)
+		fmt.Printf("%v\n", feed.FeedName)
 		if len(posts) > 0 {
 			for _, post := range posts {
 				fmt.Printf("\t- %v\n", post.Title)
