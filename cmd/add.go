@@ -60,7 +60,7 @@ func addFeed(s *state, user database.User) error {
 	}
 
 	// Save the feed to the database
-	newFeed, err := saveFeed(s, rssFeed.Channel.Title, rssFeed.Channel.Link, user)
+	newFeed, err := saveFeed(s, rssFeed.Channel.Title, feedUrlArg, user)
 	if err != nil {
 		return err
 	}
