@@ -7,6 +7,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"slices"
 	"time"
 
 	"github.com/LamontBanks/gator/internal/database"
@@ -70,22 +71,31 @@ func updateAllFeeds(s *state, user database.User) error {
 	}
 
 	// Update all feeds at once using goroutines
-	// And prints the unread feed count
+	// And prints the unread feed count (for followed feeds)
 	feedUpdatedCh := make(chan struct{})
+	followedFeeds, err := s.db.GetFeedsForUser(context.Background(), user.ID)
+	if err != nil {
+		return err
+	}
+
 	for _, feed := range allFeeds {
 		go func() error {
 
 			// Save posts
 			updateSingleFeed(s, feed.Url)
 
-			// Display unread posts for each feed
-			unreadPostCount, err := getUnreadPostCount(s, user, feed.ID)
-			if err != nil {
-				return err
-			}
+			// Display unread posts, but only for followed feeds
+			if slices.ContainsFunc(followedFeeds, func(followedFeed database.GetFeedsForUserRow) bool {
+				return followedFeed.FeedUrl == feed.Url
+			}) {
+				unreadPostCount, err := getUnreadPostCount(s, user, feed.ID)
+				if err != nil {
+					return err
+				}
 
-			if unreadPostCount > 0 {
-				fmt.Printf("%v\n\t- %v unread posts\n", feed.FeedName, unreadPostCount)
+				if unreadPostCount > 0 {
+					fmt.Printf("%v\n\t- %v unread posts\n", feed.FeedName, unreadPostCount)
+				}
 			}
 
 			feedUpdatedCh <- struct{}{}

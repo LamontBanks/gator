@@ -76,7 +76,6 @@ The full-text of the post, if any, will have to be viewed in a web browser.
 
 func init() {
 	rootCmd.AddCommand(readCmd)
-
 }
 
 // Display option picker for user to select a feed, then select the post to read it's RSS description.
