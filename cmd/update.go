@@ -72,7 +72,8 @@ func updateAllFeeds(s *state, user database.User) error {
 
 	// Update all feeds at once using goroutines
 	// And prints the unread feed count (for followed feeds)
-	feedUpdatedCh := make(chan struct{})
+	// Arbitrary limit of 10 requests at a time
+	feedUpdatedCh := make(chan struct{}, 10)
 	followedFeeds, err := s.db.GetFeedsForUser(context.Background(), user.ID)
 	if err != nil {
 		return err
