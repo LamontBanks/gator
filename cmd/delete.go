@@ -49,13 +49,10 @@ func interactiveDelete(s *state, user database.User) error {
 		return err
 	}
 
-	// Prompt to select feed
-	// Create label-value 2D array for the option picker
-	feedOptions := make([][]string, len(feedsToDelete))
+	// Make option picker from list of feed names
+	feedOptions := make([]string, len(feedsToDelete))
 	for i := range feedsToDelete {
-		feedOptions[i] = make([]string, 2)
-		feedOptions[i][0] = feedsToDelete[i].Name
-		feedOptions[i][1] = feedsToDelete[i].FeedID.URN()
+		feedOptions[i] = feedsToDelete[i].Name
 	}
 
 	choice, err := listOptionsReadChoice(feedOptions, "Choose a feed to delete:")
@@ -63,12 +60,14 @@ func interactiveDelete(s *state, user database.User) error {
 		return err
 	}
 
+	feedToDelete := feedsToDelete[choice]
+
 	// Delete the feed
-	err = s.db.DeleteFeedById(context.Background(), feedsToDelete[choice].FeedID)
+	err = s.db.DeleteFeedById(context.Background(), feedToDelete.FeedID)
 	if err != nil {
-		return fmt.Errorf("failed to delete %v", feedsToDelete[choice].Name)
+		return fmt.Errorf("failed to delete %v", feedToDelete.Name)
 	}
 
-	fmt.Printf("Deleted feed %v\n", feedsToDelete[choice].Name)
+	fmt.Printf("Deleted feed %v\n", feedToDelete.Name)
 	return nil
 }

@@ -134,13 +134,13 @@ func closeDB() {
 //
 //	int - the index of the choice
 //	error - if choice out of range
-func listOptionsReadChoice(labelsValues [][]string, message string) (int, error) {
+func listOptionsReadChoice(options []string, message string) (int, error) {
 	fmt.Println(message)
 
 	// List options, start index with "1"
 	// Easier to select on a typical keyboard than "0" for choosing the first option (the most common case)
-	for i, lblVal := range labelsValues {
-		fmt.Printf("%v: %v\n", i+1, lblVal[0])
+	for i, option := range options {
+		fmt.Printf("%v: %v\n", i+1, option)
 	}
 
 	// Get user's choice
@@ -153,7 +153,7 @@ func listOptionsReadChoice(labelsValues [][]string, message string) (int, error)
 
 	// Normalize choice to 0-based indexing
 	choice -= 1
-	if choice < 0 || choice >= len(labelsValues) {
+	if choice < 0 || choice >= len(options) {
 		return 0, errors.New("invalid choice")
 	}
 

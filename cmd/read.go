@@ -98,21 +98,20 @@ func readPosts(s *state, user database.User) error {
 		return err
 	}
 
-	// Copy feedNames, feedUrl into a label-value 2D slice, pass to the option picker, select the feed
-	feedOptions := make([][]string, len(userFeeds))
+	// Make option picker from list of feed names
+	feedOptions := make([]string, len(userFeeds))
 	for i := range userFeeds {
-		feedOptions[i] = make([]string, 2)
-		feedOptions[i][0] = userFeeds[i].FeedName
-		feedOptions[i][1] = userFeeds[i].FeedUrl
+		feedOptions[i] = userFeeds[i].FeedName
 	}
 
 	choice, err := listOptionsReadChoice(feedOptions, "Choose a feed:")
 	if err != nil {
 		return err
 	}
-	feed := userFeeds[choice]
-	fmt.Println(feed.FeedName)
 
+	feed := userFeeds[choice]
+
+	fmt.Println(feed.FeedName)
 	posts, err := s.db.GetPostsFromFeed(context.Background(), database.GetPostsFromFeedParams{
 		FeedID: feed.FeedID,
 		Limit:  int32(numReadPosts),
@@ -121,12 +120,10 @@ func readPosts(s *state, user database.User) error {
 		return err
 	}
 
-	// Copy postTitle, postId into a label-value 2D slice, pass to the option picker, select the post
-	postOptions := make([][]string, len(posts))
+	// Make option picker from list of post titles, timestamp
+	postOptions := make([]string, len(posts))
 	for i := range posts {
-		postOptions[i] = make([]string, 2)
-		postOptions[i][0] = posts[i].Title + "\n\t" + posts[i].PublishedAt.In(time.Local).Format("03:04 PM, Mon, 02 Jan 06")
-		postOptions[i][1] = posts[i].ID.String()
+		postOptions[i] = posts[i].Title + "\n\t" + posts[i].PublishedAt.In(time.Local).Format("03:04 PM, Mon, 02 Jan 06")
 	}
 
 	choice, err = listOptionsReadChoice(postOptions, "Choose a post:")
@@ -159,12 +156,10 @@ func readNewPosts(s *state, user database.User) error {
 		return err
 	}
 
-	// Copy feedNames, feedUrl into a label-value 2D slice, pass to the option picker, select the feed
-	feedOptions := make([][]string, len(userFeeds))
+	// Options picker from list of feed names
+	feedOptions := make([]string, len(userFeeds))
 	for i := range userFeeds {
-		feedOptions[i] = make([]string, 2)
-		feedOptions[i][0] = userFeeds[i].FeedName
-		feedOptions[i][1] = userFeeds[i].FeedUrl
+		feedOptions[i] = userFeeds[i].FeedName
 	}
 	choice, err := listOptionsReadChoice(feedOptions, "Choose a feed:")
 	if err != nil {
@@ -201,7 +196,12 @@ func readNewPosts(s *state, user database.User) error {
 
 	// Navigate through posts or exit
 	for navChoice != navQuit {
-		// Print post, marked as read
+		// Mar as read
+		if err := markPostAsRead(s, user, unreadPosts[currPostIndex].FeedID, unreadPosts[currPostIndex].PostID); err != nil {
+			return err
+		}
+
+		// Print post
 		post := unreadPosts[currPostIndex]
 		fmt.Println("---")
 		postText := fmt.Sprintf("%v\n", post.Title)
@@ -210,12 +210,9 @@ func readNewPosts(s *state, user database.User) error {
 		postText += fmt.Sprintf("%v\n", post.Url)
 		fmt.Println(postText)
 
-		if err := markPostAsRead(s, user, unreadPosts[currPostIndex].FeedID, unreadPosts[currPostIndex].PostID); err != nil {
-			return err
-		}
-
 		// Display 1-based page numbers
 		fmt.Printf("Post %v of %v\n\n", currPostIndex+1, len(unreadPosts))
+		fmt.Println("---")
 
 		// Commands
 		fmt.Printf("'%v' - next, '%v' - back, '%v' - quit\n\n", navNext, navPrev, navQuit)

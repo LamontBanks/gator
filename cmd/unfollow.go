@@ -66,12 +66,10 @@ func interactiveUnfollowFeed(s *state, user database.User) error {
 		return nil
 	}
 
-	// Create label-value 2D array for the option picker
-	feedOptions := make([][]string, len(followedFeeds))
+	// Make option picker from list of feed names
+	feedOptions := make([]string, len(followedFeeds))
 	for i := range followedFeeds {
-		feedOptions[i] = make([]string, 2)
-		feedOptions[i][0] = followedFeeds[i].FeedName
-		feedOptions[i][1] = followedFeeds[i].FeedUrl
+		feedOptions[i] = followedFeeds[i].FeedName
 	}
 
 	// Choose feed to unfollow

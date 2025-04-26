@@ -88,12 +88,10 @@ func interactiveFollowFeed(s *state, user database.User) error {
 	}
 	fmt.Println()
 
-	// Create label-value 2D array for the option picker
-	feedOptions := make([][]string, len(feedsNotFollowed))
+	// Make option picker from list of feed names + descriptions
+	feedOptions := make([]string, len(feedsNotFollowed))
 	for i := range feedsNotFollowed {
-		feedOptions[i] = make([]string, 2)
-		feedOptions[i][0] = feedsNotFollowed[i].Name + " | " + feedsNotFollowed[i].Description
-		feedOptions[i][1] = feedsNotFollowed[i].Url
+		feedOptions[i] = feedsNotFollowed[i].Name + " | " + feedsNotFollowed[i].Description
 	}
 
 	choice, err := listOptionsReadChoice(feedOptions, "Choose a new RSS feed to follow:")
