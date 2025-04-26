@@ -2,6 +2,7 @@ package customtimestamp
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 )
 
@@ -15,20 +16,54 @@ func relativeTimestamp(now time.Time, then time.Time) string {
 
 	// Ignoring errors
 	year, _ := time.ParseDuration("8760h")
-	// month, _ := time.ParseDuration("720h")
+	month, _ := time.ParseDuration("720h")
 	// day, _ := time.ParseDuration("24h")
 	// hour, _ := time.ParseDuration("1h")
 	// minute, _ := time.ParseDuration("1m")
 
+	// > year
 	if timeDiff >= year {
-		roundYear := (timeDiff / year)
+		roundedTimeDiff, err := convertDurationToInt(timeDiff / year)
+		if err != nil {
+			return ""
+		}
 
-		// TODO: "s" - multipels suffix
-		return fmt.Sprintf("%d years ago", roundYear.)
+		period := appendMultiplesSuffix("year", roundedTimeDiff)
+		return fmt.Sprintf("%v %v ago", roundedTimeDiff, period)
+	}
+
+	// 1 - 11 months
+	if timeDiff < year && timeDiff >= month {
+		roundedTimeDiff, err := convertDurationToInt(timeDiff / month)
+		if err != nil {
+			return ""
+		}
+
+		period := appendMultiplesSuffix("month", roundedTimeDiff)
+		return fmt.Sprintf("%v %v ago", roundedTimeDiff, period)
 	}
 
 	return timeDiff.String()
 }
+
+// Append "s" to `word` if num is > "0"
+func appendMultiplesSuffix(word string, num int) string {
+	if num > 1 {
+		word += "s"
+	}
+
+	return word
+}
+
+func convertDurationToInt(t time.Duration) (int, error) {
+	i, err := strconv.Atoi(fmt.Sprintf("%d", t))
+	if err != nil {
+		return 0, err
+	}
+
+	return i, nil
+}
+
 func relativeTimeOfDay(t time.Time) string {
 	hour := t.Hour()
 

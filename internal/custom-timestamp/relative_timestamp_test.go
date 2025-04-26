@@ -60,15 +60,66 @@ func TestRelativeHour(t *testing.T) {
 func TestRelativeTimestamp(t *testing.T) {
 	tests := []struct {
 		name         string
-		mockTimeThen time.Time
 		mockTimeNow  time.Time
+		mockTimeThen time.Time
 		expected     string
 	}{
+		// Years
 		{
-			name:         "Years",
-			mockTimeThen: time.Date(2021, time.April, 10, 0, 0, 0, 0, time.UTC),
-			mockTimeNow:  time.Date(2024, time.April, 10, 0, 0, 0, 0, time.UTC),
-			expected:     "4 years ago",
+			name:         "Year",
+			mockTimeThen: time.Date(2024, time.January, 0, 0, 0, 0, 0, time.UTC),
+			mockTimeNow:  time.Date(2025, time.January, 0, 0, 0, 0, 0, time.UTC),
+			expected:     "1 year ago",
+		},
+		{
+			name:         "1.5 Year",
+			mockTimeThen: time.Date(2023, time.June, 0, 0, 0, 0, 0, time.UTC),
+			mockTimeNow:  time.Date(2025, time.January, 0, 0, 0, 0, 0, time.UTC),
+			expected:     "1 year ago",
+		},
+		{
+			name:         "5 Years",
+			mockTimeThen: time.Date(2020, time.January, 0, 0, 0, 0, 0, time.UTC),
+			mockTimeNow:  time.Date(2025, time.January, 0, 0, 0, 0, 0, time.UTC),
+			expected:     "5 years ago",
+		},
+		// Years
+		{
+			name:         "Year",
+			mockTimeThen: time.Date(2024, time.January, 0, 0, 0, 0, 0, time.UTC),
+			mockTimeNow:  time.Date(2025, time.January, 0, 0, 0, 0, 0, time.UTC),
+			expected:     "1 year ago",
+		},
+		{
+			name:         "1.5 Year",
+			mockTimeThen: time.Date(2023, time.June, 0, 0, 0, 0, 0, time.UTC),
+			mockTimeNow:  time.Date(2025, time.January, 0, 0, 0, 0, 0, time.UTC),
+			expected:     "1 year ago",
+		},
+		{
+			name:         "5 Years",
+			mockTimeThen: time.Date(2020, time.January, 0, 0, 0, 0, 0, time.UTC),
+			mockTimeNow:  time.Date(2025, time.January, 0, 0, 0, 0, 0, time.UTC),
+			expected:     "5 years ago",
+		},
+		// Months
+		{
+			name:         "Month",
+			mockTimeThen: time.Date(2025, time.May, 0, 0, 0, 0, 0, time.UTC),
+			mockTimeNow:  time.Date(2025, time.June, 0, 0, 0, 0, 0, time.UTC),
+			expected:     "1 month ago",
+		},
+		{
+			name:         "1.5 Months",
+			mockTimeThen: time.Date(2025, time.April, 15, 0, 0, 0, 0, time.UTC),
+			mockTimeNow:  time.Date(2025, time.June, 0, 0, 0, 0, 0, time.UTC),
+			expected:     "1 month ago",
+		},
+		{
+			name:         "5 Months",
+			mockTimeThen: time.Date(2025, time.January, 0, 0, 0, 0, 0, time.UTC),
+			mockTimeNow:  time.Date(2025, time.June, 0, 0, 0, 0, 0, time.UTC),
+			expected:     "5 months ago",
 		},
 	}
 
