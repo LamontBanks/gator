@@ -6,7 +6,9 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"slices"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/LamontBanks/gator/internal/database"
@@ -15,6 +17,7 @@ import (
 )
 
 var numReadPosts int
+var newPosts bool
 
 // readCmd represents the read command
 var readCmd = &cobra.Command{
@@ -60,22 +63,27 @@ The full-text of the post, if any, will have to be viewed in a web browser.
 	`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		numReadPosts = 3
+		if newPosts {
+			return userAuthCall(readNewPosts)(appState)
+		} else {
+			numReadPosts = 3
 
-		if len(args) == 1 {
-			i, err := strconv.Atoi(args[0])
-			if err != nil {
-				return err
+			if len(args) == 1 {
+				i, err := strconv.Atoi(args[0])
+				if err != nil {
+					return err
+				}
+
+				numReadPosts = i
 			}
-
-			numReadPosts = i
+			return userAuthCall(readPosts)(appState)
 		}
-		return userAuthCall(readPosts)(appState)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(readCmd)
+	readCmd.Flags().BoolVarP(&newPosts, "new", "n", false, "Read new posts from oldest to latest")
 }
 
 // Display option picker for user to select a feed, then select the post to read it's RSS description.
@@ -90,7 +98,7 @@ func readPosts(s *state, user database.User) error {
 		return err
 	}
 
-	// Copy feedNames, feedUrl into a label-value 2D slive, pass to the option picker, select the feed
+	// Copy feedNames, feedUrl into a label-value 2D slice, pass to the option picker, select the feed
 	feedOptions := make([][]string, len(userFeeds))
 	for i := range userFeeds {
 		feedOptions[i] = make([]string, 2)
@@ -137,6 +145,104 @@ func readPosts(s *state, user database.User) error {
 	postText += fmt.Sprintf("%v\n\n", posts[choice].Description)
 	postText += fmt.Sprintf("%v\n", posts[choice].Url)
 	fmt.Println(postText)
+
+	return nil
+}
+
+// Sequential display only the newest posts
+func readNewPosts(s *state, user database.User) error {
+	userFeeds, err := s.db.GetFeedsForUser(context.Background(), user.ID)
+	if err == sql.ErrNoRows {
+		return fmt.Errorf("you're not following any feeds")
+	}
+	if err != nil {
+		return err
+	}
+
+	// Copy feedNames, feedUrl into a label-value 2D slice, pass to the option picker, select the feed
+	feedOptions := make([][]string, len(userFeeds))
+	for i := range userFeeds {
+		feedOptions[i] = make([]string, 2)
+		feedOptions[i][0] = userFeeds[i].FeedName
+		feedOptions[i][1] = userFeeds[i].FeedUrl
+	}
+	choice, err := listOptionsReadChoice(feedOptions, "Choose a feed:")
+	if err != nil {
+		return err
+	}
+	feed := userFeeds[choice]
+
+	unreadPosts, err := s.db.GetUnreadPostsForFeed(context.Background(), database.GetUnreadPostsForFeedParams{
+		UserID: user.ID,
+		FeedID: feed.FeedID,
+	})
+	if err != nil {
+		return fmt.Errorf("error getting unread posts, %v", err)
+	}
+	if len(unreadPosts) == 0 {
+		fmt.Printf("- No new posts in %v\n", feed.FeedName)
+		return nil
+	}
+
+	// Posts are returned newest to oldest
+	// But we want to read from oldest to newest
+	// So, reverse the list
+	slices.Reverse(unreadPosts)
+
+	// Get user's choice
+	fmt.Println()
+	var navChoice string
+	navQuit := "q"
+	navNext := "n"
+	navPrev := "p"
+
+	// Start with first post
+	currPostIndex := 0
+
+	// Navigate through posts or exit
+	for navChoice != navQuit {
+		// Print post, marked as read
+		post := unreadPosts[currPostIndex]
+		fmt.Println("---")
+		postText := fmt.Sprintf("%v\n", post.Title)
+		postText += fmt.Sprintf("%v\n\n", post.PublishedAt.In(time.Local).Format("03:04 PM EST, Monday, 02 Jan"))
+		postText += fmt.Sprintf("%v\n\n", post.Description)
+		postText += fmt.Sprintf("%v\n", post.Url)
+		fmt.Println(postText)
+
+		if err := markPostAsRead(s, user, unreadPosts[currPostIndex].FeedID, unreadPosts[currPostIndex].PostID); err != nil {
+			return err
+		}
+
+		// Display 1-based page numbers
+		fmt.Printf("Post %v of %v\n\n", currPostIndex+1, len(unreadPosts))
+
+		// Commands
+		fmt.Printf("'%v' - next, '%v' - back, '%v' - quit\n\n", navNext, navPrev, navQuit)
+
+		// Read user command
+		_, err = fmt.Scan(&navChoice)
+		if err != nil {
+			return err
+		}
+		navChoice = strings.ToLower(navChoice)
+
+		// Navigate through posts
+		switch navChoice {
+		case navNext:
+			if currPostIndex == len(unreadPosts)-1 {
+				fmt.Println("- Reached end of unread posts")
+				continue
+			}
+			currPostIndex++
+		case navPrev:
+			if currPostIndex <= 0 {
+				fmt.Println("- Reached beginning of unread posts")
+				continue
+			}
+			currPostIndex--
+		}
+	}
 
 	return nil
 }

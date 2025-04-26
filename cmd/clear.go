@@ -49,7 +49,7 @@ func markAllPostsAsRead(s *state, user database.User) error {
 		return err
 	}
 
-	// Copy feedNames, feedUrl into a label-value 2D slive, pass to the option picker, select the feed
+	// Copy feedNames, feedUrl into a label-value 2D slice, pass to the option picker, select the feed
 	feedOptions := make([][]string, len(userFeeds))
 	for i := range userFeeds {
 		feedOptions[i] = make([]string, 2)

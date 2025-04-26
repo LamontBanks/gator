@@ -93,7 +93,7 @@ func (q *Queries) GetPostFromUserReadHisory(ctx context.Context, arg GetPostFrom
 }
 
 const getUnreadPostsForFeed = `-- name: GetUnreadPostsForFeed :many
-SELECT posts.id, posts.feed_id, posts.title
+SELECT posts.id AS post_id, posts.feed_id, posts.title, posts.published_at, posts.description, posts.url
 FROM posts
 WHERE posts.feed_id = $2
 AND
@@ -112,11 +112,15 @@ type GetUnreadPostsForFeedParams struct {
 }
 
 type GetUnreadPostsForFeedRow struct {
-	ID     uuid.UUID
-	FeedID uuid.UUID
-	Title  string
+	PostID      uuid.UUID
+	FeedID      uuid.UUID
+	Title       string
+	PublishedAt time.Time
+	Description string
+	Url         string
 }
 
+// TODO: Replace with proper OUTER JOIN
 // - Get all posts for a given feed...
 // - ...but only posts user has not read
 func (q *Queries) GetUnreadPostsForFeed(ctx context.Context, arg GetUnreadPostsForFeedParams) ([]GetUnreadPostsForFeedRow, error) {
@@ -128,7 +132,14 @@ func (q *Queries) GetUnreadPostsForFeed(ctx context.Context, arg GetUnreadPostsF
 	var items []GetUnreadPostsForFeedRow
 	for rows.Next() {
 		var i GetUnreadPostsForFeedRow
-		if err := rows.Scan(&i.ID, &i.FeedID, &i.Title); err != nil {
+		if err := rows.Scan(
+			&i.PostID,
+			&i.FeedID,
+			&i.Title,
+			&i.PublishedAt,
+			&i.Description,
+			&i.Url,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
