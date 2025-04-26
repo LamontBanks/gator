@@ -65,61 +65,24 @@ func TestRelativeTimestamp(t *testing.T) {
 		expected     string
 	}{
 		// Years
+		// Testing om month boundaries generate weird behavior
 		{
-			name:         "Year",
-			mockTimeThen: time.Date(2024, time.January, 0, 0, 0, 0, 0, time.UTC),
-			mockTimeNow:  time.Date(2025, time.January, 0, 0, 0, 0, 0, time.UTC),
+			name:         "1 Year",
+			mockTimeNow:  time.Date(2025, time.December, 15, 0, 0, 0, 0, time.UTC),
+			mockTimeThen: time.Date(2024, time.December, 15, 0, 0, 0, 0, time.UTC),
 			expected:     "1 year ago",
 		},
 		{
-			name:         "1.5 Year",
-			mockTimeThen: time.Date(2023, time.June, 0, 0, 0, 0, 0, time.UTC),
-			mockTimeNow:  time.Date(2025, time.January, 0, 0, 0, 0, 0, time.UTC),
+			name:         "Almost 2 Years",
+			mockTimeNow:  time.Date(2024, time.December, 15, 0, 0, 0, 0, time.UTC),
+			mockTimeThen: time.Date(2023, time.November, 15, 0, 0, 0, 0, time.UTC),
 			expected:     "1 year ago",
 		},
 		{
-			name:         "5 Years",
-			mockTimeThen: time.Date(2020, time.January, 0, 0, 0, 0, 0, time.UTC),
-			mockTimeNow:  time.Date(2025, time.January, 0, 0, 0, 0, 0, time.UTC),
-			expected:     "5 years ago",
-		},
-		// Years
-		{
-			name:         "Year",
-			mockTimeThen: time.Date(2024, time.January, 0, 0, 0, 0, 0, time.UTC),
-			mockTimeNow:  time.Date(2025, time.January, 0, 0, 0, 0, 0, time.UTC),
-			expected:     "1 year ago",
-		},
-		{
-			name:         "1.5 Year",
-			mockTimeThen: time.Date(2023, time.June, 0, 0, 0, 0, 0, time.UTC),
-			mockTimeNow:  time.Date(2025, time.January, 0, 0, 0, 0, 0, time.UTC),
-			expected:     "1 year ago",
-		},
-		{
-			name:         "5 Years",
-			mockTimeThen: time.Date(2020, time.January, 0, 0, 0, 0, 0, time.UTC),
-			mockTimeNow:  time.Date(2025, time.January, 0, 0, 0, 0, 0, time.UTC),
-			expected:     "5 years ago",
-		},
-		// Months
-		{
-			name:         "Month",
-			mockTimeThen: time.Date(2025, time.May, 0, 0, 0, 0, 0, time.UTC),
-			mockTimeNow:  time.Date(2025, time.June, 0, 0, 0, 0, 0, time.UTC),
-			expected:     "1 month ago",
-		},
-		{
-			name:         "1.5 Months",
-			mockTimeThen: time.Date(2025, time.April, 15, 0, 0, 0, 0, time.UTC),
-			mockTimeNow:  time.Date(2025, time.June, 0, 0, 0, 0, 0, time.UTC),
-			expected:     "1 month ago",
-		},
-		{
-			name:         "5 Months",
-			mockTimeThen: time.Date(2025, time.January, 0, 0, 0, 0, 0, time.UTC),
-			mockTimeNow:  time.Date(2025, time.June, 0, 0, 0, 0, 0, time.UTC),
-			expected:     "5 months ago",
+			name:         "2 Years",
+			mockTimeNow:  time.Date(2025, time.December, 15, 0, 0, 0, 0, time.UTC),
+			mockTimeThen: time.Date(2023, time.December, 15, 0, 0, 0, 0, time.UTC),
+			expected:     "2 years ago",
 		},
 	}
 

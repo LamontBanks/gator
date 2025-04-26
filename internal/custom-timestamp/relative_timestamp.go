@@ -21,7 +21,7 @@ func relativeTimestamp(now time.Time, then time.Time) string {
 	// hour, _ := time.ParseDuration("1h")
 	// minute, _ := time.ParseDuration("1m")
 
-	// > year
+	// >= year
 	if timeDiff >= year {
 		roundedTimeDiff, err := convertDurationToInt(timeDiff / year)
 		if err != nil {
