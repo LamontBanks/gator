@@ -74,6 +74,7 @@ func updateAllFeeds(s *state, user database.User) error {
 	// And prints the unread feed count (for followed feeds)
 	// Arbitrary limit of 10 requests at a time
 	feedUpdatedCh := make(chan struct{}, 10)
+
 	followedFeeds, err := s.db.GetFeedsForUser(context.Background(), user.ID)
 	if err != nil {
 		return err
@@ -81,8 +82,6 @@ func updateAllFeeds(s *state, user database.User) error {
 
 	for _, feed := range allFeeds {
 		go func() error {
-
-			// Save posts
 			updateSingleFeed(s, feed.Url)
 
 			// Display unread posts, but only for followed feeds
@@ -159,8 +158,8 @@ func saveFeedPosts(s *state, rssFeed *RSSFeed, feedId uuid.UUID) error {
 			return err
 		}
 
-		// Assumes RSS posts are in descending order (latest to oldest)
-		// So, only new posts should be written
+		// Assumes RSS posts are received in descending order (latest to oldest)
+		// So, skip posts we've seen before
 		if pubDate.Before(lastPostTimestamp) || pubDate.Equal(lastPostTimestamp) {
 			break
 		}

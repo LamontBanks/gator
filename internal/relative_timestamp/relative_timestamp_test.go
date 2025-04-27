@@ -1,4 +1,4 @@
-package customtimestamp
+package relativetimestamp
 
 import (
 	"testing"

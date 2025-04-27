@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/LamontBanks/gator/internal/database"
+	relativetimestamp "github.com/LamontBanks/gator/internal/relative_timestamp"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 )
@@ -98,10 +99,20 @@ func readPosts(s *state, user database.User) error {
 		return err
 	}
 
-	// Make option picker from list of feed names
+	// Make option picker from list of feed names, unread count
 	feedOptions := make([]string, len(userFeeds))
 	for i := range userFeeds {
-		feedOptions[i] = userFeeds[i].FeedName
+		unreadPostCount, err := getUnreadPostCount(s, user, userFeeds[i].FeedID)
+		if err != nil {
+			return err
+		}
+
+		label := userFeeds[i].FeedName
+		if unreadPostCount > 0 {
+			label += fmt.Sprintf("\n\t- %v unread posts", unreadPostCount)
+		}
+
+		feedOptions[i] = label
 	}
 
 	choice, err := listOptionsReadChoice(feedOptions, "Choose a feed:")
@@ -123,7 +134,7 @@ func readPosts(s *state, user database.User) error {
 	// Make option picker from list of post titles, timestamp
 	postOptions := make([]string, len(posts))
 	for i := range posts {
-		postOptions[i] = posts[i].Title + "\n\t" + posts[i].PublishedAt.In(time.Local).Format("03:04 PM, Mon, 02 Jan 06")
+		postOptions[i] = fmt.Sprintf("%v\n\t%v", posts[i].Title, relativetimestamp.RelativeTimestamp(posts[i].PublishedAt))
 	}
 
 	choice, err = listOptionsReadChoice(postOptions, "Choose a post:")
@@ -131,16 +142,18 @@ func readPosts(s *state, user database.User) error {
 		return err
 	}
 
+	post := posts[choice]
+
 	// Mark as read for user
-	if err = markPostAsRead(s, user, posts[choice].FeedID, posts[choice].ID); err != nil {
+	if err = markPostAsRead(s, user, post.FeedID, post.ID); err != nil {
 		return err
 	}
 
 	// Display the post
-	postText := fmt.Sprintf("%v\n", posts[choice].Title)
-	postText += fmt.Sprintf("%v\n\n", posts[choice].PublishedAt.In(time.Local).Format("03:04 PM, Monday, 02 Jan"))
-	postText += fmt.Sprintf("%v\n\n", posts[choice].Description)
-	postText += fmt.Sprintf("%v\n", posts[choice].Url)
+	postText := fmt.Sprintf("%v\n", post.Title)
+	postText += fmt.Sprintf("%v | %v\n\n", relativetimestamp.RelativeTimestamp(post.PublishedAt), post.PublishedAt.In(time.Local).Format("03:04 PM EST, Monday, 02 Jan"))
+	postText += fmt.Sprintf("%v\n\n", post.Description)
+	postText += fmt.Sprintf("%v\n", post.Url)
 	fmt.Println(postText)
 
 	return nil
@@ -205,7 +218,7 @@ func readNewPosts(s *state, user database.User) error {
 		post := unreadPosts[currPostIndex]
 		fmt.Println("---")
 		postText := fmt.Sprintf("%v\n", post.Title)
-		postText += fmt.Sprintf("%v\n\n", post.PublishedAt.In(time.Local).Format("03:04 PM EST, Monday, 02 Jan"))
+		postText += fmt.Sprintf("%v | %v\n\n", relativetimestamp.RelativeTimestamp(post.PublishedAt), post.PublishedAt.In(time.Local).Format("03:04 PM EST, Monday, 02 Jan"))
 		postText += fmt.Sprintf("%v\n\n", post.Description)
 		postText += fmt.Sprintf("%v\n", post.Url)
 		fmt.Println(postText)

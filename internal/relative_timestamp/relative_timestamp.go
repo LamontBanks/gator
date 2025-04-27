@@ -1,9 +1,13 @@
-package customtimestamp
+package relativetimestamp
 
 import (
 	"fmt"
 	"time"
 )
+
+func RelativeTimestamp(publishDate time.Time) string {
+	return relativeTime(time.Now(), publishDate)
+}
 
 func relativeTime(currDate time.Time, publishDate time.Time) string {
 	timeSince := currDate.Sub(publishDate)
@@ -40,8 +44,6 @@ func relativeTime(currDate time.Time, publishDate time.Time) string {
 	return fmt.Sprintf("%v %v ago", numSecond, msgSeconds)
 }
 
-// Return `word` with appended "s" if count > 1
-// Otherwise return `word` unchanged
 func appendMultiplesSuffixS(word string, count int64) string {
 	if count > 1 {
 		word += "s"
