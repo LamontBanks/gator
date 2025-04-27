@@ -15,70 +15,70 @@ func TestRelativeTimestamp(t *testing.T) {
 		{
 			name:        "1 day",
 			timeElapsed: "24h",
-			expected:    "1 day ago",
+			expected:    "1d",
 		},
 		{
 			name:        "1 day if less than halfway to next day",
 			timeElapsed: "35h",
-			expected:    "1 day ago",
+			expected:    "1d",
 		},
 		{
 			name:        "Round up when halfway to next day",
 			timeElapsed: "36h",
-			expected:    "2 days ago",
+			expected:    "2d",
 		},
 		{
 			name:        "2 days",
 			timeElapsed: "48h",
-			expected:    "2 days ago",
+			expected:    "2d",
 		},
 		// Hours
 		{
 			name:        "1 hour",
 			timeElapsed: "1h",
-			expected:    "1 hour ago",
+			expected:    "1h",
 		},
 		{
 			name:        "1 hour if less than halfway to next hour",
 			timeElapsed: "89m",
-			expected:    "1 hour ago",
+			expected:    "1h",
 		},
 		{
 			name:        "Round up when halfway to next hour",
 			timeElapsed: "90m",
-			expected:    "2 hours ago",
+			expected:    "2h",
 		},
 		// Minutes
 		{
 			name:        "1 minute",
 			timeElapsed: "1m",
-			expected:    "1 minute ago",
+			expected:    "1m",
 		},
 		{
 			name:        "59 minutes",
 			timeElapsed: "59m",
-			expected:    "59 minutes ago",
+			expected:    "59m",
 		},
 		{
 			name:        "1 minute if less than halfway to next minute",
 			timeElapsed: "89s",
-			expected:    "1 minute ago",
+			expected:    "1m",
 		},
 		{
 			name:        "Round up when halfway to next minute",
 			timeElapsed: "90s",
-			expected:    "2 minutes ago",
+			expected:    "2m",
 		},
 		// Seconds (no rounding)
 		{
 			name:        "1 second",
 			timeElapsed: "1s",
-			expected:    "1 second ago",
+			expected:    "1s",
 		},
 		{
 			name:        "59 seconds",
 			timeElapsed: "59s",
-			expected:    "59 seconds ago",
+			expected:    "59s",
 		},
 	}
 

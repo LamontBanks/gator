@@ -2,6 +2,7 @@ package relativetimestamp
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -17,38 +18,37 @@ func relativeTime(currDate time.Time, publishDate time.Time) string {
 		return currDate.String()
 	}
 
+	oneWeek, err := time.ParseDuration("168h")
+	if err != nil {
+		return currDate.String()
+	}
+
+	// weeks
+	if timeSince >= oneWeek {
+		return fmt.Sprintf("%vw", int64(timeSince.Round(oneWeek)/oneWeek))
+	}
+
+	// day of the week
+	if timeSince >= oneDay*3 && timeSince < oneWeek {
+		return strings.ToLower(publishDate.Format("Mon"))
+	}
+
 	// days
-	if timeSince >= oneDay {
-		numDays := int64(timeSince.Round(24*time.Hour) / (24 * time.Hour))
-		msgDays := appendMultiplesSuffixS("day", numDays)
-		return fmt.Sprintf("%v %v ago", numDays, msgDays)
+	if timeSince >= oneDay && timeSince < oneDay*3 {
+		return fmt.Sprintf("%vd", int64(timeSince.Round(24*time.Hour)/(24*time.Hour)))
 	}
 
 	// hours
 	if timeSince >= time.Hour && timeSince < oneDay {
-		numHours := int64(timeSince.Round(time.Hour) / time.Hour)
-		msgHours := appendMultiplesSuffixS("hour", numHours)
-		return fmt.Sprintf("%v %v ago", numHours, msgHours)
+		return fmt.Sprintf("%vh", int64(timeSince.Round(time.Hour)/time.Hour))
 	}
 
 	// minutes
 	if timeSince >= time.Minute && timeSince < time.Hour {
-		numMinutes := int64(timeSince.Round(time.Minute) / time.Minute)
-		msgMinutes := appendMultiplesSuffixS("minute", numMinutes)
-		return fmt.Sprintf("%v %v ago", numMinutes, msgMinutes)
+		return fmt.Sprintf("%vm", int64(timeSince.Round(time.Minute)/time.Minute))
 	}
 
 	// seconds
 	// No rounding
-	numSecond := int64(timeSince / time.Second)
-	msgSeconds := appendMultiplesSuffixS("second", numSecond)
-	return fmt.Sprintf("%v %v ago", numSecond, msgSeconds)
-}
-
-func appendMultiplesSuffixS(word string, count int64) string {
-	if count > 1 {
-		word += "s"
-	}
-
-	return word
+	return fmt.Sprintf("%vs", int64(timeSince/time.Second))
 }
