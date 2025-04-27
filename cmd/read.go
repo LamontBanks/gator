@@ -121,8 +121,8 @@ func readPosts(s *state, user database.User) error {
 	}
 
 	feed := userFeeds[choice]
-
 	fmt.Println(feed.FeedName)
+
 	posts, err := s.db.GetPostsFromFeed(context.Background(), database.GetPostsFromFeedParams{
 		FeedID: feed.FeedID,
 		Limit:  int32(numReadPosts),
@@ -131,7 +131,7 @@ func readPosts(s *state, user database.User) error {
 		return err
 	}
 
-	// Make option picker from list of post titles, timestamp
+	// Make option picker from list of post titles
 	postOptions := make([]string, len(posts))
 	for i := range posts {
 		postOptions[i] = fmt.Sprintf("%v\t| %v", relativetimestamp.RelativeTimestamp(posts[i].PublishedAt), posts[i].Title)
@@ -149,12 +149,7 @@ func readPosts(s *state, user database.User) error {
 		return err
 	}
 
-	// Display the post
-	postText := fmt.Sprintf("%v\n", post.Title)
-	postText += fmt.Sprintf("%v | %v\n\n", relativetimestamp.RelativeTimestamp(post.PublishedAt), post.PublishedAt.In(time.Local).Format("03:04 PM EST, Monday, 02 Jan"))
-	postText += fmt.Sprintf("%v\n\n", post.Description)
-	postText += fmt.Sprintf("%v\n", post.Url)
-	fmt.Println(postText)
+	fmt.Println(formatPost(post.Title, post.Description, post.Url, post.PublishedAt))
 
 	return nil
 }
@@ -217,20 +212,15 @@ func readNewPosts(s *state, user database.User) error {
 		// Print post
 		post := unreadPosts[currPostIndex]
 		fmt.Println("---")
-		postText := fmt.Sprintf("%v\n", post.Title)
-		postText += fmt.Sprintf("%v | %v\n\n", relativetimestamp.RelativeTimestamp(post.PublishedAt), post.PublishedAt.In(time.Local).Format("03:04 PM EST, Monday, 02 Jan"))
-		postText += fmt.Sprintf("%v\n\n", post.Description)
-		postText += fmt.Sprintf("%v\n", post.Url)
-		fmt.Println(postText)
-
-		// Display 1-based page numbers
+		fmt.Println(formatPost(post.Title, post.Description, post.Url, post.PublishedAt))
+		// Display 1-based page numbers at bottom of post
 		fmt.Printf("Post %v of %v\n\n", currPostIndex+1, len(unreadPosts))
 		fmt.Println("---")
 
 		// Commands
 		fmt.Printf("'%v' - next, '%v' - back, '%v' - quit\n\n", navNext, navPrev, navQuit)
 
-		// Read user command
+		// Read user nvagiate command
 		_, err = fmt.Scan(&navChoice)
 		if err != nil {
 			return err
@@ -297,4 +287,12 @@ func markPostAsRead(s *state, user database.User, feedID, postID uuid.UUID) erro
 	}
 
 	return nil
+}
+
+func formatPost(postTitle, postDesc, postUrl string, publishedAtDate time.Time) string {
+	postText := fmt.Sprintf("%v\n", postTitle)
+	postText += fmt.Sprintf("%v\n\n", publishedAtDate.In(time.Local).Format("03:04 PM EST, Monday, 02 Jan 2006"))
+	postText += fmt.Sprintf("%v\n\n", postDesc)
+	postText += fmt.Sprintf("%v\n", postUrl)
+	return postText
 }
