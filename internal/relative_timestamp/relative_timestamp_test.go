@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func TestSmoke(t *testing.T) {
+func TestRelativeTimestamp(t *testing.T) {
 	tests := []struct {
 		name        string
 		timeElapsed string
@@ -18,9 +18,14 @@ func TestSmoke(t *testing.T) {
 			expected:    "1 day ago",
 		},
 		{
-			name:        "More than 1, less than 2 days",
-			timeElapsed: "36h",
+			name:        "1 day if less than halfway to next day",
+			timeElapsed: "35h",
 			expected:    "1 day ago",
+		},
+		{
+			name:        "Round up when halfway to next day",
+			timeElapsed: "36h",
+			expected:    "2 days ago",
 		},
 		{
 			name:        "2 days",
@@ -34,9 +39,14 @@ func TestSmoke(t *testing.T) {
 			expected:    "1 hour ago",
 		},
 		{
-			name:        "More than 1 hour, less than 1 day",
-			timeElapsed: "11h",
-			expected:    "11 hours ago",
+			name:        "1 hour if less than halfway to next hour",
+			timeElapsed: "89m",
+			expected:    "1 hour ago",
+		},
+		{
+			name:        "Round up when halfway to next hour",
+			timeElapsed: "90m",
+			expected:    "2 hours ago",
 		},
 		// Minutes
 		{
@@ -45,18 +55,28 @@ func TestSmoke(t *testing.T) {
 			expected:    "1 minute ago",
 		},
 		{
-			name:        "More than 1 minute, less than 1 hour",
+			name:        "59 minutes",
 			timeElapsed: "59m",
 			expected:    "59 minutes ago",
 		},
-		// Seconds
+		{
+			name:        "1 minute if less than halfway to next minute",
+			timeElapsed: "89s",
+			expected:    "1 minute ago",
+		},
+		{
+			name:        "Round up when halfway to next minute",
+			timeElapsed: "90s",
+			expected:    "2 minutes ago",
+		},
+		// Seconds (no rounding)
 		{
 			name:        "1 second",
 			timeElapsed: "1s",
 			expected:    "1 second ago",
 		},
 		{
-			name:        "More than 1 second, less than 1 minute",
+			name:        "59 seconds",
 			timeElapsed: "59s",
 			expected:    "59 seconds ago",
 		},

@@ -19,26 +19,27 @@ func relativeTime(currDate time.Time, publishDate time.Time) string {
 
 	// days
 	if timeSince >= oneDay {
-		numDays := int64(timeSince / (24 * time.Hour))
+		numDays := int64(timeSince.Round(24*time.Hour) / (24 * time.Hour))
 		msgDays := appendMultiplesSuffixS("day", numDays)
 		return fmt.Sprintf("%v %v ago", numDays, msgDays)
 	}
 
 	// hours
 	if timeSince >= time.Hour && timeSince < oneDay {
-		numHours := int64(timeSince / time.Hour)
+		numHours := int64(timeSince.Round(time.Hour) / time.Hour)
 		msgHours := appendMultiplesSuffixS("hour", numHours)
 		return fmt.Sprintf("%v %v ago", numHours, msgHours)
 	}
 
 	// minutes
 	if timeSince >= time.Minute && timeSince < time.Hour {
-		numMinutes := int64(timeSince / time.Minute)
+		numMinutes := int64(timeSince.Round(time.Minute) / time.Minute)
 		msgMinutes := appendMultiplesSuffixS("minute", numMinutes)
 		return fmt.Sprintf("%v %v ago", numMinutes, msgMinutes)
 	}
 
 	// seconds
+	// No rounding
 	numSecond := int64(timeSince / time.Second)
 	msgSeconds := appendMultiplesSuffixS("second", numSecond)
 	return fmt.Sprintf("%v %v ago", numSecond, msgSeconds)
