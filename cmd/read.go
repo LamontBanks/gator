@@ -134,7 +134,7 @@ func readPosts(s *state, user database.User) error {
 	// Make option picker from list of post titles
 	postOptions := make([]string, len(posts))
 	for i := range posts {
-		postOptions[i] = fmt.Sprintf("%v\t| %v", relativetimestamp.RelativeTimestamp(posts[i].PublishedAt), posts[i].Title)
+		postOptions[i] = fmt.Sprintf("%v\t| %v", relativetimestamp.RelativeTimestamp(posts[i].PublishedAt.Local()), posts[i].Title)
 	}
 
 	choice, err = listOptionsReadChoice(postOptions, "Choose a post:")
@@ -144,7 +144,7 @@ func readPosts(s *state, user database.User) error {
 
 	post := posts[choice]
 
-	// Mark as read for user
+	// Mark as read
 	if err = markPostAsRead(s, user, post.FeedID, post.ID); err != nil {
 		return err
 	}
