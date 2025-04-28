@@ -20,6 +20,8 @@ import (
 var numReadPosts int
 var newPosts bool
 
+const UNREADPOSTMARKER = "new"
+
 // readCmd represents the read command
 var readCmd = &cobra.Command{
 	Use: "read",
@@ -123,6 +125,7 @@ func readPosts(s *state, user database.User) error {
 	feed := userFeeds[choice]
 	fmt.Println(feed.FeedName)
 
+	// Get posts from chosen feed
 	posts, err := s.db.GetPostsFromFeed(context.Background(), database.GetPostsFromFeedParams{
 		FeedID: feed.FeedID,
 		Limit:  int32(numReadPosts),
@@ -133,8 +136,12 @@ func readPosts(s *state, user database.User) error {
 
 	// Make option picker from list of post titles
 	postOptions := make([]string, len(posts))
-	for i := range posts {
-		postOptions[i] = fmt.Sprintf("%v\t| %v", relativetimestamp.RelativeTimestamp(posts[i].PublishedAt.Local()), posts[i].Title)
+	for i, post := range posts {
+		unreadpost := ""
+		if postIsUnread(post.ID, post.FeedID, s, user) {
+			unreadpost = fmt.Sprintf(" (%v) ", UNREADPOSTMARKER)
+		}
+		postOptions[i] = fmt.Sprintf("%v\t|%v %v", relativetimestamp.RelativeTimestamp(post.PublishedAt.Local()), unreadpost, post.Title)
 	}
 
 	choice, err = listOptionsReadChoice(postOptions, "Choose a post:")
@@ -295,4 +302,20 @@ func formatPost(postTitle, postDesc, postUrl string, publishedAtDate time.Time) 
 	postText += fmt.Sprintf("%v\n\n", postDesc)
 	postText += fmt.Sprintf("%v\n", postUrl)
 	return postText
+}
+
+func postIsUnread(postId, feedId uuid.UUID, s *state, user database.User) bool {
+	post, err := s.db.GetPostFromUserReadHistory(context.Background(), database.GetPostFromUserReadHistoryParams{
+		UserID: user.ID,
+		FeedID: feedId,
+		PostID: postId,
+	})
+
+	// Nothing returned or any other error is considered unread
+	if err != nil {
+		return true
+	}
+
+	// Negate column
+	return !post.HasViewed
 }
