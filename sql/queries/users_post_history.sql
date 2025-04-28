@@ -1,4 +1,4 @@
--- name: GetPostFromUserReadHisory :one
+-- name: GetPostFromUserReadHistory :one
 SELECT * FROM users_posts_history
 WHERE user_id = $1 
         AND feed_id = $2

@@ -71,6 +71,8 @@ type GetAllPostsFromFeedRow struct {
 	FeedID      uuid.UUID
 }
 
+// Created new query to get all posts;
+// Unsure of how to use `GetPostsFromFeed` and set LIMIT NULL to pull everything
 func (q *Queries) GetAllPostsFromFeed(ctx context.Context, feedID uuid.UUID) ([]GetAllPostsFromFeedRow, error) {
 	rows, err := q.db.QueryContext(ctx, getAllPostsFromFeed, feedID)
 	if err != nil {

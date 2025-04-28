@@ -40,6 +40,8 @@ WHERE posts.feed_id = $1
 ORDER BY posts.published_at DESC
 LIMIT $2;
 
+-- Created new query to get all posts;
+-- Unsure of how to use `GetPostsFromFeed` and set LIMIT NULL to pull everything
 -- name: GetAllPostsFromFeed :many
 SELECT feeds.name AS feed_name, posts.*
 FROM posts
