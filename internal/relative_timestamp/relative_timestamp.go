@@ -23,29 +23,29 @@ func relativeTime(currDate time.Time, publishDate time.Time) string {
 		return currDate.String()
 	}
 
-	// weeks
+	// weeks (> 7 days)
 	if timeSince >= oneWeek {
 		return fmt.Sprintf("%vw", int64(timeSince.Round(oneWeek)/oneWeek))
 	}
 
-	// day of the week
+	// day of the week (between 4-6 days)
 	if timeSince > oneDay*3 && timeSince < oneWeek {
 		return strings.ToLower(publishDate.Format("Mon"))
 	}
 
-	// days (up to 3 days)
+	// days (between 1 - 3 days)
 	if timeSince >= oneDay && timeSince <= oneDay*3 {
 		return fmt.Sprintf("%vd", int64(timeSince.Round(24*time.Hour)/(24*time.Hour)))
 	}
 
-	// time of day
-	if timeSince >= time.Hour*3 && timeSince < oneDay {
-		return relativeTimeOfDay(publishDate)
+	// number of hours (between 6 - 24 hours)
+	if timeSince >= time.Hour*6 && timeSince < oneDay {
+		return fmt.Sprintf("%vh", int64(timeSince.Round(time.Hour)/time.Hour))
 	}
 
-	// hours
-	if timeSince >= time.Hour && timeSince < time.Hour*3 {
-		return fmt.Sprintf("%vh", int64(timeSince.Round(time.Hour)/time.Hour))
+	// hour:minute (between 1 - 6 hours)
+	if timeSince >= time.Hour && timeSince < time.Hour*6 {
+		return publishDate.Format("3:04 PM")
 	}
 
 	// minutes

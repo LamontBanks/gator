@@ -33,20 +33,26 @@ func TestRelativeTimestamp(t *testing.T) {
 			expected:    "2d",
 		},
 		// Hours
+		// hour+minute if bewtween 1-6 hours
 		{
-			name:        "1 hour",
+			name:        "Original hour:minute if between 1-5 hours (no rounding)",
 			timeElapsed: "1h",
-			expected:    "1h",
+			expected:    "1:23 AM",
 		},
 		{
-			name:        "1 hour if less than halfway to next hour",
-			timeElapsed: "89m",
-			expected:    "1h",
+			name:        "Original hour:minute if between 1-5 hours (no rounding)",
+			timeElapsed: "5h",
+			expected:    "1:23 AM",
 		},
 		{
-			name:        "Round up when halfway to next hour",
-			timeElapsed: "90m",
-			expected:    "2h",
+			name:        "Hours if between 6-23 hours, 6h",
+			timeElapsed: "6h",
+			expected:    "6h",
+		},
+		{
+			name:        "Hours if between 6-23 hours, 23h",
+			timeElapsed: "23h",
+			expected:    "23h",
 		},
 		// Minutes
 		{
@@ -89,7 +95,7 @@ func TestRelativeTimestamp(t *testing.T) {
 			t.Error(err)
 		}
 
-		mockPublishedAtDate := time.Date(2025, time.June, 15, 0, 0, 0, 0, time.UTC)
+		mockPublishedAtDate := time.Date(2025, time.June, 15, 1, 23, 45, 0, time.UTC)
 		mockCurrTime := mockPublishedAtDate.Add(timeElapsed)
 
 		// Test
