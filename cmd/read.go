@@ -248,7 +248,7 @@ func readNewPosts(s *state, user database.User) error {
 }
 
 func markPostAsRead(s *state, user database.User, feedID, postID uuid.UUID) error {
-	_, err := s.db.GetPostFromUserReadHistory(context.Background(), database.GetPostFromUserReadHisoryParams{
+	_, err := s.db.GetPostFromUserReadHistory(context.Background(), database.GetPostFromUserReadHistoryParams{
 		UserID: user.ID,
 		FeedID: feedID,
 		PostID: postID,
