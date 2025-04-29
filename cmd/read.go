@@ -17,8 +17,22 @@ import (
 	"github.com/spf13/cobra"
 )
 
+/*
+Format Post dat from the database in a general struct for viewing
+*/
+type PrintablePost struct {
+	PostID            uuid.UUID
+	FeedID            uuid.UUID
+	Title             string
+	PublishedAt       time.Time
+	RelativeTimestamp string
+	Description       string
+	Url               string
+}
+
 var numReadPosts int
-var newPosts bool
+var sequentialReadFlag bool
+var showOnlyNewPostsFlag bool
 
 const UNREADPOSTMARKER = "new"
 
@@ -66,27 +80,24 @@ The full-text of the post, if any, will have to be viewed in a web browser.
 	`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if newPosts {
-			return userAuthCall(readNewPosts)(appState)
-		} else {
-			numReadPosts = 3
+		numReadPosts = 3
 
-			if len(args) == 1 {
-				i, err := strconv.Atoi(args[0])
-				if err != nil {
-					return err
-				}
-
-				numReadPosts = i
+		if len(args) == 1 {
+			i, err := strconv.Atoi(args[0])
+			if err != nil {
+				return err
 			}
-			return userAuthCall(readPosts)(appState)
+
+			numReadPosts = i
 		}
+		return userAuthCall(readPosts)(appState)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(readCmd)
-	readCmd.Flags().BoolVarP(&newPosts, "new", "n", false, "Read new posts from oldest to latest")
+	readCmd.Flags().BoolVarP(&showOnlyNewPostsFlag, "new", "n", false, "List only new posts")
+	readCmd.Flags().BoolVarP(&sequentialReadFlag, "seq", "s", false, "Read listed posts from oldest to newest")
 }
 
 // Display option picker for user to select a feed, then select the post to read it's RSS description.
@@ -102,6 +113,7 @@ func readPosts(s *state, user database.User) error {
 	}
 
 	// Make option picker from list of feed names, unread count
+	// Choose feed
 	feedOptions := make([]string, len(userFeeds))
 	for i := range userFeeds {
 		unreadPostCount, err := getUnreadPostCount(s, user, userFeeds[i].FeedID)
@@ -125,79 +137,94 @@ func readPosts(s *state, user database.User) error {
 	feed := userFeeds[choice]
 	fmt.Println(feed.FeedName)
 
-	// Get posts from chosen feed
-	posts, err := s.db.GetPostsFromFeed(context.Background(), database.GetPostsFromFeedParams{
-		FeedID: feed.FeedID,
-		Limit:  int32(numReadPosts),
-	})
-	if err != nil {
-		return err
+	posts := []PrintablePost{}
+
+	// Show only unread posts...
+	if showOnlyNewPostsFlag {
+		queryResult, err := s.db.GetUnreadPostsForFeed(context.Background(), database.GetUnreadPostsForFeedParams{
+			UserID: user.ID,
+			FeedID: feed.FeedID,
+		})
+		if err != nil {
+			return fmt.Errorf("error getting unread posts")
+		}
+
+		if len(queryResult) == 0 {
+			fmt.Println("- No unread posts")
+			return nil
+		}
+
+		for _, r := range queryResult {
+			posts = append(posts, PrintablePost{
+				PostID:            r.PostID,
+				FeedID:            r.FeedID,
+				Title:             r.Title,
+				PublishedAt:       r.PublishedAt,
+				RelativeTimestamp: relativetimestamp.RelativeTimestamp(r.PublishedAt),
+				Description:       r.Description,
+				Url:               r.Url,
+			})
+		}
+		// ...or whatever number of posts the user wants
+	} else {
+		queryResult, err := s.db.GetPostsFromFeed(context.Background(), database.GetPostsFromFeedParams{
+			FeedID: feed.FeedID,
+			Limit:  int32(numReadPosts),
+		})
+		if err != nil {
+			return err
+		}
+
+		for _, r := range queryResult {
+			posts = append(posts, PrintablePost{
+				PostID:            r.ID,
+				FeedID:            r.FeedID,
+				Title:             r.Title,
+				PublishedAt:       r.PublishedAt,
+				RelativeTimestamp: relativetimestamp.RelativeTimestamp(r.PublishedAt),
+				Description:       r.Description,
+				Url:               r.Url,
+			})
+		}
 	}
 
-	// Make option picker from list of post titles
+	// Read all posts
+	if sequentialReadFlag {
+		return readPost(s, user, posts)
+	}
+
+	// Make option picker of post titles, adding unread markers as needed
 	postOptions := make([]string, len(posts))
 	for i, post := range posts {
 		unreadpost := ""
-		if postIsUnread(post.ID, post.FeedID, s, user) {
+		if postIsUnread(post.PostID, post.FeedID, s, user) {
 			unreadpost = fmt.Sprintf(" (%v) ", UNREADPOSTMARKER)
 		}
 		postOptions[i] = fmt.Sprintf("%v\t|%v %v", relativetimestamp.RelativeTimestamp(post.PublishedAt.Local()), unreadpost, post.Title)
 	}
 
+	// Choose a post
 	choice, err = listOptionsReadChoice(postOptions, "Choose a post:")
 	if err != nil {
 		return err
 	}
-
 	post := posts[choice]
 
 	// Mark as read
-	if err = markPostAsRead(s, user, post.FeedID, post.ID); err != nil {
+	if err = markPostAsRead(s, user, post.FeedID, post.PostID); err != nil {
 		return err
 	}
 
-	fmt.Println(formatPost(post.Title, post.Description, post.Url, post.PublishedAt))
-
-	return nil
+	// Read single post
+	return readPost(s, user, []PrintablePost{post})
 }
 
-// Sequential display only the newest posts
-func readNewPosts(s *state, user database.User) error {
-	userFeeds, err := s.db.GetFeedsForUser(context.Background(), user.ID)
-	if err == sql.ErrNoRows {
-		return fmt.Errorf("you're not following any feeds")
-	}
-	if err != nil {
-		return err
-	}
-
-	// Options picker from list of feed names
-	feedOptions := make([]string, len(userFeeds))
-	for i := range userFeeds {
-		feedOptions[i] = userFeeds[i].FeedName
-	}
-	choice, err := listOptionsReadChoice(feedOptions, "Choose a feed:")
-	if err != nil {
-		return err
-	}
-	feed := userFeeds[choice]
-
-	unreadPosts, err := s.db.GetUnreadPostsForFeed(context.Background(), database.GetUnreadPostsForFeedParams{
-		UserID: user.ID,
-		FeedID: feed.FeedID,
-	})
-	if err != nil {
-		return fmt.Errorf("error getting unread posts, %v", err)
-	}
-	if len(unreadPosts) == 0 {
-		fmt.Printf("- No new posts in %v\n", feed.FeedName)
-		return nil
-	}
-
+// Navigate through each post
+func readPost(s *state, user database.User, posts []PrintablePost) error {
 	// Posts are returned newest to oldest
 	// But we want to read from oldest to newest
 	// So, reverse the list
-	slices.Reverse(unreadPosts)
+	slices.Reverse(posts)
 
 	// Get user's choice
 	fmt.Println()
@@ -212,23 +239,23 @@ func readNewPosts(s *state, user database.User) error {
 	// Navigate through posts or exit
 	for navChoice != navQuit {
 		// Mar as read
-		if err := markPostAsRead(s, user, unreadPosts[currPostIndex].FeedID, unreadPosts[currPostIndex].PostID); err != nil {
+		if err := markPostAsRead(s, user, posts[currPostIndex].FeedID, posts[currPostIndex].PostID); err != nil {
 			return err
 		}
 
 		// Print post
-		post := unreadPosts[currPostIndex]
+		post := posts[currPostIndex]
 		fmt.Println("---")
 		fmt.Println(formatPost(post.Title, post.Description, post.Url, post.PublishedAt))
 		// Display 1-based page numbers at bottom of post
-		fmt.Printf("Post %v of %v\n\n", currPostIndex+1, len(unreadPosts))
+		fmt.Printf("Post %v of %v\n\n", currPostIndex+1, len(posts))
 		fmt.Println("---")
 
 		// Commands
 		fmt.Printf("'%v' - next, '%v' - back, '%v' - quit\n\n", navNext, navPrev, navQuit)
 
 		// Read user nvagiate command
-		_, err = fmt.Scan(&navChoice)
+		_, err := fmt.Scan(&navChoice)
 		if err != nil {
 			return err
 		}
@@ -237,7 +264,7 @@ func readNewPosts(s *state, user database.User) error {
 		// Navigate through posts
 		switch navChoice {
 		case navNext:
-			if currPostIndex == len(unreadPosts)-1 {
+			if currPostIndex == len(posts)-1 {
 				fmt.Println("- Reached end of unread posts")
 				continue
 			}
