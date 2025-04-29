@@ -201,7 +201,7 @@ func printFollowedFeeds(s *state, user database.User) error {
 	}
 
 	// Pull posts for each feed
-	fmt.Println("Your Feeds:")
+	fmt.Println("Followed Feeds:")
 	for _, feed := range feeds {
 		posts, err := s.db.GetPostsFromFeed(context.Background(), database.GetPostsFromFeedParams{
 			FeedID: feed.FeedID,

@@ -18,7 +18,7 @@ import (
 )
 
 /*
-Format Post dat from the database in a general struct for viewing
+Format Post data from the database in a general struct for viewing
 */
 type PrintablePost struct {
 	PostID            uuid.UUID
@@ -40,9 +40,9 @@ const UNREADPOSTMARKER = "new"
 var readCmd = &cobra.Command{
 	Use: "read",
 
-	Short: "Read posts in your feeds",
-	Long: `Read posts in your feeds.
-A interactive menu will help navigate through your followed feeds, then to the posts within a feed.
+	Short: "Read posts in a feed",
+	Long: `Read posts in a feed.
+A interactive menu will help navigate through followed feeds, then to the posts within a feed.
 
 	gator read
 	gator read <number of posts to display, default: 3>

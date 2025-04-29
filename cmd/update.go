@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/LamontBanks/gator/internal/database"
+	rss "github.com/LamontBanks/gator/internal/rss"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 )
@@ -120,7 +121,7 @@ func updateSingleFeed(s *state, feedUrl string) error {
 		return err
 	}
 
-	rssFeed, err := FetchFeed(context.Background(), feed.Url)
+	rssFeed, err := rss.FetchFeed(context.Background(), feed.Url)
 	if err != nil {
 		return err
 	}
@@ -136,7 +137,7 @@ func updateSingleFeed(s *state, feedUrl string) error {
 
 // Save posts to the database
 // Only saves posts newer than the previous latest post
-func saveFeedPosts(s *state, rssFeed *RSSFeed, feedId uuid.UUID) error {
+func saveFeedPosts(s *state, rssFeed *rss.RSSFeed, feedId uuid.UUID) error {
 	err := s.db.UpdateFeedDescription(context.Background(), database.UpdateFeedDescriptionParams{
 		ID:          feedId,
 		Description: rssFeed.Channel.Description,
@@ -153,7 +154,7 @@ func saveFeedPosts(s *state, rssFeed *RSSFeed, feedId uuid.UUID) error {
 	}
 
 	for i := range len(rssFeed.Channel.Item) {
-		pubDate, err := ParseRSSPubDate(rssFeed.Channel.Item[i].PubDate)
+		pubDate, err := rss.ParseRSSPubDate(rssFeed.Channel.Item[i].PubDate)
 		if err != nil {
 			return err
 		}

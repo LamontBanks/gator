@@ -1,7 +1,7 @@
 /*
 Reads RSS feed info into custom structs
 */
-package cmd
+package rss
 
 import (
 	"context"

@@ -43,7 +43,7 @@ func markAllPostsAsRead(s *state, user database.User) error {
 	// TODO: Only get feeds with unread posts
 	userFeeds, err := s.db.GetFeedsForUser(context.Background(), user.ID)
 	if err == sql.ErrNoRows {
-		return fmt.Errorf("you're not following any feeds")
+		return fmt.Errorf("not following any feeds")
 	}
 	if err != nil {
 		return err

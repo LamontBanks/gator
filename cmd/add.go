@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/LamontBanks/gator/internal/database"
+	rss "github.com/LamontBanks/gator/internal/rss"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 )
@@ -54,7 +55,7 @@ func addFeed(s *state, user database.User) error {
 	}
 
 	// Attempt to download feed
-	rssFeed, err := FetchFeed(context.Background(), feedUrlArg)
+	rssFeed, err := rss.FetchFeed(context.Background(), feedUrlArg)
 	if err != nil {
 		return fmt.Errorf("could not download feed %v: %v", feedUrlArg, err)
 	}
