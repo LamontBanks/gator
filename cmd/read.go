@@ -246,13 +246,19 @@ func readPost(s *state, user database.User, posts []PrintablePost) error {
 		// Print post
 		post := posts[currPostIndex]
 		fmt.Println("---")
-		fmt.Println(formatPost(post.Title, post.Description, post.Url, post.PublishedAt))
+		fmt.Println(formatPost(post))
+
+		// Exit now if there's only 1 post to show
+		if len(posts) == 1 {
+			return nil
+		}
+
 		// Display 1-based page numbers at bottom of post
 		fmt.Printf("Post %v of %v\n\n", currPostIndex+1, len(posts))
 		fmt.Println("---")
 
-		// Commands
-		fmt.Printf("'%v' - next, '%v' - back, '%v' - quit\n\n", navNext, navPrev, navQuit)
+		// Accept command for navigating between posts
+		fmt.Printf("%v - next, %v - prev, %v - quit\n\n", navNext, navPrev, navQuit)
 
 		// Read user nvagiate command
 		_, err := fmt.Scan(&navChoice)
@@ -323,11 +329,11 @@ func markPostAsRead(s *state, user database.User, feedID, postID uuid.UUID) erro
 	return nil
 }
 
-func formatPost(postTitle, postDesc, postUrl string, publishedAtDate time.Time) string {
-	postText := fmt.Sprintf("%v\n", postTitle)
-	postText += fmt.Sprintf("%v\n\n", publishedAtDate.In(time.Local).Format("03:04 PM EST, Monday, 02 Jan 2006"))
-	postText += fmt.Sprintf("%v\n\n", postDesc)
-	postText += fmt.Sprintf("%v\n", postUrl)
+func formatPost(post PrintablePost) string {
+	postText := fmt.Sprintf("%v\n", post.Title)
+	postText += fmt.Sprintf("%v\n\n", post.PublishedAt.In(time.Local).Format("03:04 PM EST, Monday, 02 Jan 2006"))
+	postText += fmt.Sprintf("%v\n\n", post.Description)
+	postText += fmt.Sprintf("%v\n", post.Url)
 	return postText
 }
 

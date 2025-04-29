@@ -83,6 +83,7 @@ func updateAllFeeds(s *state, user database.User) error {
 
 	for _, feed := range allFeeds {
 		go func() error {
+			fmt.Printf("Updating %v...\n", feed.FeedName)
 			updateSingleFeed(s, feed.Url)
 
 			// Display unread posts, but only for followed feeds
