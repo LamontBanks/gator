@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/LamontBanks/gator/internal/database"
+	relativetimestamp "github.com/LamontBanks/gator/internal/relative_timestamp"
 	rss "github.com/LamontBanks/gator/internal/rss"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
@@ -83,20 +84,20 @@ func updateAllFeeds(s *state, user database.User) error {
 
 	for _, feed := range allFeeds {
 		go func() error {
-			fmt.Printf("Updating %v...\n", feed.FeedName)
+			fmt.Printf("- %v...\n", feed.FeedName)
 			updateSingleFeed(s, feed.Url)
 
-			// Display unread posts, but only for followed feeds
+			// Filter by followed feeds, get unread posts count
 			if slices.ContainsFunc(followedFeeds, func(followedFeed database.GetFeedsForUserRow) bool {
 				return followedFeed.FeedUrl == feed.Url
 			}) {
-				unreadPostCount, err := getUnreadPostCount(s, user, feed.ID)
+				count, msg, err := getUnreadPostInfo(s, user, feed.FeedName, feed.ID)
 				if err != nil {
 					return err
 				}
 
-				if unreadPostCount > 0 {
-					fmt.Printf("%v\n\t- %v unread posts\n", feed.FeedName, unreadPostCount)
+				if count > 0 {
+					fmt.Println(msg)
 				}
 			}
 
@@ -194,4 +195,24 @@ func getUnreadPostCount(s *state, user database.User, feedID uuid.UUID) (int, er
 	}
 
 	return len(unreadPosts), nil
+}
+
+/*
+Returns the unread post count and message
+*/
+func getUnreadPostInfo(s *state, user database.User, feedName string, feedId uuid.UUID) (int, string, error) {
+	unreadPosts, err := s.db.GetUnreadPostsForFeed(context.Background(), database.GetUnreadPostsForFeedParams{
+		UserID: user.ID,
+		FeedID: feedId,
+	})
+	if err != nil {
+		return 0, "", fmt.Errorf("error getting unread posts, %v", err)
+	}
+
+	msg := ""
+	if len(unreadPosts) > 0 {
+		msg = fmt.Sprintf("%v\n\t- %v unread posts since %v", feedName, len(unreadPosts), relativetimestamp.RelativeTimestamp(unreadPosts[len(unreadPosts)-1].PublishedAt.Local()))
+	}
+
+	return len(unreadPosts), msg, nil
 }

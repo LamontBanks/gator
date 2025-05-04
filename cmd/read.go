@@ -116,14 +116,15 @@ func readPosts(s *state, user database.User) error {
 	// Choose feed
 	feedOptions := make([]string, len(userFeeds))
 	for i := range userFeeds {
-		unreadPostCount, err := getUnreadPostCount(s, user, userFeeds[i].FeedID)
+		label := userFeeds[i].FeedName
+
+		// Replace label with unread posts info, if any
+		count, msg, err := getUnreadPostInfo(s, user, userFeeds[i].FeedName, userFeeds[i].FeedID)
 		if err != nil {
 			return err
 		}
-
-		label := userFeeds[i].FeedName
-		if unreadPostCount > 0 {
-			label += fmt.Sprintf("\n\t- %v unread posts", unreadPostCount)
+		if count > 0 {
+			label = msg
 		}
 
 		feedOptions[i] = label
