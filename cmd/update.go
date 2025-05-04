@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/LamontBanks/gator/internal/database"
-	relativetimestamp "github.com/LamontBanks/gator/internal/relative_timestamp"
+	fuzzytimestamp "github.com/LamontBanks/gator/internal/fuzzy_timestamp"
 	rss "github.com/LamontBanks/gator/internal/rss"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
@@ -211,7 +211,7 @@ func getUnreadPostInfo(s *state, user database.User, feedName string, feedId uui
 
 	msg := ""
 	if len(unreadPosts) > 0 {
-		msg = fmt.Sprintf("%v\n\t- %v unread posts since %v", feedName, len(unreadPosts), relativetimestamp.RelativeTimestamp(unreadPosts[len(unreadPosts)-1].PublishedAt.Local()))
+		msg = fmt.Sprintf("%v\n\t- %v unread posts since %v", feedName, len(unreadPosts), fuzzytimestamp.FuzzyTimestamp(unreadPosts[len(unreadPosts)-1].PublishedAt.Local()))
 	}
 
 	return len(unreadPosts), msg, nil

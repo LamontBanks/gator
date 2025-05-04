@@ -1,4 +1,4 @@
-package relativetimestamp
+package fuzzytimestamp
 
 import (
 	"fmt"
@@ -6,11 +6,11 @@ import (
 	"time"
 )
 
-func RelativeTimestamp(publishDate time.Time) string {
-	return relativeTime(time.Now(), publishDate)
+func FuzzyTimestamp(publishDate time.Time) string {
+	return fuzzyTime(time.Now(), publishDate)
 }
 
-func relativeTime(currDate time.Time, publishDate time.Time) string {
+func fuzzyTime(currDate time.Time, publishDate time.Time) string {
 	timeSince := currDate.Sub(publishDate)
 
 	oneDay, err := time.ParseDuration("24h")
@@ -55,32 +55,4 @@ func relativeTime(currDate time.Time, publishDate time.Time) string {
 
 	// seconds, no rounding
 	return fmt.Sprintf("%vs", int64(timeSince/time.Second))
-}
-
-func relativeTimeOfDay(t time.Time) string {
-	hour := t.Hour()
-
-	// 12 AM - 6 AM
-	if hour >= 0 && hour < 6 {
-		return "overnight"
-	}
-	// 6 AM - 12 PM
-	if hour >= 6 && hour < 12 {
-		return "this morning"
-	}
-
-	// 12 PM - 4:59 PM
-	if hour >= 12 && hour < 17 {
-		return "this afternoon"
-	}
-	// 4 PM - 7:59 PM
-	if hour >= 17 && hour < 20 {
-		return "this evening"
-	}
-	// 8 PM - 11:59 PM
-	if hour >= 20 && hour <= 23 {
-		return "last night"
-	}
-
-	return "unknown"
 }

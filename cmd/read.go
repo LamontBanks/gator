@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/LamontBanks/gator/internal/database"
-	relativetimestamp "github.com/LamontBanks/gator/internal/relative_timestamp"
+	fuzzytimestamp "github.com/LamontBanks/gator/internal/fuzzy_timestamp"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 )
@@ -21,13 +21,13 @@ import (
 Format Post data from the database in a general struct for viewing
 */
 type PrintablePost struct {
-	PostID            uuid.UUID
-	FeedID            uuid.UUID
-	Title             string
-	PublishedAt       time.Time
-	RelativeTimestamp string
-	Description       string
-	Url               string
+	PostID         uuid.UUID
+	FeedID         uuid.UUID
+	Title          string
+	PublishedAt    time.Time
+	FuzzyTimestamp string
+	Description    string
+	Url            string
 }
 
 var numReadPosts int
@@ -157,13 +157,13 @@ func readPosts(s *state, user database.User) error {
 
 		for _, r := range queryResult {
 			posts = append(posts, PrintablePost{
-				PostID:            r.PostID,
-				FeedID:            r.FeedID,
-				Title:             r.Title,
-				PublishedAt:       r.PublishedAt,
-				RelativeTimestamp: relativetimestamp.RelativeTimestamp(r.PublishedAt),
-				Description:       r.Description,
-				Url:               r.Url,
+				PostID:         r.PostID,
+				FeedID:         r.FeedID,
+				Title:          r.Title,
+				PublishedAt:    r.PublishedAt,
+				FuzzyTimestamp: fuzzytimestamp.FuzzyTimestamp(r.PublishedAt),
+				Description:    r.Description,
+				Url:            r.Url,
 			})
 		}
 		// ...or whatever number of posts the user wants
@@ -178,13 +178,13 @@ func readPosts(s *state, user database.User) error {
 
 		for _, r := range queryResult {
 			posts = append(posts, PrintablePost{
-				PostID:            r.ID,
-				FeedID:            r.FeedID,
-				Title:             r.Title,
-				PublishedAt:       r.PublishedAt,
-				RelativeTimestamp: relativetimestamp.RelativeTimestamp(r.PublishedAt),
-				Description:       r.Description,
-				Url:               r.Url,
+				PostID:         r.ID,
+				FeedID:         r.FeedID,
+				Title:          r.Title,
+				PublishedAt:    r.PublishedAt,
+				FuzzyTimestamp: fuzzytimestamp.FuzzyTimestamp(r.PublishedAt),
+				Description:    r.Description,
+				Url:            r.Url,
 			})
 		}
 	}
@@ -201,7 +201,7 @@ func readPosts(s *state, user database.User) error {
 		if postIsUnread(post.PostID, post.FeedID, s, user) {
 			unreadpost = fmt.Sprintf(" (%v) ", UNREADPOSTMARKER)
 		}
-		postOptions[i] = fmt.Sprintf("%v\t|%v %v", relativetimestamp.RelativeTimestamp(post.PublishedAt.Local()), unreadpost, post.Title)
+		postOptions[i] = fmt.Sprintf("%v\t|%v %v", fuzzytimestamp.FuzzyTimestamp(post.PublishedAt.Local()), unreadpost, post.Title)
 	}
 
 	// Choose a post

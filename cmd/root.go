@@ -11,7 +11,7 @@ import (
 
 	"github.com/LamontBanks/gator/internal/config"
 	"github.com/LamontBanks/gator/internal/database"
-	relativetimestamp "github.com/LamontBanks/gator/internal/relative_timestamp"
+	fuzzytimestamp "github.com/LamontBanks/gator/internal/fuzzy_timestamp"
 	"github.com/spf13/cobra"
 
 	// Leading underscore means the package will be used, but not directly
@@ -215,7 +215,7 @@ func printFollowedFeeds(s *state, user database.User) error {
 		fmt.Printf("%v\n-\n", feed.FeedName)
 		if len(posts) > 0 {
 			for _, post := range posts {
-				fmt.Printf("%v | %v\n", relativetimestamp.RelativeTimestamp(post.PublishedAt), post.Title)
+				fmt.Printf("%v | %v\n", fuzzytimestamp.FuzzyTimestamp(post.PublishedAt), post.Title)
 			}
 		} else {
 			fmt.Println("\t- No recent posts")

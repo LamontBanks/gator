@@ -1,4 +1,4 @@
-package relativetimestamp
+package fuzzytimestamp
 
 import (
 	"testing"
@@ -99,7 +99,7 @@ func TestRelativeTimestamp(t *testing.T) {
 		mockCurrTime := mockPublishedAtDate.Add(timeElapsed)
 
 		// Test
-		actual := relativeTime(mockCurrTime, mockPublishedAtDate)
+		actual := fuzzyTime(mockCurrTime, mockPublishedAtDate)
 
 		// Check
 		if actual != test.expected {
