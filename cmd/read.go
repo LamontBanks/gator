@@ -231,15 +231,15 @@ func readPost(s *state, user database.User, posts []PrintablePost) error {
 	fmt.Println()
 	var navChoice string
 	navQuit := "q"
-	navNext := "n"
-	navPrev := "p"
+	navNext := "f"
+	navPrev := "b"
 
 	// Start with first post
 	currPostIndex := 0
 
 	// Navigate through posts or exit
 	for navChoice != navQuit {
-		// Mar as read
+		// Mark as read
 		if err := markPostAsRead(s, user, posts[currPostIndex].FeedID, posts[currPostIndex].PostID); err != nil {
 			return err
 		}
@@ -249,19 +249,14 @@ func readPost(s *state, user database.User, posts []PrintablePost) error {
 		fmt.Println("---")
 		fmt.Println(formatPost(post))
 
-		// Exit now if there's only 1 post to show
-		if len(posts) == 1 {
-			return nil
-		}
-
 		// Display 1-based page numbers at bottom of post
 		fmt.Printf("Post %v of %v\n\n", currPostIndex+1, len(posts))
 		fmt.Println("---")
 
 		// Accept command for navigating between posts
-		fmt.Printf("%v - next, %v - prev, %v - quit\n\n", navNext, navPrev, navQuit)
+		fmt.Printf("%v - forward, %v - back, %v - quit\n\n", navNext, navPrev, navQuit)
 
-		// Read user nvagiate command
+		// Read user navigate command
 		_, err := fmt.Scan(&navChoice)
 		if err != nil {
 			return err
