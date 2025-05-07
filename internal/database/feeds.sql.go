@@ -99,6 +99,43 @@ func (q *Queries) GetFeedByUrl(ctx context.Context, url string) (Feed, error) {
 	return i, err
 }
 
+const getFeedFollowerCount = `-- name: GetFeedFollowerCount :many
+SELECT feed_id, feeds.name as feed_name, COUNT(*) as num_followers
+FROM feed_follows
+INNER JOIN feeds ON feeds.id = feed_follows.feed_id
+GROUP BY feed_id, feeds.name
+ORDER BY num_followers DESC
+`
+
+type GetFeedFollowerCountRow struct {
+	FeedID       uuid.UUID
+	FeedName     string
+	NumFollowers int64
+}
+
+func (q *Queries) GetFeedFollowerCount(ctx context.Context) ([]GetFeedFollowerCountRow, error) {
+	rows, err := q.db.QueryContext(ctx, getFeedFollowerCount)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetFeedFollowerCountRow
+	for rows.Next() {
+		var i GetFeedFollowerCountRow
+		if err := rows.Scan(&i.FeedID, &i.FeedName, &i.NumFollowers); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getFeeds = `-- name: GetFeeds :many
 SELECT feeds.id, feeds.name AS feed_name, feeds.url, feeds.description, users.name AS user_name
 FROM feeds

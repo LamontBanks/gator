@@ -64,3 +64,10 @@ SELECT feeds.name, num_followers_per_feed.feed_id, num_followers_per_feed.num_fo
 -- name: DeleteFeedById :exec
 DELETE FROM feeds
 WHERE feeds.id = $1;
+
+-- name: GetFeedFollowerCount :many
+SELECT feed_id, feeds.name as feed_name, COUNT(*) as num_followers
+FROM feed_follows
+INNER JOIN feeds ON feeds.id = feed_follows.feed_id
+GROUP BY feed_id, feeds.name
+ORDER BY num_followers DESC;
