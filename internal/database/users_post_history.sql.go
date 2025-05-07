@@ -120,7 +120,6 @@ type GetUnreadPostsForFeedRow struct {
 	Url         string
 }
 
-// TODO: Replace with proper OUTER JOIN
 // - Get all posts for a given feed...
 // - ...but only posts user has not read
 func (q *Queries) GetUnreadPostsForFeed(ctx context.Context, arg GetUnreadPostsForFeedParams) ([]GetUnreadPostsForFeedRow, error) {

@@ -25,7 +25,6 @@ WHERE user_id = $1
     AND feed_id = $2
     AND post_id = $3;
 
--- TODO: Replace with proper OUTER JOIN
 -- name: GetUnreadPostsForFeed :many
 --- Get all posts for a given feed...
 SELECT posts.id AS post_id, posts.feed_id, posts.title, posts.published_at, posts.description, posts.url
