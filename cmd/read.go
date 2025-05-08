@@ -329,7 +329,7 @@ func formatPost(post PrintablePost) string {
 	postText := fmt.Sprintf("%v\n", post.Title)
 	postText += fmt.Sprintf("%v\n\n", post.PublishedAt.In(time.Local).Format("03:04 PM EST, Monday, 02 Jan 2006"))
 	postText += fmt.Sprintf("%v\n\n", post.Description)
-	postText += fmt.Sprintf("%v\n", post.Url)
+	postText += fmt.Sprintf("Full post (opens browser):\n$ open \"%v\"\n", post.Url)
 	return postText
 }
 
