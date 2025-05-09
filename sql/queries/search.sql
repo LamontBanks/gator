@@ -1,0 +1,5 @@
+-- name: SearchPostTitles :many
+SELECT feeds.name AS feed_name, posts.title, posts.published_at FROM posts
+INNER JOIN feeds on feeds.id = posts.feed_id
+WHERE posts.title ILIKE $1
+ORDER BY posts.published_at DESC;
