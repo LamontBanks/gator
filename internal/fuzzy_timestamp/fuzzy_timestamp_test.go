@@ -11,6 +11,19 @@ func TestRelativeTimestamp(t *testing.T) {
 		timeElapsed string
 		expected    string
 	}{
+		// Months
+		{
+			name:        "3 months",
+			timeElapsed: "2184h", // largest interval is hours
+			expected:    "3mo",
+		},
+		// Weeks
+		{
+			name:        "1 week",
+			timeElapsed: "168h", // largest interval is hours
+			expected:    "1w",
+		},
+
 		// Days
 		{
 			name:        "1 day",

@@ -23,6 +23,16 @@ func fuzzyTime(currDate time.Time, publishDate time.Time) string {
 		return currDate.String()
 	}
 
+	oneMonth, err := time.ParseDuration("672h")
+	if err != nil {
+		return currDate.String()
+	}
+
+	// month (> 4 weeks)
+	if timeSince >= oneMonth {
+		return fmt.Sprintf("%vmo", int64(timeSince.Round(oneMonth)/oneMonth))
+	}
+
 	// weeks (> 7 days)
 	if timeSince >= oneWeek {
 		return fmt.Sprintf("%vw", int64(timeSince.Round(oneWeek)/oneWeek))
