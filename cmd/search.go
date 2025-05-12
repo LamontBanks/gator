@@ -6,7 +6,10 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"slices"
 
+	fuzzytimestamp "github.com/LamontBanks/gator/internal/fuzzy_timestamp"
+	"github.com/ryanuber/columnize"
 	"github.com/spf13/cobra"
 )
 
@@ -16,12 +19,7 @@ var postSearchStr string
 var searchCmd = &cobra.Command{
 	Use:   "search",
 	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Long:  ``,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		results, err := appState.db.SearchPostTitles(context.Background(), fmt.Sprintf("%v%v%v", "%", postSearchStr, "%"))
 		if err != nil {
@@ -33,11 +31,23 @@ to quickly create a Cobra application.`,
 			return nil
 		}
 
-		fmt.Println("Posts found:")
-		fmt.Println("Feed\t\t\t\tTitle\n---\t\t\t\t---")
+		output := []string{"Feed | Date | Post"}
+
+		seenFeedNames := []string{}
+
 		for _, result := range results {
-			fmt.Printf("%v\t\t\t%v\n", result.FeedName, result.Title)
+			// Only print feeds names once
+			// Assumes feeds are grouped
+			feedName := ""
+			if !slices.Contains(seenFeedNames, result.FeedName) {
+				seenFeedNames = append(seenFeedNames, result.FeedName)
+				feedName = result.FeedName
+			}
+
+			output = append(output, fmt.Sprintf("%v | %v | %v", feedName, fuzzytimestamp.FuzzyTimestamp(result.PublishedAt), result.Title))
 		}
+
+		fmt.Println(columnize.SimpleFormat(output))
 
 		return nil
 	},
