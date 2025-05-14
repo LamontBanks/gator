@@ -37,9 +37,9 @@ var searchCmd = &cobra.Command{
 		if len(postsFound) == 0 {
 			postsFoundOutput = "- No posts found"
 		} else {
-			foundPostsSlice := []string{"Feed | Date | Post"}
+			foundPostsSlice := []string{"Post | Date | Feed"}
 			for _, result := range postsFound {
-				foundPostsSlice = append(foundPostsSlice, fmt.Sprintf("%v | %v | %v", result.FeedName, fuzzytimestamp.FuzzyTimestamp(result.PublishedAt), result.Title))
+				foundPostsSlice = append(foundPostsSlice, fmt.Sprintf("%v | %v | %v", result.Title, fuzzytimestamp.FuzzyTimestamp(result.PublishedAt), result.FeedName))
 			}
 			postsFoundOutput = columnize.SimpleFormat(foundPostsSlice)
 		}
@@ -61,11 +61,11 @@ var searchCmd = &cobra.Command{
 			feedsFoundOutput = columnize.SimpleFormat(foundFeedSlice)
 		}
 
-		fmt.Printf("Feeds\n---\n")
+		fmt.Printf("Feeds: %v results found\n---\n", len(feedsFound))
 		fmt.Println(feedsFoundOutput)
 
 		fmt.Println()
-		fmt.Printf("Posts\n---\n")
+		fmt.Printf("Posts: %v results found\n---\n", len(postsFound))
 		fmt.Println(postsFoundOutput)
 
 		return nil
