@@ -10,6 +10,41 @@ import (
 	"time"
 )
 
+const searchFeeds = `-- name: SearchFeeds :many
+SELECT feeds.name, feeds.description
+FROM feeds
+WHERE (feeds.description ILIKE $1) OR (feeds.name ILIKE $1)
+ORDER BY feeds.name ASC
+`
+
+type SearchFeedsRow struct {
+	Name        string
+	Description string
+}
+
+func (q *Queries) SearchFeeds(ctx context.Context, description string) ([]SearchFeedsRow, error) {
+	rows, err := q.db.QueryContext(ctx, searchFeeds, description)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchFeedsRow
+	for rows.Next() {
+		var i SearchFeedsRow
+		if err := rows.Scan(&i.Name, &i.Description); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const searchPostTitles = `-- name: SearchPostTitles :many
 SELECT feeds.name AS feed_name, posts.title, posts.published_at FROM posts
 INNER JOIN feeds on feeds.id = posts.feed_id
