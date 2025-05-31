@@ -80,8 +80,8 @@ The full-text of the post, if any, will have to be viewed in a web browser.
 	`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		// Display either default or desired number of posts to display
 		numReadPosts = 3
-
 		if len(args) == 1 {
 			i, err := strconv.Atoi(args[0])
 			if err != nil {
@@ -90,6 +90,12 @@ The full-text of the post, if any, will have to be viewed in a web browser.
 
 			numReadPosts = i
 		}
+
+		if err := updateIfOutOfDate(appState); err != nil {
+			// If unable to update, show the error but continue reading the feeds
+			fmt.Println(err)
+		}
+
 		return userAuthCall(readPosts)(appState)
 	},
 }

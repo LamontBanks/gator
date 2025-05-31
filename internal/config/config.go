@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"os"
+	"time"
 )
 
 const (
@@ -13,8 +14,10 @@ const (
 
 // Read and writes the current user and database details to file
 type Config struct {
-	DbUrl           string `json:"db_url"`
-	CurrentUserName string `json:"current_user_name"`
+	DbUrl           string    `json:"db_url"`
+	CurrentUserName string    `json:"current_user_name"`
+	LastUpdated     time.Time `json:"last_updated"`
+	UpdateFrequency string    `json:"update_frequency"`
 }
 
 // Read the JSON from the ~/.gatorconfig.json

@@ -109,6 +109,11 @@ func updateAllFeeds(s *state, user database.User) error {
 		<-feedUpdatedCh
 	}
 
+	s.config.LastUpdated = time.Now()
+	if err := s.config.SetConfig(); err != nil {
+		return err
+	}
+
 	fmt.Printf("Feeds updated at %v\n", time.Now().Format("3:04PM"))
 	return nil
 }
@@ -133,6 +138,23 @@ func updateSingleFeed(s *state, feedUrl string) error {
 	}
 
 	return saveFeedPosts(s, rssFeed, feed.ID)
+}
+
+// Update all feeds if out of date
+func updateIfOutOfDate(s *state) error {
+	updateFreqDuration, err := time.ParseDuration(s.config.UpdateFrequency)
+	if err != nil {
+		return fmt.Errorf("unable to update based on frequency %v, check .gatorconfig", s.config.UpdateFrequency)
+	}
+
+	if time.Now().After(s.config.LastUpdated.Add(updateFreqDuration)) {
+		fmt.Println("Feeds out of date, updating...")
+		if err := userAuthCall(updateAllFeeds)(s); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // Save posts to the database

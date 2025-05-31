@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/LamontBanks/gator/internal/config"
 	"github.com/LamontBanks/gator/internal/database"
@@ -99,6 +100,15 @@ func initAppState() {
 	cfg, err := config.ReadConfig()
 	if err != nil {
 		panic(err)
+	}
+
+	// Set a default update frequency if one isn't set
+	if _, err = time.ParseDuration(cfg.UpdateFrequency); err != nil {
+		cfg.UpdateFrequency = "15m"
+
+		if err := cfg.SetConfig(); err != nil {
+			panic(err)
+		}
 	}
 
 	// Database
