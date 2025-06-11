@@ -231,7 +231,7 @@ func getUnreadPostInfo(s *state, user database.User, feedName string, feedId uui
 
 	msg := ""
 	if len(unreadPosts) > 0 {
-		msg = fmt.Sprintf("%v\n\t- %v unread posts since %v", feedName, len(unreadPosts), fuzzytimestamp.FuzzyTimestamp(unreadPosts[len(unreadPosts)-1].PublishedAt.Local()))
+		msg = fmt.Sprintf("%v unread posts since %v", len(unreadPosts), fuzzytimestamp.FuzzyTimestamp(unreadPosts[len(unreadPosts)-1].PublishedAt.Local()))
 	}
 
 	return len(unreadPosts), msg, nil

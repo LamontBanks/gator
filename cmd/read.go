@@ -92,7 +92,7 @@ The full-text of the post, if any, will have to be viewed in a web browser.
 		}
 
 		if err := updateIfOutOfDate(appState); err != nil {
-			// If unable to update, show the error but continue reading the feeds
+			// If unable to update, show the error, but continue reading the feeds
 			fmt.Println(err)
 		}
 
@@ -103,12 +103,12 @@ The full-text of the post, if any, will have to be viewed in a web browser.
 func init() {
 	rootCmd.AddCommand(readCmd)
 	readCmd.Flags().BoolVarP(&showOnlyNewPostsFlag, "new", "n", false, "List only new posts")
-	readCmd.Flags().BoolVarP(&sequentialReadFlag, "seq", "s", false, "Read listed posts from oldest to newest")
+	readCmd.Flags().BoolVarP(&sequentialReadFlag, "seq", "s", false, "Read displayed posts from oldest to newest")
 }
 
-// Display option picker for user to select a feed, then select the post to read it's RSS description.
-// Some RSS feeds contain the full post test in the description, others have only a snippet.
-// This is dependent on the creators of the feed itself, not a limitation of this program.
+// Display option picker for user to select a feed, then select the post to read the RSS desc field
+// Some RSS feeds contain the full post test in the description, others have only a snippet
+// This is dependent on the creators of the feed itself, not a limitation of this program
 func readPosts(s *state, user database.User) error {
 	userFeeds, err := s.db.GetFeedsForUser(context.Background(), user.ID)
 	if err == sql.ErrNoRows {
@@ -118,22 +118,28 @@ func readPosts(s *state, user database.User) error {
 		return err
 	}
 
-	// Make option picker from list of feed names, unread count
-	// Choose feed
-	feedOptions := make([]string, len(userFeeds))
+	// Make option picker from list of feed names and unread counts
+	feedOptions := []string{}
+	haveUnreadPosts := false
 	for i := range userFeeds {
-		label := userFeeds[i].FeedName
-
-		// Replace label with unread posts info, if any
-		count, msg, err := getUnreadPostInfo(s, user, userFeeds[i].FeedName, userFeeds[i].FeedID)
+		unreadCount, unreadCountMsg, err := getUnreadPostInfo(s, user, userFeeds[i].FeedName, userFeeds[i].FeedID)
 		if err != nil {
 			return err
 		}
-		if count > 0 {
-			label = msg
+
+		feedOptionLabel := userFeeds[i].FeedName
+		if unreadCount > 0 {
+			haveUnreadPosts = true
+			feedOptionLabel += "\n\t- " + unreadCountMsg
 		}
 
-		feedOptions[i] = label
+		feedOptions = append(feedOptions, feedOptionLabel)
+	}
+
+	// If there are no new posts at all, exit
+	if showOnlyNewPostsFlag && !haveUnreadPosts {
+		fmt.Println("- No new posts for any feeds")
+		return nil
 	}
 
 	choice, err := listOptionsReadChoice(feedOptions, "Choose a feed:")
@@ -157,7 +163,6 @@ func readPosts(s *state, user database.User) error {
 		}
 
 		if len(queryResult) == 0 {
-			fmt.Println("- No unread posts")
 			return nil
 		}
 
