@@ -175,6 +175,7 @@ func listOptionsReadChoice(options []string, message string) (int, error) {
 // A closure for wrapping functions requiring a user
 func userAuthCall(f func(s *state, user database.User) error) func(*state) error {
 	return func(s *state) error {
+		// Get user from the database
 		username := s.config.CurrentUserName
 
 		if username == "" {
@@ -189,6 +190,7 @@ func userAuthCall(f func(s *state, user database.User) error) func(*state) error
 			return err
 		}
 
+		// Pass in state, user to provided function
 		return f(s, u)
 	}
 

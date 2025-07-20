@@ -95,7 +95,7 @@ func updateAllFeeds(s *state, user database.User) error {
 				}
 
 				if count > 0 {
-					fmt.Println(msg)
+					fmt.Printf("%v\n\t- %v\n", feed.FeedName, msg)
 				}
 			}
 
