@@ -43,6 +43,8 @@ var readCmd = &cobra.Command{
 	Short: "Read posts in a feed",
 	Long: `Read posts in a feed.
 A interactive menu will help navigate through followed feeds, then to the posts within a feed.
+Read will automatically download the latest post, based on the "last_updated" field saved in the .gatorconfig.json file.
+See the "update" command for changing the update frequency.
 
 	gator read
 	gator read <number of posts to display, default: 3>
@@ -52,31 +54,127 @@ Examples:
 	gator
 
 	Choose a feed:
-	1: Nasa Image of the Day
-	2: Phys.org | Space News
-	3: Pivot To AI
+	1: Dev Tracker
+		- 4 unread posts since 17h
+	2: GuildWars2.com
+		- 1 unread posts since 22h
+	3: NASA Image of the Day
+		- 3 unread posts since 2d
+	4: Pivot to AI
 
-	1	# Choice
+	3	# User input (NASA Image of the Day)
 
-	Nasa Image of the Day
+	NASA Image of the Day
 	Choose a post:
-	1: Testing NASA’s IMAP (Interstellar Mapping and Acceleration Probe)
-			12:08 PM, Tue, 15 Apr 25
-	2: Sculpted by Luminous Stars
-			02:23 PM, Mon, 14 Apr 25
-	3: Apollo 13 Launch: 55 Years Ago
-			11:59 AM, Fri, 11 Apr 25
+	1: 36m	| (new)  Looking Forward to the Moon
+	2: 22h	| (new)  NASA Drop Test Supports Safer Air Taxi Designs
+	3: 2d	| (new)  Hubble Spies Swirling Spiral
 
-	2	# Choice
+	2	# User input (NASA Drop Test Supports Safer Air Taxi Designs)
 
-	Sculpted by Luminous Stars
-	02:23 PM, Monday, 14 Apr
+	NASA Drop Test Supports Safer Air Taxi Designs
+	11:37 AM EST, Tuesday, 29 Jul 2025
 
-	This new image showcases the dazzling young star cluster NGC 346. Although both the James Webb Space Telescope...
+	An aircraft body modeled after an air taxi with weighted test dummies inside is being prepared 
+	for a drop test by researchers at NASA’s Langley Research Center in Hampton, Virginia. 
+	The test was completed June 26 at Langley’s Landing and Impact Research Facility. The aircraft 
+	was dropped from a tall steel structure, known as a gantry, after being hoisted about 35 feet 
+	in the air by cables. NASA researchers are investigating aircraft materials that best absorb 
+	impact forces in a crash.
+
+	Full post (opens browser):
+	$ open "https://www.nasa.gov/image-detail/lift-plus-cruise-2-evtol-swing-and-drop-test/"
+
+	Post 1 of 1
 
 Currently only a plaintext <description> is readable in the terminal.
 Images will not render, HTML will be raw, etc.
-The full-text of the post, if any, will have to be viewed in a web browser.
+The full-text of the post will have to be viewed in a web browser.
+
+-
+
+Posts can be read sequentially using the -s / --seq flag:
+
+	gator read -s <number of posts to display, default: 3>
+
+	Choose a feed:
+	1: Dev Tracker
+		- 4 unread posts since 17h
+	2: GuildWars2.com
+		- 1 unread posts since 22h
+	3: NASA Image of the Day
+		- 2 unread posts since 2d
+	4: Pivot to AI
+
+	3 (NASA Image of the Day)
+
+The posts will be displayed from oldest to newest
+
+	NASA Image of the Day
+	---
+	Hubble Spies Swirling Spiral
+	12:40 PM EST, Monday, 28 Jul 2025
+
+	This NASA/ESA Hubble Space Telescope image features the spiral galaxy NGC 3285B, a member of the Hydra I cluster of galaxies.
+
+	Full post (opens browser):
+	$ open "https://www.nasa.gov/image-detail/swirling-spiral-in-hydra/"
+
+	Post 1 of 3
+
+	---
+	f - forward, b - back, q - quit
+
+Use the "f", "b", and "q" commands to navigate:
+
+	f 	# User input (forward)
+
+	---
+	NASA Drop Test Supports Safer Air Taxi Designs
+	11:37 AM EST, Tuesday, 29 Jul 2025
+
+	An aircraft body modeled after an air taxi with weighted test dummies inside is being prepared for a drop test by researchers at NASA’s Langley Research Center in Hampton, Virginia. The test was completed June 26 at Langley’s Landing and Impact Research Facility. The aircraft was dropped from a tall steel structure, known as a gantry, after being hoisted about 35 feet in the air by cables. NASA researchers are investigating aircraft materials that best absorb impact forces in a crash.
+
+	Full post (opens browser):
+	$ open "https://www.nasa.gov/image-detail/lift-plus-cruise-2-evtol-swing-and-drop-test/"
+
+	Post 2 of 3
+
+	---
+	f - forward, b - back, q - quit
+
+Combine the sequential and new flags to quickly read all new posts for a feed:
+
+	gator read -ns
+
+	Choose a feed:
+	1: Dev Tracker
+		- 4 unread posts since 17h
+	2: GuildWars2.com
+		- 1 unread posts since 22h
+	3: NASA Image of the Day
+		- 1 unread posts since 47m
+	4: Pivot to AI
+
+	1 	# User input (Dev Tracker)
+
+	Crafting gifts for Orrax Manifested before finishing story not counting to the locked achievements
+	05:05 PM EST, Tuesday, 29 Jul 2025
+
+	Hey everyone, I have an update! ...
+
+	Post 1 of 4
+
+	f 	# User (forward)
+
+	Lily of the Elon
+	06:43 PM EST, Tuesday, 29 Jul 2025
+
+	...
+
+	Post 2 of 4
+
+etc.
 	`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
