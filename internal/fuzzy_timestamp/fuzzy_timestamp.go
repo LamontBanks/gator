@@ -1,3 +1,7 @@
+/*
+*
+Print approximate timestamps
+*/
 package fuzzytimestamp
 
 import (

@@ -38,8 +38,7 @@ const UNREADPOSTMARKER = "new"
 
 // readCmd represents the read command
 var readCmd = &cobra.Command{
-	Use: "read",
-
+	Use:   "read",
 	Short: "Read posts in a feed",
 	Long: `Read posts in a feed.
 A interactive menu will help navigate through followed feeds, then to the posts within a feed.
@@ -226,6 +225,8 @@ func readPosts(s *state, user database.User) error {
 		}
 
 		feedOptionLabel := userFeeds[i].FeedName
+
+		// Display unread count only if there are unread posts
 		if unreadCount > 0 {
 			haveUnreadPosts = true
 			feedOptionLabel += "\n\t- " + unreadCountMsg
@@ -234,7 +235,7 @@ func readPosts(s *state, user database.User) error {
 		feedOptions = append(feedOptions, feedOptionLabel)
 	}
 
-	// If there are no new posts at all, exit
+	// If there are no new posts for any feeds, exit
 	if showOnlyNewPostsFlag && !haveUnreadPosts {
 		fmt.Println("- No new posts for any feeds")
 		return nil
@@ -298,7 +299,7 @@ func readPosts(s *state, user database.User) error {
 		}
 	}
 
-	// Read all posts
+	// Read all posts, exit
 	if sequentialReadFlag {
 		return readPost(s, user, posts)
 	}

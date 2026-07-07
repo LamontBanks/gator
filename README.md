@@ -322,16 +322,18 @@ Find SQLC's config file in the base project directory:
 Sample Go `launch.json` config for Visual Studio Code:
 
 ```json
-launch.json:
-
 {
-        "name": "add",
-        "type": "go",
-        "request": "launch",
-        "mode": "auto",
-        "program": "/<path>/gator/go run main.go",
-        "args": "add -n \"Nasa Image of the Day\" -u https://www.nasa.gov/feeds/iotd-feed/",
-        "console": "integratedTerminal"
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Read new posts sequentially",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}",
+            "args": "read -ns"
+        }
+    ]
 }
 ```
 
@@ -443,4 +445,3 @@ Use the program:
 - Tests, unit/integration
 - Process HTML info RSS feed posts
 - Retrieve full blog posts from feed URL
-- Relative timestmps: 15 min ago, 1 hr ago, 3 days ago, etc.
